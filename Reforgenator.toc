@@ -1,0 +1,11 @@
+## Interface: 40000
+## Title: Reforgenator
+## Notes: Figure out what to reforge
+## Author: Mitchell Morris
+## eMail: mitchell@morrisland.com
+## URL: 
+## Version: 0.0.1
+## SavedVariables: ReforgenatorDB
+## OptionalDeps: Ace3, tekDebug
+
+Reforgenator.xml
