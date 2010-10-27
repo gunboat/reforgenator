@@ -2,14 +2,13 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local version = "0.0.1"
-Reforgenator.reforgingInfo = LibStub("LibReforgingInfo-1.0")
 
 local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
 
 local INVENTORY_SLOTS = { "HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot",
     "ChestSlot", "ShirtSlot", "TabardSlot", "WristSlot", "HandsSlot",
     "WaistSlot", "LegsSlot", "FeetSlot", "Finger0Slot", "Finger1Slot",
-    "Trinket0Slot", "Trinket1Slot", "MainHandSlot", "SecondaryHandSlot", 
+    "Trinket0Slot", "Trinket1Slot", "MainHandSlot", "SecondaryHandSlot",
     "RangedSlot" }
 
 local COMBAT_RATINGS = {
@@ -48,15 +47,7 @@ local options = {
     name = "Reforgenator",
     handler = Reforgenator,
     desc = "Calculate what to reforge",
-    args = {
-        orientation = {
-            name = "Orientation",
-            desc = "Orientation of the popup window",
-            type = "select",
-            values = ClamStacker.OrientationChoices,
-            set = function(info, val) ClamStacker.db.profile.orientation = val; Reforgenator:BAG_UPDATE() end,
-            get = function(info) return ClamStacker.db.profile.orientation end
-        },
+    args = { 
     },
 }
 
@@ -80,8 +71,7 @@ function Reforgenator:Debug(...)
 end
 
 function Reforgenator:OnInitialize()
-    Reforgenator.orientation = L["ORIENTATION_HORIZONTAL"]
-    defaults.profile.orientation = L["ORIENTATION_HORIZONTAL"]
+    self:Print("OnInitialize called")
 
     Reforgenator.db = LibStub("AceDB-3.0"):New("ReforgenatorDB", defaults, "Default")
 
@@ -89,38 +79,46 @@ function Reforgenator:OnInitialize()
 
     Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
 
-    self:RegisterChatCommand("reforgenator", "ChatCommand")
+    self:RegisterChatCommand("reforgenator", "ShowState")
 end
 
-function Reforgenator:ChatCommand(input)
-    if input:trim() == "config" then
-	InterfaceOptionsFrame_OpenToCategory(Reforgenator.optionsFrame)
-	return
-    end
+function Reforgenator:ShowState()
+    self:Print("in ShowState")
 
     -- Get the character's current ratings
     local meleeHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_MELEE)
     local expertise = GetCombatRating(COMBAT_RATINGS.CR_EXPERTISE)
 
+    self:Print("melee hit = " .. meleeHit)
+    self:Print("expertise = " .. expertise)
+
     -- Get the current state of the equipment
-    local ri = Reforgenator.reforgingInfo
     local vals = {}
-    for k,v in pairs(INVENTORY_SLOTS) do
-        local item = GetInventoryItemLink("player", GetInventorySlotInfo(v));
+    for k,v in ipairs(INVENTORY_SLOTS) do
+        self:Print("v="..v)
+        local info = GetInventorySlotInfo(v)
+        self:Print("info="..info)
+        local item = GetInventoryItemLink("player", info)
         if item then
-            tinsert(vals, {item=item, stats=GetItemStats{item}})
+            self:Print("item="..item)
+            local stats = {}
+            GetItemStats(item, stats)
+            table.insert(vals, {item=item, stats=stats})
+        else
+            self:Print("there's no item in slot "..info)
         end
     end
 
-    self:Print(string.format("melee hit = %d", meleeHit))
-    self:Print(string.format("expertise = %d", expertise))
+    self:Print("ok, so that's it then")
 
-    for k,v in pairs(vals) do
-        self:Print(string.format("item = %s", vals.item)
-        for k2,v2 in pairs(vals.stats) do
-            self:Print(string.format("    stat[%s]=%d", k2, v2))
+    for k,v in ipairs(vals) do
+        self:Print("checking item = " .. v.item)
+        for k2,v2 in pairs(v.stats) do
+            self:Print("    stat["..k2.."]="..v2)
         end
     end
+
+    self:Print("all done")
 end
 
 function Reforgenator:OnEnable()
