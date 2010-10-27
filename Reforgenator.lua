@@ -5,7 +5,14 @@ local version = "0.0.1"
 
 local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
 
-local INVENTORY_SLOTS = { "HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot",
+local function Set(list)
+    local set = {}
+    for _, l in ipairs(list) do set[tostring(l)] = true end
+    return set
+end
+
+local INVENTORY_SLOTS = {
+    "HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot",
     "ChestSlot", "ShirtSlot", "TabardSlot", "WristSlot", "HandsSlot",
     "WaistSlot", "LegsSlot", "FeetSlot", "Finger0Slot", "Finger1Slot",
     "Trinket0Slot", "Trinket1Slot", "MainHandSlot", "SecondaryHandSlot",
@@ -40,7 +47,16 @@ local COMBAT_RATINGS = {
     CR_MASTERY = 26
 }
 
-
+local ITEM_STATS = Set {
+    "ITEM_MOD_CRIT_RATING_SHORT",
+    "ITEM_MOD_DODGE_RATING_SHORT",
+    "ITEM_MOD_EXPERTISE_RATING_SHORT",
+    "ITEM_MOD_HASTE_RATING_SHORT",
+    "ITEM_MOD_HIT_RATING_SHORT",
+    "ITEM_MOD_MASTERY_RATING_SHORT",
+    "ITEM_MOD_PARRY_RATING_SHORT",
+    "ITEM_MOD_SPIRIT_RATING_SHORT",
+}
 
 local options = {
     type = 'group',
@@ -87,34 +103,34 @@ function Reforgenator:ShowState()
 
     -- Get the character's current ratings
     local meleeHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_MELEE)
+    local rangedHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_RANGED)
+    local spellHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_SPELL)
     local expertise = GetCombatRating(COMBAT_RATINGS.CR_EXPERTISE)
 
     self:Print("melee hit = " .. meleeHit)
+    self:Print("ranged hit = " .. rangedHit)
+    self:Print("spell hit = " .. spellHit)
     self:Print("expertise = " .. expertise)
 
     -- Get the current state of the equipment
     local vals = {}
-    for k,v in ipairs(INVENTORY_SLOTS) do
-        self:Print("v="..v)
+    for k,v in pairs(INVENTORY_SLOTS) do
         local info = GetInventorySlotInfo(v)
-        self:Print("info="..info)
         local item = GetInventoryItemLink("player", info)
         if item then
-            self:Print("item="..item)
             local stats = {}
             GetItemStats(item, stats)
             table.insert(vals, {item=item, stats=stats})
-        else
-            self:Print("there's no item in slot "..info)
         end
     end
 
-    self:Print("ok, so that's it then")
-
+    self:Print("table.getn(vals) = "..table.getn(vals))
     for k,v in ipairs(vals) do
         self:Print("checking item = " .. v.item)
         for k2,v2 in pairs(v.stats) do
-            self:Print("    stat["..k2.."]="..v2)
+            if ITEM_STATS[k2] then
+                self:Print("    stat["..k2.."]="..v2)
+            end
         end
     end
 
