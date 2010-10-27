@@ -12,6 +12,37 @@ local INVENTORY_SLOTS = { "HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot",
     "Trinket0Slot", "Trinket1Slot", "MainHandSlot", "SecondaryHandSlot", 
     "RangedSlot" }
 
+local COMBAT_RATINGS = {
+    CR_WEAPON_SKILL = 1,
+    CR_DEFENSE_SKILL = 2,
+    CR_DODGE = 3,
+    CR_PARRY = 4,
+    CR_BLOCK = 5,
+    CR_HIT_MELEE = 6,
+    CR_HIT_RANGED = 7,
+    CR_HIT_SPELL = 8,
+    CR_CRIT_MELEE = 9,
+    CR_CRIT_RANGED = 10,
+    CR_CRIT_SPELL = 11,
+    CR_HIT_TAKEN_MELEE = 12,
+    CR_HIT_TAKEN_RANGED = 13,
+    CR_HIT_TAKEN_SPELL = 14,
+    COMBAT_RATING_RESILIENCE_CRIT_TAKEN = 15,
+    COMBAT_RATING_RESILIENCE_PLAYER_DAMAGE_TAKEN = 16,
+    CR_CRIT_TAKEN_SPELL = 17,
+    CR_HASTE_MELEE = 18,
+    CR_HASTE_RANGED = 19,
+    CR_HASTE_SPELL = 20,
+    CR_WEAPON_SKILL_MAINHAND = 21,
+    CR_WEAPON_SKILL_OFFHAND = 22,
+    CR_WEAPON_SKILL_RANGED = 23,
+    CR_EXPERTISE = 24,
+    CR_ARMOR_PENETRATION = 25,
+    CR_MASTERY = 26
+}
+
+
+
 local options = {
     type = 'group',
     name = "Reforgenator",
@@ -67,19 +98,28 @@ function Reforgenator:ChatCommand(input)
 	return
     end
 
+    -- Get the character's current ratings
+    local meleeHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_MELEE)
+    local expertise = GetCombatRating(COMBAT_RATINGS.CR_EXPERTISE)
+
     -- Get the current state of the equipment
     local ri = Reforgenator.reforgingInfo
-    vals = {}
-    for k,v in ipairs(INVENTORY_SLOTS) do
-	vals[slot] = {}
-	local item = GetInventoryItemLink("player", GetInventorySlotInfo(v))
-	-- get item attributes
-	if ri:IsItemReforged(item) then
-	    local reforgeID = ri:GetReforgeID(item)
-	    local plus, minus = ri:GetReforgedStatNames(reforgeID)
-	else
-	end
+    local vals = {}
+    for k,v in pairs(INVENTORY_SLOTS) do
+        local item = GetInventoryItemLink("player", GetInventorySlotInfo(v));
+        if item then
+            tinsert(vals, {item=item, stats=GetItemStats{item}})
+        end
+    end
 
+    self:Print(string.format("melee hit = %d", meleeHit))
+    self:Print(string.format("expertise = %d", expertise))
+
+    for k,v in pairs(vals) do
+        self:Print(string.format("item = %s", vals.item)
+        for k2,v2 in pairs(vals.stats) do
+            self:Print(string.format("    stat[%s]=%d", k2, v2))
+        end
     end
 end
 
