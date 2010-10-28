@@ -166,21 +166,21 @@ function Reforgenator:Dump(name, t)
 end
 
 function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBound, ancestor)
-    local dequeue = self:NewDequeue()
+    local dequeue = Dequeue:new()
     local solutions = {}
 
     local seed = {}
     seed.delta = 0
     seed.items = {}
     self:Dump("ancestor.items", ancestor.items)
-    seed.uninspectedItems = self:DeepCopy(ancestor.items)
+    seed.uninspectedItems = self:deepCopy(ancestor.items)
     self:Dump("seed.uninspectedItems", seed.uninspectedItems)
-    self:PushRight(dequeue, seed)
+    dequeue:pushRight(seed)
     self:Print("starting the optimization process")
 
-    while not self:IsEmpty(dequeue) do
+    while not dequeue:IsEmpty() do
         self:Print("popping first item off the stack")
-	local opt_A = self:PopLeft(dequeue)
+	local opt_A = dequeue:popLeft()
         self:Print("#opt_A.uninspectedItems="..#opt_A.uninspectedItems)
 	if #opt_A.uninspectedItems == 0 then
             self:Print("we're done with this one")
@@ -193,9 +193,9 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
             self:Print("done with opt_A")
 	    local item = table.remove(opt_A.uninspectedItems, 1)
             self:Print("experimenting with " .. item)
-	    local opt_B = self:DeepCopy(opt_A)
+	    local opt_B = self:deepCopy(opt_A)
 	    table.insert(opt_A.items, item)
-	    self:PushRight(dequeue, opt_A)
+	    dequeue:pushRight(opt_A)
 
             self:Print("inspecting item "..item)
 	    if self:CanReforge(item) then
@@ -272,67 +272,69 @@ function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
 end
 
-function Reforgenator:ShallowCopy(tbl)
-    local result = {}
-    for k,v in next,tbl do
-	result[k] = v
+function Reforgenator:deepCopy(o)
+    local lut = {}
+    local function _copy(o)
+        if type(o) ~= "table" then
+            return o
+        elseif lut[o] then
+            return lut[o]
+        end
+        local result = {}
+        lut[o] = result
+        for k,v in pairs(o) do
+            result[_copy(k)] = _copy(v)
+        end
+        return setmetatable(result, getmetatable(o))
     end
+    return _copy(o)
+end
+
+local Dequeue = {}
+function Dequeue:new()
+    local result = {first = 0, last = -1, maxSize = -1}
+    setmetatable(result, self)
+    self.__index = self
     return result
 end
 
-function Reforgenator:DeepCopy(tbl)
-    local result = {}
-    for k,v in next,tbl do
-	if type(v) == "table" then
-	    result[k] = self:DeepCopy(v)
-	else
-	    result[k] = v
-	end
-    end
-    return result
-end
-
-function Reforgenator:NewDequeue()
-    return {first = 0, last = -1, maxSize = -1}
-end
-
-function Reforgenator:PushLeft(dequeue, value)
-    local first = dequeue.first - 1
-    dequeue.first = first
-    dequeue[first] = value
-    if #dequeue > dequeue.maxSize then
-	dequeue.maxSize = #dequeue
+function Dequeue:pushLeft(value)
+    local first = self.first - 1
+    self.first = first
+    self[first] = value
+    if #self > self.maxSize then
+	self.maxSize = #self
     end
 end
 
-function Reforgenator:PushRight(dequeue, value)
-    local last = dequeue.last + 1
-    dequeue.last = last
-    dequeue[last] = value
-    if #dequeue > dequeue.maxSize then
-	dequeue.maxSize = #dequeue
+function Dequeue:pushRight(value)
+    local last = self.last + 1
+    self.last = last
+    self[last] = value
+    if #self > self.maxSize then
+	self.maxSize = #self
     end
 end
 
-function Reforgenator:IsEmpty(dequeue)
-    return dequeue.first > dequeue.last
+function Dequeue:IsEmpty()
+    return self.first > self.last
 end
 
-function Reforgenator:PopLeft(dequeue)
-    local first = dequeue.first
-    if first > dequeue.last then error("dequeue is empty") end
-    local value = dequeue[first]
-    dequeue[first] = nil
-    dequeue.first = first + 1
+function Dequeue:popLeft()
+    local first = self.first
+    if first > self.last then error("dequeue is empty") end
+    local value = self[first]
+    self[first] = nil
+    self.first = first + 1
     return value
 end
 
-function Reforgenator:PopRight(dequeue)
-    local last = dequeue.last
-    if dequeue.first > last then error("dequeue is empty") end
-    local value = dequeue[last]
-    dequeue[last] = nil
-    dequeue.last = last - 1
+function Dequeue:popRight()
+    local last = self.last
+    if self.first > last then error("dequeue is empty") end
+    local value = self[last]
+    self[last] = nil
+    self.last = last - 1
     return value
 end
 
