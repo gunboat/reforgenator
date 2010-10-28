@@ -13,7 +13,7 @@
 	<Include file="lib\AceDB-3.0\AceDB-3.0.xml" />
 	<Include file="lib\AceTimer-3.0\AceTimer-3.0.xml" />
 	<Script file="lib\LibDataBroker-1.1\LibDataBroker-1.1.lua" />
-	<Include file="lib\LibReforgingInfo-1.0\LibReforgingInfo-1.0.xml" />
+	<Script file="lib\LibReforgingInfo-1.0\LibReforgingInfo-1.0.lua" />
 	
         <Script file="locale\enUS.lua"/>
 	<Script file="Reforgenator.lua"/>

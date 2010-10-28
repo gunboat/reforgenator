@@ -1,7 +1,7 @@
 
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
-local RI = LibStub("LibReforgingInfo-1.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
+local RI = LibStub("LibReforgingInfo-1.0")
 local version = "0.0.1"
 
 local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
@@ -102,8 +102,6 @@ end
 function Reforgenator:ShowState()
     self:Print("in ShowState")
 
-    local ri = LibReforgingInfo
-
     -- Get the character's current ratings
     local meleeHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_MELEE)
     local rangedHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_RANGED)
@@ -116,38 +114,40 @@ function Reforgenator:ShowState()
     self:Print("expertise = " .. expertise)
 
     -- Get the current state of the equipment
-    local eqipmentSet = {}
+    local baseEquipment = {}
+    baseEquipment.delta = 0
+    baseEquipment.items = {}
+    baseEquipment.itemCount = 0
     for k,v in pairs(INVENTORY_SLOTS) do
         local itemLink = GetInventoryItemLink("player", GetInventorySlotInfo(k))
         if itemLink then
             local stats = {}
             GetItemStats(itemLink, stats)
-	    local Item = {}
-	    Item.itemLink = itemLink
+	    local entry = {}
+	    entry.itemLink = itemLink
 
-	    if RI:IsItemReforged(itemString) then
-		Item.reforged = true
+	    if RI:IsItemReforged(itemLink) then
+		entry.reforged = true
 	    else
-		Item.reforged = nil
+		entry.reforged = nil
 	    end
 
 	    for k,v in pairs(stats) do
 		if ITEM_STATS[k] then
-		    Item[k] = v
+		    entry[k] = v
 		end
 	    end
 
-            table.insert(eqipmentSet, Item)
+            baseEquipment.itemCount = baseEquipment.itemCount + 1
+            baseEquipment.items[baseEquipment.itemCount] = entry
         end
     end
-    local Base = {}
-    Base.deltaHit = 0
-    Base.items = equipmentSet
+    self:Print("done fetching equipment")
 
     -- Reforge for hit cap
     if meleeHit < 246 then
 	-- Construct an equipment set optimized for hit
-	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, Base)
+	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, baseEquipment)
 	self:Print("best solution is X")
     else
     end
@@ -155,37 +155,49 @@ function Reforgenator:ShowState()
     self:Print("all done")
 end
 
--- construct an empty context
--- put all the items in the uninspecteditems list
--- push the context onto the stack
--- while the stack is not empty:
---   Pop a context off the stack
---   remove the first item from the uninspectedItems list
---   construct "A" clone
---   construct "B" clone
---   push the item onto A.inspectedItems and push the context
---   if the item is reforgable and reforging doesn't put us too far over cap
---     push the reforged item onto B.inspectedItems and push the context
+function Reforgenator:Dump(name, t)
+    if type(t) == "table" then
+        for k,v in next,t do
+            self:Print(name.."["..k.."]="..to_string(v))
+        end
+    else
+        self:Print(name.."=" .. to_string(t))
+    end
+end
+
 function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBound, ancestor)
     local dequeue = self:NewDequeue()
     local solutions = {}
 
-    local Context = {}
-    Context.delta = 0
-    Context.items = {}
-    Context.uninspectedItems = self:ShallowCopy(ancestor.items)
-    self:PushRight(dequeue, Context)
+    local seed = {}
+    seed.delta = 0
+    seed.items = {}
+    self:Dump("ancestor.items", ancestor.items)
+    seed.uninspectedItems = self:DeepCopy(ancestor.items)
+    self:Dump("seed.uninspectedItems", seed.uninspectedItems)
+    self:PushRight(dequeue, seed)
+    self:Print("starting the optimization process")
 
-    while #dequeue > 0 do
+    while not self:IsEmpty(dequeue) do
+        self:Print("popping first item off the stack")
 	local opt_A = self:PopLeft(dequeue)
-	if #opt_A.uninspectedItems = 0 then
+        self:Print("#opt_A.uninspectedItems="..#opt_A.uninspectedItems)
+	if #opt_A.uninspectedItems == 0 then
+            self:Print("we're done with this one")
 	    table.insert(solutions, opt_A)
 	else
+            self:Print("grabbing next item in opt_A")
+            for k,v in pairs(opt_A) do
+                self:Print("arr["..k.."]=["..v.."]")
+            end
+            self:Print("done with opt_A")
 	    local item = table.remove(opt_A.uninspectedItems, 1)
+            self:Print("experimenting with " .. item)
 	    local opt_B = self:DeepCopy(opt_A)
 	    table.insert(opt_A.items, item)
 	    self:PushRight(dequeue, opt_A)
 
+            self:Print("inspecting item "..item)
 	    if self:CanReforge(item) then
 		item = self:ReforgeItem(item, rating)
 		item_B.delta = item_B.delta + item[rating]
@@ -205,7 +217,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
     local bestSolutionValue = 9999
     for k,v in pairs(solutions) do
 	local value = currentValue + v.delta
-	if value > lowerBound && value < bestSolutionValue then
+	if value > lowerBound and value < bestSolutionValue then
 	    bestSolution = v;
 	    bestSolutionValue = hit
 	end
@@ -227,14 +239,14 @@ function Reforgenator:CanReforge(item, desiredStat)
 end
 
 local StatDesirability = {
-    "ITEM_MOD_HIT_RATING_SHORT" = 1,
-    "ITEM_MOD_EXPERTISE_RATING_SHORT" = 2,
-    "ITEM_MOD_MASTERY_RATING_SHORT" = 3,
-    "ITEM_MOD_DODGE_RATING_SHORT" = 4,
-    "ITEM_MOD_PARRY_RATING_SHORT" = 5,
-    "ITEM_MOD_CRIT_RATING_SHORT" = 6,
-    "ITEM_MOD_HASTE_RATING_SHORT" = 7,
-    "ITEM_MOD_SPIRIT_RATING_SHORT" = 8,
+    ["ITEM_MOD_HIT_RATING_SHORT"] = 1,
+    ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2,
+    ["ITEM_MOD_MASTERY_RATING_SHORT"] = 3,
+    ["ITEM_MOD_DODGE_RATING_SHORT"] = 4,
+    ["ITEM_MOD_PARRY_RATING_SHORT"] = 5,
+    ["ITEM_MOD_CRIT_RATING_SHORT"] = 6,
+    ["ITEM_MOD_HASTE_RATING_SHORT"] = 7,
+    ["ITEM_MOD_SPIRIT_RATING_SHORT"] = 8,
 }
 
 function Reforgenator:ReforgeItem(item, desiredStat)
@@ -262,7 +274,7 @@ end
 
 function Reforgenator:ShallowCopy(tbl)
     local result = {}
-    for k,v in pairs(tbl) do
+    for k,v in next,tbl do
 	result[k] = v
     end
     return result
@@ -270,8 +282,8 @@ end
 
 function Reforgenator:DeepCopy(tbl)
     local result = {}
-    for k,v in pairs(tbl) do
-	if type(v) = "table" then
+    for k,v in next,tbl do
+	if type(v) == "table" then
 	    result[k] = self:DeepCopy(v)
 	else
 	    result[k] = v
@@ -302,6 +314,10 @@ function Reforgenator:PushRight(dequeue, value)
     end
 end
 
+function Reforgenator:IsEmpty(dequeue)
+    return dequeue.first > dequeue.last
+end
+
 function Reforgenator:PopLeft(dequeue)
     local first = dequeue.first
     if first > dequeue.last then error("dequeue is empty") end
@@ -319,3 +335,41 @@ function Reforgenator:PopRight(dequeue)
     dequeue.last = last - 1
     return value
 end
+
+local function table_print (tt, indent, done)
+    done = done or {}
+    indent = indent or 0
+    if type(tt) == "table" then
+        local sb = {}
+        for key, value in pairs (tt) do
+            table.insert(sb, string.rep (" ", indent)) -- indent it
+            if type (value) == "table" and not done [value] then
+                done [value] = true
+                table.insert(sb, "{");
+                table.insert(sb, table_print (value, indent + 2, done))
+                table.insert(sb, string.rep (" ", indent)) -- indent it
+                table.insert(sb, "}");
+            elseif "number" == type(key) then
+                table.insert(sb, string.format("\"%s\"", tostring(value)))
+            else
+                table.insert(sb, string.format("%s = \"%s\"", tostring (key), tostring(value)))
+            end
+        end
+        return table.concat(sb)
+    else
+        return tt
+    end
+end
+
+local function to_string( tbl )
+    if  "nil"       == type( tbl ) then
+        return tostring(nil)
+    elseif  "table" == type( tbl ) then
+        return table_print(tbl)
+    elseif  "string" == type( tbl ) then
+        return tbl
+    else
+        return tostring(tbl)
+    end
+end
+

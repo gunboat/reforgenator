@@ -1,7 +1,6 @@
--- Still experimental :)
 -- Many of the IDs were verified on live & beta, but some are interpolated.
 
-local MAJOR, MINOR = "LibReforgingInfo-1.0", 1
+local MAJOR, MINOR = "LibReforgingInfo-1.0", 2
 
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -73,7 +72,7 @@ local reforgeIDs = {
 	{PARRY, EXP},
 	{PARRY, MASTERY},
 	
-	{HIT, SPIRIT},
+	{HIT, SPI},
 	{HIT, DODGE},
 	{HIT, PARRY},
 	{HIT, CRIT},
@@ -81,7 +80,7 @@ local reforgeIDs = {
 	{HIT, EXP},
 	{HIT, MASTERY},
 	
-	{CRIT, SPIRIT},
+	{CRIT, SPI},
 	{CRIT, DODGE},
 	{CRIT, PARRY},
 	{CRIT, HIT},
@@ -89,7 +88,7 @@ local reforgeIDs = {
 	{CRIT, EXP},
 	{CRIT, MASTERY},
 	
-	{HASTE, SPIRIT},
+	{HASTE, SPI},
 	{HASTE, DODGE},
 	{HASTE, PARRY},
 	{HASTE, HIT},
@@ -97,7 +96,7 @@ local reforgeIDs = {
 	{HASTE, EXP},
 	{HASTE, MASTERY},
 	
-	{EXP, SPIRIT},
+	{EXP, SPI},
 	{EXP, DODGE},
 	{EXP, PARRY},
 	{EXP, HIT},
@@ -105,7 +104,7 @@ local reforgeIDs = {
 	{EXP, HASTE},
 	{EXP, MASTERY},
 	
-	{MASTERY, SPIRIT},
+	{MASTERY, SPI},
 	{MASTERY, DODGE},
 	{MASTERY, PARRY},
 	{MASTERY, HIT},
