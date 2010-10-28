@@ -155,6 +155,47 @@ function Reforgenator:ShowState()
     self:Print("all done")
 end
 
+function Reforgenator:OnEnable()
+    self:Print("v"..version.." loaded")
+end
+
+local function table_print (tt, indent, done)
+    done = done or {}
+    indent = indent or 0
+    if type(tt) == "table" then
+        local sb = {}
+        for key, value in pairs (tt) do
+            table.insert(sb, string.rep (" ", indent)) -- indent it
+            if type (value) == "table" and not done [value] then
+                done [value] = true
+                table.insert(sb, "{");
+                table.insert(sb, table_print (value, indent + 2, done))
+                table.insert(sb, string.rep (" ", indent)) -- indent it
+                table.insert(sb, "}, ");
+            elseif "number" == type(key) then
+                table.insert(sb, string.format("\"%s\", ", tostring(value)))
+            else
+                table.insert(sb, string.format("%s=\"%s\", ", tostring (key), tostring(value)))
+            end
+        end
+        return table.concat(sb)
+    else
+        return tt
+    end
+end
+
+local function to_string( tbl )
+    if  "nil"       == type( tbl ) then
+        return tostring(nil)
+    elseif  "table" == type( tbl ) then
+        return table_print(tbl)
+    elseif  "string" == type( tbl ) then
+        return tbl
+    else
+        return tostring(tbl)
+    end
+end
+
 function Reforgenator:Dump(name, t)
     if type(t) == "table" then
         for k,v in next,t do
@@ -165,45 +206,93 @@ function Reforgenator:Dump(name, t)
     end
 end
 
+local Dequeue = {}
+function Dequeue:new()
+    local result = {first = 0, last = -1, maxSize = -1}
+    setmetatable(result, self)
+    self.__index = self
+    return result
+end
+
+function Dequeue:pushLeft(value)
+    local first = self.first - 1
+    self.first = first
+    self[first] = value
+    local size = self.last - first + 1
+    if size > self.maxSize then
+	self.maxSize = size
+    end
+end
+
+function Dequeue:pushRight(value)
+    local last = self.last + 1
+    self.last = last
+    self[last] = value
+    local size = last - self.first + 1
+    if size > self.maxSize then
+	self.maxSize = size
+    end
+end
+
+function Dequeue:isEmpty()
+    return self.first > self.last
+end
+
+function Dequeue:popLeft()
+    local first = self.first
+    if first > self.last then error("dequeue is empty") end
+    local value = self[first]
+    self[first] = nil
+    self.first = first + 1
+    return value
+end
+
+function Dequeue:popRight()
+    local last = self.last
+    if self.first > last then error("dequeue is empty") end
+    local value = self[last]
+    self[last] = nil
+    self.last = last - 1
+    return value
+end
+
+
+local SolutionContext = {}
+
+function SolutionContext:new()
+    local result = { delta=0, items={}, uninspectedItems={} }
+    setmetatable(result, self)
+    self.__index = self
+    return result
+end
+
+
 function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBound, ancestor)
     local dequeue = Dequeue:new()
     local solutions = {}
 
-    local seed = {}
-    seed.delta = 0
-    seed.items = {}
-    self:Dump("ancestor.items", ancestor.items)
+    local seed = SolutionContext:new()
     seed.uninspectedItems = self:deepCopy(ancestor.items)
-    self:Dump("seed.uninspectedItems", seed.uninspectedItems)
+    self:Dump("seed", seed)
     dequeue:pushRight(seed)
     self:Print("starting the optimization process")
 
-    while not dequeue:IsEmpty() do
-        self:Print("popping first item off the stack")
+    while not dequeue:isEmpty() do
 	local opt_A = dequeue:popLeft()
-        self:Print("#opt_A.uninspectedItems="..#opt_A.uninspectedItems)
 	if #opt_A.uninspectedItems == 0 then
-            self:Print("we're done with this one")
 	    table.insert(solutions, opt_A)
 	else
-            self:Print("grabbing next item in opt_A")
-            for k,v in pairs(opt_A) do
-                self:Print("arr["..k.."]=["..v.."]")
-            end
-            self:Print("done with opt_A")
 	    local item = table.remove(opt_A.uninspectedItems, 1)
-            self:Print("experimenting with " .. item)
 	    local opt_B = self:deepCopy(opt_A)
 	    table.insert(opt_A.items, item)
 	    dequeue:pushRight(opt_A)
 
-            self:Print("inspecting item "..item)
 	    if self:CanReforge(item) then
 		item = self:ReforgeItem(item, rating)
-		item_B.delta = item_B.delta + item[rating]
-		if currentValue + item_B.delta < upperBound then
-		    table.insert(opt_B.inspectedItems, item)
-		    self:PushRight(dequeue, opt_B)
+		opt_B.delta = opt_B.delta + item[rating]
+		if currentValue + opt_B.delta < upperBound then
+		    table.insert(opt_B.items, item)
+		    dequeue:pushRight(opt_B)
 		end
 	    end
 	end
@@ -216,12 +305,15 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
     local bestSolution = {}
     local bestSolutionValue = 9999
     for k,v in pairs(solutions) do
+	self:Dump("solution #"..k, v)
 	local value = currentValue + v.delta
 	if value > lowerBound and value < bestSolutionValue then
 	    bestSolution = v;
-	    bestSolutionValue = hit
+	    bestSolutionValue = value
 	end
     end
+
+    self:Dump("winner", bestSolution)
 
     return bestSolution
 end
@@ -255,7 +347,7 @@ function Reforgenator:ReforgeItem(item, desiredStat)
     local loserStatValue = 0
     for k,v in pairs(item) do
 	result[k] = v
-	if StatDesirability[k] > loserStatValue then
+	if StatDesirability[k] and StatDesirability[k] > loserStatValue then
 	    loserStat = k
 	    loserStatValue = StatDesirability[k]
 	end
@@ -263,13 +355,9 @@ function Reforgenator:ReforgeItem(item, desiredStat)
 
     result.reforged = true
     local pool = result[loserStat]
-    result[loserStat] = int(pool * 0.6)
+    result[loserStat] = math.floor(pool * 0.6)
     result[desiredStat] = pool - result[loserStat]
     return result
-end
-
-function Reforgenator:OnEnable()
-    self:Print("v"..version.." loaded")
 end
 
 function Reforgenator:deepCopy(o)
@@ -289,89 +377,3 @@ function Reforgenator:deepCopy(o)
     end
     return _copy(o)
 end
-
-local Dequeue = {}
-function Dequeue:new()
-    local result = {first = 0, last = -1, maxSize = -1}
-    setmetatable(result, self)
-    self.__index = self
-    return result
-end
-
-function Dequeue:pushLeft(value)
-    local first = self.first - 1
-    self.first = first
-    self[first] = value
-    if #self > self.maxSize then
-	self.maxSize = #self
-    end
-end
-
-function Dequeue:pushRight(value)
-    local last = self.last + 1
-    self.last = last
-    self[last] = value
-    if #self > self.maxSize then
-	self.maxSize = #self
-    end
-end
-
-function Dequeue:IsEmpty()
-    return self.first > self.last
-end
-
-function Dequeue:popLeft()
-    local first = self.first
-    if first > self.last then error("dequeue is empty") end
-    local value = self[first]
-    self[first] = nil
-    self.first = first + 1
-    return value
-end
-
-function Dequeue:popRight()
-    local last = self.last
-    if self.first > last then error("dequeue is empty") end
-    local value = self[last]
-    self[last] = nil
-    self.last = last - 1
-    return value
-end
-
-local function table_print (tt, indent, done)
-    done = done or {}
-    indent = indent or 0
-    if type(tt) == "table" then
-        local sb = {}
-        for key, value in pairs (tt) do
-            table.insert(sb, string.rep (" ", indent)) -- indent it
-            if type (value) == "table" and not done [value] then
-                done [value] = true
-                table.insert(sb, "{");
-                table.insert(sb, table_print (value, indent + 2, done))
-                table.insert(sb, string.rep (" ", indent)) -- indent it
-                table.insert(sb, "}");
-            elseif "number" == type(key) then
-                table.insert(sb, string.format("\"%s\"", tostring(value)))
-            else
-                table.insert(sb, string.format("%s = \"%s\"", tostring (key), tostring(value)))
-            end
-        end
-        return table.concat(sb)
-    else
-        return tt
-    end
-end
-
-local function to_string( tbl )
-    if  "nil"       == type( tbl ) then
-        return tostring(nil)
-    elseif  "table" == type( tbl ) then
-        return table_print(tbl)
-    elseif  "string" == type( tbl ) then
-        return tbl
-    else
-        return tostring(tbl)
-    end
-end
-
