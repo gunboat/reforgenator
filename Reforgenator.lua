@@ -154,11 +154,13 @@ function Reforgenator:ShowState()
     local rangedHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_RANGED)
     local spellHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_SPELL)
     local expertise = GetCombatRating(COMBAT_RATINGS.CR_EXPERTISE)
+    local mastery = GetCombatRating(COMBAT_RATINGS.CR_MASTERY)
 
     self:Print("melee hit = " .. meleeHit)
     self:Print("ranged hit = " .. rangedHit)
     self:Print("spell hit = " .. spellHit)
     self:Print("expertise = " .. expertise)
+    self:Print("mastery = " .. mastery)
 
     -- Get the current state of the equipment
     local baseEquipment = {}
@@ -196,7 +198,12 @@ function Reforgenator:ShowState()
 	-- Construct an equipment set optimized for hit
 	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, baseEquipment)
 	self:Print("best solution is "..to_string(soln))
+    elseif expertise < 173 then
+	soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, 173, 225, baseEquipment)
+	self:Print("best solution is "..to_string(soln))
     else
+	soln = self:OptimizeSolution("ITEM_MOD_MASTERY_RATING_SHORT", mastery, 173, 225, baseEquipment)
+	self:Print("best solution is "..to_string(soln))
     end
 
     self:Print("all done")
@@ -268,6 +275,27 @@ end
 
 
 function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBound, ancestor)
+    -- find the reforgable item with the largest delta
+    -- that won't put us over the cap
+    local winningDelta = 0
+    local winningItem = nil
+    for k,v in ipairs(ancestor.items) do
+        if self:CanReforge(v, rating) then
+            local item = self:ReforgeItem(v, rating)
+            local newValue = currentValue + item[rating]
+            if newValue < upperBound then
+                if item[rating] > winningDelta then
+                    winningDelta = item[rating]
+                    winningItem = item
+                end
+            end
+        end
+    end
+
+    return winningItem
+end
+
+function Reforgenator:crap()
     local dequeue = Dequeue:new()
     local solutions = {}
 
@@ -287,7 +315,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
 	    table.insert(opt_A.items, item)
 	    dequeue:pushRight(opt_A)
 
-	    if self:CanReforge(item) then
+	    if self:CanReforge(item, rating) then
 		item = self:ReforgeItem(item, rating)
 		opt_B.delta = opt_B.delta + item[rating]
 		if currentValue + opt_B.delta < upperBound then
@@ -342,7 +370,6 @@ local StatDesirability = {
 }
 
 function Reforgenator:ReforgeItem(item, desiredStat)
-    self:Print("attempting to reforge " .. to_string(item))
     local result = {}
     local loserStat = nil
     local loserStatValue = 0
@@ -360,10 +387,9 @@ function Reforgenator:ReforgeItem(item, desiredStat)
         return result
     end
 
-    self:Print("reforging item "..to_string(item).." to get rid of "..loserStat)
-
     result.reforged = true
     local pool = result[loserStat]
+    result.reforgedStat = loserStat
     result[loserStat] = math.floor(pool * 0.6)
     result[desiredStat] = pool - result[loserStat]
     return result
