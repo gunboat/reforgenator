@@ -87,6 +87,53 @@ function Reforgenator:Debug(...)
     end
 end
 
+local function table_print (tt, indent, done)
+    done = done or {}
+    indent = indent or 0
+    if type(tt) == "table" then
+        local sb = {}
+        for key, value in pairs (tt) do
+            table.insert(sb, string.rep (" ", indent)) -- indent it
+            if type (value) == "table" and not done [value] then
+                done [value] = true
+                table.insert(sb, "{");
+                table.insert(sb, table_print (value, indent + 2, done))
+                table.insert(sb, string.rep (" ", indent)) -- indent it
+                table.insert(sb, "}, ");
+            elseif "number" == type(key) then
+                table.insert(sb, string.format("\"%s\", ", tostring(value)))
+            else
+                table.insert(sb, string.format("%s=\"%s\", ", tostring (key), tostring(value)))
+            end
+        end
+        return table.concat(sb)
+    else
+        return tt
+    end
+end
+
+local function to_string( tbl )
+    if  "nil"       == type( tbl ) then
+        return tostring(nil)
+    elseif  "table" == type( tbl ) then
+        return table_print(tbl)
+    elseif  "string" == type( tbl ) then
+        return tbl
+    else
+        return tostring(tbl)
+    end
+end
+
+function Reforgenator:Dump(name, t)
+    if type(t) == "table" then
+        for k,v in next,t do
+            self:Print(name.."["..k.."]="..to_string(v))
+        end
+    else
+        self:Print(name.."=" .. to_string(t))
+    end
+end
+
 function Reforgenator:OnInitialize()
     self:Print("OnInitialize called")
 
@@ -148,7 +195,7 @@ function Reforgenator:ShowState()
     if meleeHit < 246 then
 	-- Construct an equipment set optimized for hit
 	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, baseEquipment)
-	self:Print("best solution is X")
+	self:Print("best solution is "..to_string(soln))
     else
     end
 
@@ -157,53 +204,6 @@ end
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
-end
-
-local function table_print (tt, indent, done)
-    done = done or {}
-    indent = indent or 0
-    if type(tt) == "table" then
-        local sb = {}
-        for key, value in pairs (tt) do
-            table.insert(sb, string.rep (" ", indent)) -- indent it
-            if type (value) == "table" and not done [value] then
-                done [value] = true
-                table.insert(sb, "{");
-                table.insert(sb, table_print (value, indent + 2, done))
-                table.insert(sb, string.rep (" ", indent)) -- indent it
-                table.insert(sb, "}, ");
-            elseif "number" == type(key) then
-                table.insert(sb, string.format("\"%s\", ", tostring(value)))
-            else
-                table.insert(sb, string.format("%s=\"%s\", ", tostring (key), tostring(value)))
-            end
-        end
-        return table.concat(sb)
-    else
-        return tt
-    end
-end
-
-local function to_string( tbl )
-    if  "nil"       == type( tbl ) then
-        return tostring(nil)
-    elseif  "table" == type( tbl ) then
-        return table_print(tbl)
-    elseif  "string" == type( tbl ) then
-        return tbl
-    else
-        return tostring(tbl)
-    end
-end
-
-function Reforgenator:Dump(name, t)
-    if type(t) == "table" then
-        for k,v in next,t do
-            self:Print(name.."["..k.."]="..to_string(v))
-        end
-    else
-        self:Print(name.."=" .. to_string(t))
-    end
 end
 
 local Dequeue = {}
@@ -342,6 +342,7 @@ local StatDesirability = {
 }
 
 function Reforgenator:ReforgeItem(item, desiredStat)
+    self:Print("attempting to reforge " .. to_string(item))
     local result = {}
     local loserStat = nil
     local loserStatValue = 0
@@ -352,6 +353,14 @@ function Reforgenator:ReforgeItem(item, desiredStat)
 	    loserStatValue = StatDesirability[k]
 	end
     end
+
+    if not loserStat then
+        self:Print("nothing to reforge? How'd we get here?")
+        result[desiredStat] = 0
+        return result
+    end
+
+    self:Print("reforging item "..to_string(item).." to get rid of "..loserStat)
 
     result.reforged = true
     local pool = result[loserStat]
