@@ -99,11 +99,11 @@ local function table_print (tt, indent, done)
                 table.insert(sb, "{");
                 table.insert(sb, table_print (value, indent + 2, done))
                 table.insert(sb, string.rep (" ", indent)) -- indent it
-                table.insert(sb, "}, ");
+                table.insert(sb, "},\n");
             elseif "number" == type(key) then
-                table.insert(sb, string.format("\"%s\", ", tostring(value)))
+                table.insert(sb, string.format("\"%s\",\n", tostring(value)))
             else
-                table.insert(sb, string.format("%s=\"%s\", ", tostring (key), tostring(value)))
+                table.insert(sb, string.format("%s=\"%s\",\n", tostring (key), tostring(value)))
             end
         end
         return table.concat(sb)
@@ -163,12 +163,9 @@ function Reforgenator:ShowState()
     self:Print("mastery = " .. mastery)
 
     -- Get the current state of the equipment
-    local baseEquipment = {}
-    baseEquipment.delta = 0
-    baseEquipment.items = {}
-    baseEquipment.itemCount = 0
-    for k,v in pairs(INVENTORY_SLOTS) do
-        local itemLink = GetInventoryItemLink("player", GetInventorySlotInfo(k))
+    soln = SolutionContext:new()
+    for k,v in ipairs(INVENTORY_SLOTS) do
+        local itemLink = GetInventoryItemLink("player", GetInventorySlotInfo(v))
         if itemLink then
             local stats = {}
             GetItemStats(itemLink, stats)
@@ -187,30 +184,47 @@ function Reforgenator:ShowState()
 		end
 	    end
 
-            baseEquipment.itemCount = baseEquipment.itemCount + 1
-            baseEquipment.items[baseEquipment.itemCount] = entry
+	    soln.items[#soln.items + 1] = entry
         end
     end
     self:Print("done fetching equipment")
 
     -- Reforge for hit cap
     if meleeHit < 246 then
-	-- Construct an equipment set optimized for hit
-	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, baseEquipment)
-	self:Print("best solution is "..to_string(soln))
-    elseif expertise < 173 then
-	soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, 173, 225, baseEquipment)
-	self:Print("best solution is "..to_string(soln))
-    else
-	soln = self:OptimizeSolution("ITEM_MOD_MASTERY_RATING_SHORT", mastery, 173, 225, baseEquipment)
-	self:Print("best solution is "..to_string(soln))
+	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, soln)
     end
 
-    self:Print("all done")
+    -- Reforge for expertise
+    if expertise < 173 then
+	soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, 173, 225, soln)
+    end
+
+    -- Reforge for mastery
+    soln = self:OptimizeSolution("ITEM_MOD_MASTERY_RATING_SHORT", mastery, 173, 225, baseEquipment)
+
+    self:Dump("soln", soln)
 end
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
+end
+
+function Reforgenator:deepCopy(o)
+    local lut = {}
+    local function _copy(o)
+        if type(o) ~= "table" then
+            return o
+        elseif lut[o] then
+            return lut[o]
+        end
+        local result = {}
+        lut[o] = result
+        for k,v in pairs(o) do
+            result[_copy(k)] = _copy(v)
+        end
+        return setmetatable(result, getmetatable(o))
+    end
+    return _copy(o)
 end
 
 local Dequeue = {}
@@ -263,7 +277,6 @@ function Dequeue:popRight()
     return value
 end
 
-
 local SolutionContext = {}
 
 function SolutionContext:new()
@@ -271,79 +284,6 @@ function SolutionContext:new()
     setmetatable(result, self)
     self.__index = self
     return result
-end
-
-
-function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBound, ancestor)
-    -- find the reforgable item with the largest delta
-    -- that won't put us over the cap
-    local winningDelta = 0
-    local winningItem = nil
-    for k,v in ipairs(ancestor.items) do
-        if self:CanReforge(v, rating) then
-            local item = self:ReforgeItem(v, rating)
-            local newValue = currentValue + item[rating]
-            if newValue < upperBound then
-                if item[rating] > winningDelta then
-                    winningDelta = item[rating]
-                    winningItem = item
-                end
-            end
-        end
-    end
-
-    return winningItem
-end
-
-function Reforgenator:crap()
-    local dequeue = Dequeue:new()
-    local solutions = {}
-
-    local seed = SolutionContext:new()
-    seed.uninspectedItems = self:deepCopy(ancestor.items)
-    self:Dump("seed", seed)
-    dequeue:pushRight(seed)
-    self:Print("starting the optimization process")
-
-    while not dequeue:isEmpty() do
-	local opt_A = dequeue:popLeft()
-	if #opt_A.uninspectedItems == 0 then
-	    table.insert(solutions, opt_A)
-	else
-	    local item = table.remove(opt_A.uninspectedItems, 1)
-	    local opt_B = self:deepCopy(opt_A)
-	    table.insert(opt_A.items, item)
-	    dequeue:pushRight(opt_A)
-
-	    if self:CanReforge(item, rating) then
-		item = self:ReforgeItem(item, rating)
-		opt_B.delta = opt_B.delta + item[rating]
-		if currentValue + opt_B.delta < upperBound then
-		    table.insert(opt_B.items, item)
-		    dequeue:pushRight(opt_B)
-		end
-	    end
-	end
-    end
-    self:Print("dequeue.maxSize="..dequeue.maxSize)
-    self:Print("#solutions="..#solutions)
-
-    -- Okay, so now "solutions" has all the reforged combinations. Choose the
-    -- best one. And by "best" we mean "smallest value larger than upperBound"
-    local bestSolution = {}
-    local bestSolutionValue = 9999
-    for k,v in pairs(solutions) do
-	self:Dump("solution #"..k, v)
-	local value = currentValue + v.delta
-	if value > lowerBound and value < bestSolutionValue then
-	    bestSolution = v;
-	    bestSolutionValue = value
-	end
-    end
-
-    self:Dump("winner", bestSolution)
-
-    return bestSolution
 end
 
 function Reforgenator:CanReforge(item, desiredStat)
@@ -358,6 +298,7 @@ function Reforgenator:CanReforge(item, desiredStat)
     return true
 end
 
+-- This is the ordering for tanks
 local StatDesirability = {
     ["ITEM_MOD_HIT_RATING_SHORT"] = 1,
     ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2,
@@ -368,6 +309,20 @@ local StatDesirability = {
     ["ITEM_MOD_HASTE_RATING_SHORT"] = 7,
     ["ITEM_MOD_SPIRIT_RATING_SHORT"] = 8,
 }
+
+function Reforgenator:PotentialGain(item, desiredStat)
+    local loserStat = nil
+    local loserStatValue = 0
+    for k,v in pairs(item) do
+	if StatDesirability[k] and StatDesirability[k] > loserStatValue then
+	    loserStat = k
+	    loserStatValue = StatDesirability[k]
+	end
+    end
+
+    local pool = item[loserStat]
+    return math.floor(pool * 0.4)
+end
 
 function Reforgenator:ReforgeItem(item, desiredStat)
     local result = {}
@@ -381,15 +336,8 @@ function Reforgenator:ReforgeItem(item, desiredStat)
 	end
     end
 
-    if not loserStat then
-        self:Print("nothing to reforge? How'd we get here?")
-        result[desiredStat] = 0
-        return result
-    end
-
     result.reforged = true
     local pool = result[loserStat]
-    result.reforgedStat = loserStat
     result[loserStat] = math.floor(pool * 0.6)
     result[desiredStat] = pool - result[loserStat]
     return result
@@ -412,3 +360,58 @@ function Reforgenator:deepCopy(o)
     end
     return _copy(o)
 end
+
+function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBound, ancestor)
+    soln = SolutionContext:new()
+
+    for k,v in ipairs(ancestor.changes) do
+	soln.changes[#soln.changes + 1] = v
+    end
+
+    unforged = {}
+    for k,v in ipairs(ancestor.items) do
+	if self:CanReforge(v, rating) then
+	    unforged[#unforged + 1] = { item=v, delta=self:PotentialGain(v, rating) }
+	else
+	    soln.items[#soln.items + 1] = v
+	end
+    end
+
+    table.sort(unforged, function(a,b) return a.delta > b.delta end)
+    self:Dump("unforged", unforged)
+
+    val = currentValue
+    newList = {}
+    for k,v in ipairs(unforged) do
+	if val + v.delta <= lowerBound then
+	    val = val + v.delta
+	    v.item = self:ReforgeItem(v.item, rating)
+	    soln.changes[#soln.changes + 1] = v.item
+	    soln.items[#soln.items + 1] = v.item
+	    self:Dump("val", val)
+	else
+	    newList[#newList + 1] = v
+	end
+    end
+    unforged = newList
+    self:Dump("unforged", unforged)
+
+    if #unforged > 0 then
+	local v = unforged[#unforged]
+	local under = math.abs(lowerBound - val)
+	local over = math.abs(lowerBound - val + v.delta)
+	if over < under then
+	    v.item = self:ReforgeItem(v.item, rating)
+	    soln.items[#soln.items + 1] = v.item
+	    soln.changes[#soln.changes + 1] = v.item
+	    unforged[#unforged] = nil
+	end
+    end
+
+    for k,v in ipairs(unforged) do
+	soln.items[#soln.items + 1] = v.item
+    end
+
+    return soln
+end
+
