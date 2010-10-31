@@ -207,7 +207,7 @@ end
 local SolutionContext = {}
 
 function SolutionContext:new()
-    local result = { items={}, changes={} }
+    local result = { items={}, changes={}, excessRating={} }
     setmetatable(result, self)
     self.__index = self
     return result
@@ -272,14 +272,10 @@ function Reforgenator:ShowState()
     self:Dump("current", soln)
 
     -- Reforge for hit cap
-    if meleeHit < meleeHitCap then
-	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, meleeHitCap, math.floor(meleeHitCap * 1.1), soln)
-    end
+    soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, meleeHitCap, math.floor(meleeHitCap * 1.1), soln)
 
     -- Reforge for expertise
-    if expertise < expertiseCap then
-	soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, expertiseCap, math.floor(expertiseCap * 1.1), soln)
-    end
+    soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, expertiseCap, math.floor(expertiseCap * 1.1), soln)
 
     -- Reforge for mastery
     soln = self:OptimizeSolution("ITEM_MOD_MASTERY_RATING_SHORT", mastery, 999, 999, soln)
@@ -377,61 +373,83 @@ local StatDesirability = {
     ["ITEM_MOD_SPIRIT_RATING_SHORT"] = 8,
 }
 
-function Reforgenator:CanReforge(item, desiredStat)
+function Reforgenator:PotentialLossFromRating(item, rating)
+    local pool = item[rating]
+    local potentialLoss = math.floor(pool * 0.4)
+    return potentialLoss
+end
+
+function Reforgenator:GetBestReforge(item, desiredRating, excessRating)
+    self:Debug("### GetBestReforge")
+    self:Debug("### item="..to_string(item))
+    self:Debug("### desiredRating="..desiredRating)
+    self:Debug("### excessRating="..to_string(excessRating))
+
     if item.reforged then
+	self:Debug("already reforged")
 	return nil
     end
 
-    if item[desiredStat] then
+    local candidates = {}
+
+    local desiredRank = StatDesirability[desiredRating]
+    for k,v in pairs(item) do
+	if StatDesirability[k] and StatDesirability[k] > desiredRank then
+	    local loss = self:PotentialLossFromRating(item, k)
+	    self:Debug("loss from "..k.."="..loss)
+	    candidates[#candidates + 1] = {k, loss}
+	end
+    end
+
+    for k,v in pairs(excessRating) do
+	if item[k] then
+	    local loss = self:PotentialLossFromRating(item, k)
+	    self:Debug("loss from "..k.."="..loss..",excess="..excessRating[k])
+	    if loss < excessRating[k] then
+		candidates[#candidates + 1] = {k, loss}
+	    end
+	end
+    end
+
+    if #candidates == 0 then
+	self:Debug("no reforgable attributes on item")
 	return nil
     end
 
-    local desirability = StatDesirability[desiredStat]
-    for k,v in pairs(item) do
-	if StatDesirability[k] and StatDesirability[k] > desirability then
-	    return true
-	end
-    end
+    table.sort(candidates, function(a,b) return a[2] > b[2] end)
 
-    return nil
+    self:Debug("suggestedRating="..candidates[1][1])
+    self:Debug("delta="..candidates[1][2])
+
+    return { item=item, suggestedRating=candidates[1][1], delta=candidates[1][2] }
 end
 
-function Reforgenator:PotentialGain(item, desiredStat)
-    self:Debug("PotentialGain(item=" .. to_string(item), "desiredStat=" .. desiredStat)
+function Reforgenator:ReforgeItem(suggestion, desiredStat, excessRating)
+    self:Debug("### ReforgeItem")
+    self:Debug("### suggestion="..to_string(suggestion))
+    self:Debug("### desiredStat="..desiredStat)
+    self:Debug("### excessRating="..to_string(excessRating))
 
-    local loserStat = nil
-    local loserStatValue = StatDesirability[desiredStat]
-    for k,v in pairs(item) do
-	if StatDesirability[k] and StatDesirability[k] > loserStatValue then
-	    loserStat = k
-	    loserStatValue = StatDesirability[k]
-	end
-    end
-
-    local pool = item[loserStat]
-    local potentialGain = math.floor(pool * 0.4)
-    self:Debug("potentialGain="..potentialGain)
-    return potentialGain
-end
-
-function Reforgenator:ReforgeItem(item, desiredStat)
     local result = {}
-    local loserStat = nil
-    local loserStatValue = 0
-    for k,v in pairs(item) do
+    local sr = suggestion.suggestedRating
+
+    for k,v in pairs(suggestion.item) do
 	result[k] = v
-	if StatDesirability[k] and StatDesirability[k] > loserStatValue then
-	    loserStat = k
-	    loserStatValue = StatDesirability[k]
+    end
+    result.reforged = true
+    result.reforgedFrom = sr
+    result.reforgedTo = desiredStat
+
+    result[desiredStat] = suggestion.delta
+    result[sr] = result[sr] - suggestion.delta
+
+    if excessRating[sr] then
+	excessRating[sr] = excessRating[sr] - suggestion.delta
+	if excessRating[sr] == 0 then
+	    excessRating[sr] = nil
 	end
     end
 
-    result.reforged = true
-    result.reforgedFrom = loserStat
-    result.reforgedTo = desiredStat
-    local pool = result[loserStat]
-    result[desiredStat] = math.floor(pool * 0.4)
-    result[loserStat] = pool - result[desiredStat]
     return result
 end
 
@@ -439,14 +457,28 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
     self:Debug("######### Optimize Solution for " .. rating .. " #######")
     soln = SolutionContext:new()
 
+    for k,v in pairs(ancestor.excessRating) do
+	soln.excessRating[k] = v
+    end
     for k,v in ipairs(ancestor.changes) do
 	soln.changes[#soln.changes + 1] = v
     end
 
+    -- already over cap?
+    if currentValue > lowerBound then
+	soln.excessRating[rating] = currentValue - lowerBound
+	for k,v in ipairs(ancestor.items) do
+	    soln.items[#soln.items + 1] = v
+	end
+	return soln
+    end
+
+    -- okay, so we actually have to do something now
     unforged = {}
     for k,v in ipairs(ancestor.items) do
-	if self:CanReforge(v, rating) then
-	    unforged[#unforged + 1] = { item=v, delta=self:PotentialGain(v, rating) }
+	local suggestion = self:GetBestReforge(v, rating, soln.excessRating)
+	if suggestion then
+	    unforged[#unforged + 1] = suggestion
 	else
 	    soln.items[#soln.items + 1] = v
 	end
@@ -454,12 +486,16 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
 
     table.sort(unforged, function(a,b) return a.delta > b.delta end)
 
+    -- unforged is now sorted by the amount of gain that could be had from
+    -- reforging the item, and soln.items contains all the items that
+    -- can't be reforged to the desired rating
+
     val = currentValue
     newList = {}
     for k,v in ipairs(unforged) do
 	if val + v.delta <= lowerBound then
 	    val = val + v.delta
-	    v.item = self:ReforgeItem(v.item, rating)
+	    v.item = self:ReforgeItem(v, rating, soln.excessRating)
 	    soln.changes[#soln.changes + 1] = v.item
 	    soln.items[#soln.items + 1] = v.item
 	    self:Dump("val", val)
@@ -474,7 +510,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
 	local under = math.abs(lowerBound - val)
 	local over = math.abs(lowerBound - val + v.delta)
 	if over < under then
-	    v.item = self:ReforgeItem(v.item, rating)
+	    v.item = self:ReforgeItem(v, rating, soln.excessRating)
 	    soln.items[#soln.items + 1] = v.item
 	    soln.changes[#soln.changes + 1] = v.item
 	    unforged[#unforged] = nil
