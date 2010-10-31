@@ -86,7 +86,7 @@
 	    hidden="true"
 	    parent="UIParent">
 	<Size>
-	    <AbsDimension x="270" y="225"/>
+	    <AbsDimension x="270" y="235"/>
 	</Size>
 	<Anchors>
 	    <Anchor point="CENTER" />

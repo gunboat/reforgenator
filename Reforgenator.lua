@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.5"
+local version = "0.0.6"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -284,7 +284,43 @@ function Reforgenator:TankModel()
     return model
 end
 
+function Reforgenator:HunterModel()
+    local model = ReforgeModel:new()
+    model.statRank = {
+	["ITEM_MOD_HIT_RATING_SHORT"] = 1,
+	["ITEM_MOD_MASTERY_RATING_SHORT"] = 2,
+	["ITEM_MOD_CRIT_RATING_SHORT"] = 3,
+	["ITEM_MOD_HASTE_RATING_SHORT"] = 4,
+	["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 5,
+	["ITEM_MOD_DODGE_RATING_SHORT"] = 6,
+	["ITEM_MOD_PARRY_RATING_SHORT"] = 7,
+	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 8,
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateRangedHitCap() },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=999 },
+    }
+
+    return model
+end
+
 function Reforgenator:CalculateMeleeHitCap()
+    local hitCap = 247
+
+    -- Mods to hit: Draenei get 1% bonus
+    local race, raceEn = UnitRace("player")
+    if raceEn == "Draenei" then
+	hitCap = 216
+    end
+
+    self:Debug("calculated hit cap = " .. hitCap)
+
+    return hitCap
+end
+
+function Reforgenator:CalculateRangedHitCap()
     local hitCap = 247
 
     -- Mods to hit: Draenei get 1% bonus
@@ -388,6 +424,10 @@ function Reforgenator:GetPlayerReforgeModel()
     local className, classNameEN = UnitClass("player")
     local primaryTab = getPrimaryTab()
 
+    if classNameEN == "HUNTER" then
+	return self:HunterModel()
+    end
+
     if classNameEN == "WARRIOR" then
 	if primaryTab == 3 then
 	    return self:TankModel()
@@ -454,6 +494,7 @@ function Reforgenator:ShowState()
 	    local entry = {}
 	    entry.itemLink = itemLink
 	    entry.slotInfo = slotInfo
+	    entry.itemLevel = select(4, GetItemInfo(itemLink))
 
 	    if RI:IsItemReforged(itemLink) then
 		entry.reforged = true
@@ -501,6 +542,11 @@ function Reforgenator:PotentialLossFromRating(item, rating)
 end
 
 function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank)
+    if item.itemLevel < 200 then
+	self:Debug(item.itemLink.." is too low a level to reforge")
+	return nil
+    end
+
     if item.reforged then
 	self:Debug(item.itemLink.." already reforged")
 	return nil
