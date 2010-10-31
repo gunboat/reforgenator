@@ -241,6 +241,9 @@ function Reforgenator:ShowState()
     self:Debug("expertise = " .. expertise)
     self:Debug("mastery = " .. mastery)
 
+    local meleeHitCap = self:CalculateMeleeHitCap()
+    local expertiseCap = self:CalculateExpertiseCap()
+
     -- Get the current state of the equipment
     soln = SolutionContext:new()
     for k,v in ipairs(INVENTORY_SLOTS) do
@@ -269,13 +272,13 @@ function Reforgenator:ShowState()
     self:Dump("current", soln)
 
     -- Reforge for hit cap
-    if meleeHit < 246 then
-	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, soln)
+    if meleeHit < meleeHitCap then
+	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, meleeHitCap, math.floor(meleeHitCap * 1.1), soln)
     end
 
     -- Reforge for expertise
-    if expertise < 173 then
-	soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, 173, 225, soln)
+    if expertise < expertiseCap then
+	soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, expertiseCap, math.floor(expertiseCap * 1.1), soln)
     end
 
     -- Reforge for mastery
@@ -289,6 +292,77 @@ end
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
+end
+
+function Reforgenator:CalculateMeleeHitCap()
+    local hitCap = 247
+
+    -- Mods to hit: Draenei get 1% bonus
+    local race, raceEn = UnitRace("player")
+    if raceEn == "Draenei" then
+	hitCap = 216
+    end
+
+    self:Debug("calculated hit cap = " .. hitCap)
+
+    return hitCap
+end
+
+function Reforgenator:CalculateExpertiseCap()
+    -- Mods to expertise:
+    --   (7.6887 rating per)
+    --   DKs get +6 expertise from "veteran of the third war"
+    --   Orcs get +3 for axes and fist weapons
+    --   Dwarves get +3 for maces
+    --   Humans get +3 for swords and maces
+    --   Gnomes get +3 for daggers and 1H swords
+    local expertiseCap = 177
+
+    local className, classNameEN = UnitClass("player")
+    self:Debug("classNameEN="..classNameEN)
+    if classNameEN == "DEATHKNIGHT" then
+	self:Debug("reducing expertise for DK")
+	expertiseCap = expertiseCap - 46
+    end
+
+    local mainHandLink = GetInventoryItemLink("player", GetInventorySlotInfo("MainHandSlot"))
+    local _, _, _, _, _, itemType, itemSubType = GetItemInfo(mainHandLink)
+    self:Debug("itemType="..itemType..", itemSubType="..itemSubType)
+
+    local raceName, raceNameEN = UnitRace("player")
+    self:Debug("raceNameEN="..raceNameEN)
+    if raceNameEN == "Orc" then
+	if itemSubType == "One-Handed Axes"
+		or itemSubType == "Two-Handed Axes"
+		or itemSubType == "Fist Weapons" then
+	    self:Debug("reducing expertise for Orc with axe or fist")
+	    expertiseCap = expertiseCap - 23
+	end
+    elseif raceNameEN == "Dwarf" then
+	if itemSubType == "One-Handed Maces"
+		or itemSubType == "Two-Handed Maces" then
+	    self:Debug("reducing expertise for Dwarf with mace")
+	    expertiseCap = expertiseCap - 23
+	end
+    elseif raceNameEN == "Human" then
+	if itemSubType == "One-Handed Swords"
+		or itemSubType == "Two-Handed Swords"
+		or itemSubType == "One-Handed Maces"
+		or itemSubType == "Two-Handed Maces" then
+	    self:Debug("reducing expertise for Human with sword or mace")
+	    expertiseCap = expertiseCap - 23
+	end
+    elseif raceNameEN == "Gnome" then
+	if itemSubType == "One-Handed Swords"
+		or itemSubType == "Daggers" then
+	    self:Debug("reducing expertise for Gnome with dagger or 1H sword")
+	    expertiseCap = expertiseCap - 23
+	end
+    end
+
+    self:Debug("calculated expertise cap = " .. expertiseCap)
+    return expertiseCap
+
 end
 
 -- This is the ordering for tanks
@@ -361,27 +435,8 @@ function Reforgenator:ReforgeItem(item, desiredStat)
     return result
 end
 
-function Reforgenator:deepCopy(o)
-    local lut = {}
-    local function _copy(o)
-        if type(o) ~= "table" then
-            return o
-        elseif lut[o] then
-            return lut[o]
-        end
-        local result = {}
-        lut[o] = result
-        for k,v in pairs(o) do
-            result[_copy(k)] = _copy(v)
-        end
-        return setmetatable(result, getmetatable(o))
-    end
-    return _copy(o)
-end
-
 function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBound, ancestor)
     self:Debug("######### Optimize Solution for " .. rating .. " #######")
-    self:Dump("ancestor", ancestor)
     soln = SolutionContext:new()
 
     for k,v in ipairs(ancestor.changes) do
