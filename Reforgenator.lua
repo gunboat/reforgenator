@@ -390,6 +390,11 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating)
 	return nil
     end
 
+    if item[desiredRating] then
+	self:Debug("item already has desired rating")
+	return nil
+    end
+
     local candidates = {}
 
     local desiredRank = StatDesirability[desiredRating]
