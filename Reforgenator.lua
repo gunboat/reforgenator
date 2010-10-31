@@ -12,7 +12,7 @@ local function Set(list)
     return set
 end
 
-local INVENTORY_SLOTS = Set {
+local INVENTORY_SLOTS = {
     "HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot",
     "ChestSlot", "ShirtSlot", "TabardSlot", "WristSlot", "HandsSlot",
     "WaistSlot", "LegsSlot", "FeetSlot", "Finger0Slot", "Finger1Slot",
@@ -84,6 +84,8 @@ local profileOptions = {
 function Reforgenator:Debug(...)
     if debugFrame then
         debugFrame:AddMessage(string.join(", ", ...))
+    else
+	self:Print(string.join(", ", ...))
     end
 end
 
@@ -127,86 +129,11 @@ end
 function Reforgenator:Dump(name, t)
     if type(t) == "table" then
         for k,v in next,t do
-            self:Print(name.."["..k.."]="..to_string(v))
+            self:Debug(name.."["..k.."]="..to_string(v))
         end
     else
-        self:Print(name.."=" .. to_string(t))
+        self:Debug(name.."=" .. to_string(t))
     end
-end
-
-function Reforgenator:OnInitialize()
-    self:Print("OnInitialize called")
-
-    Reforgenator.db = LibStub("AceDB-3.0"):New("ReforgenatorDB", defaults, "Default")
-
-    LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator", options)
-
-    Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
-
-    self:RegisterChatCommand("reforgenator", "ShowState")
-end
-
-function Reforgenator:ShowState()
-    self:Print("in ShowState")
-
-    -- Get the character's current ratings
-    local meleeHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_MELEE)
-    local rangedHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_RANGED)
-    local spellHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_SPELL)
-    local expertise = GetCombatRating(COMBAT_RATINGS.CR_EXPERTISE)
-    local mastery = GetCombatRating(COMBAT_RATINGS.CR_MASTERY)
-
-    self:Print("melee hit = " .. meleeHit)
-    self:Print("ranged hit = " .. rangedHit)
-    self:Print("spell hit = " .. spellHit)
-    self:Print("expertise = " .. expertise)
-    self:Print("mastery = " .. mastery)
-
-    -- Get the current state of the equipment
-    soln = SolutionContext:new()
-    for k,v in ipairs(INVENTORY_SLOTS) do
-        local itemLink = GetInventoryItemLink("player", GetInventorySlotInfo(v))
-        if itemLink then
-            local stats = {}
-            GetItemStats(itemLink, stats)
-	    local entry = {}
-	    entry.itemLink = itemLink
-
-	    if RI:IsItemReforged(itemLink) then
-		entry.reforged = true
-	    else
-		entry.reforged = nil
-	    end
-
-	    for k,v in pairs(stats) do
-		if ITEM_STATS[k] then
-		    entry[k] = v
-		end
-	    end
-
-	    soln.items[#soln.items + 1] = entry
-        end
-    end
-    self:Print("done fetching equipment")
-
-    -- Reforge for hit cap
-    if meleeHit < 246 then
-	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, soln)
-    end
-
-    -- Reforge for expertise
-    if expertise < 173 then
-	soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, 173, 225, soln)
-    end
-
-    -- Reforge for mastery
-    soln = self:OptimizeSolution("ITEM_MOD_MASTERY_RATING_SHORT", mastery, 173, 225, baseEquipment)
-
-    self:Dump("soln", soln)
-end
-
-function Reforgenator:OnEnable()
-    self:Print("v"..version.." loaded")
 end
 
 function Reforgenator:deepCopy(o)
@@ -280,22 +207,88 @@ end
 local SolutionContext = {}
 
 function SolutionContext:new()
-    local result = { delta=0, items={}, uninspectedItems={} }
+    local result = { items={}, changes={} }
     setmetatable(result, self)
     self.__index = self
     return result
 end
 
-function Reforgenator:CanReforge(item, desiredStat)
-    if item.reforged then
-	return nil
+function Reforgenator:OnInitialize()
+    self:Debug("OnInitialize called")
+
+    Reforgenator.db = LibStub("AceDB-3.0"):New("ReforgenatorDB", defaults, "Default")
+
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator", options)
+
+    Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
+
+    self:RegisterChatCommand("reforgenator", "ShowState")
+end
+
+function Reforgenator:ShowState()
+    self:Debug("in ShowState")
+
+    -- Get the character's current ratings
+    local meleeHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_MELEE)
+    local rangedHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_RANGED)
+    local spellHit = GetCombatRating(COMBAT_RATINGS.CR_HIT_SPELL)
+    local expertise = GetCombatRating(COMBAT_RATINGS.CR_EXPERTISE)
+    local mastery = GetCombatRating(COMBAT_RATINGS.CR_MASTERY)
+
+    self:Debug("melee hit = " .. meleeHit)
+    self:Debug("ranged hit = " .. rangedHit)
+    self:Debug("spell hit = " .. spellHit)
+    self:Debug("expertise = " .. expertise)
+    self:Debug("mastery = " .. mastery)
+
+    -- Get the current state of the equipment
+    soln = SolutionContext:new()
+    for k,v in ipairs(INVENTORY_SLOTS) do
+        local itemLink = GetInventoryItemLink("player", GetInventorySlotInfo(v))
+        if itemLink then
+            local stats = {}
+            GetItemStats(itemLink, stats)
+	    local entry = {}
+	    entry.itemLink = itemLink
+
+	    if RI:IsItemReforged(itemLink) then
+		entry.reforged = true
+	    else
+		entry.reforged = nil
+	    end
+
+	    for k,v in pairs(stats) do
+		if ITEM_STATS[k] then
+		    entry[k] = v
+		end
+	    end
+
+	    soln.items[#soln.items + 1] = entry
+        end
+    end
+    self:Dump("current", soln)
+
+    -- Reforge for hit cap
+    if meleeHit < 246 then
+	soln = self:OptimizeSolution("ITEM_MOD_HIT_RATING_SHORT", meleeHit, 246, 300, soln)
     end
 
-    if item[desiredStat] then
-	return nil
+    -- Reforge for expertise
+    if expertise < 173 then
+	soln = self:OptimizeSolution("ITEM_MOD_EXPERTISE_RATING_SHORT", expertise, 173, 225, soln)
     end
 
-    return true
+    -- Reforge for mastery
+    soln = self:OptimizeSolution("ITEM_MOD_MASTERY_RATING_SHORT", mastery, 999, 999, soln)
+
+    for k,v in ipairs(soln.changes) do
+	self:Debug("changed: " .. to_string(v))
+	self:Print("reforge " .. v.itemLink .. " to change " .. _G[v.reforgedFrom] .. " to " .. _G[v.reforgedTo])
+    end
+end
+
+function Reforgenator:OnEnable()
+    self:Print("v"..version.." loaded")
 end
 
 -- This is the ordering for tanks
@@ -310,9 +303,30 @@ local StatDesirability = {
     ["ITEM_MOD_SPIRIT_RATING_SHORT"] = 8,
 }
 
+function Reforgenator:CanReforge(item, desiredStat)
+    if item.reforged then
+	return nil
+    end
+
+    if item[desiredStat] then
+	return nil
+    end
+
+    local desirability = StatDesirability[desiredStat]
+    for k,v in pairs(item) do
+	if StatDesirability[k] and StatDesirability[k] > desirability then
+	    return true
+	end
+    end
+
+    return nil
+end
+
 function Reforgenator:PotentialGain(item, desiredStat)
+    self:Debug("PotentialGain(item=" .. to_string(item), "desiredStat=" .. desiredStat)
+
     local loserStat = nil
-    local loserStatValue = 0
+    local loserStatValue = StatDesirability[desiredStat]
     for k,v in pairs(item) do
 	if StatDesirability[k] and StatDesirability[k] > loserStatValue then
 	    loserStat = k
@@ -321,7 +335,9 @@ function Reforgenator:PotentialGain(item, desiredStat)
     end
 
     local pool = item[loserStat]
-    return math.floor(pool * 0.4)
+    local potentialGain = math.floor(pool * 0.4)
+    self:Debug("potentialGain="..potentialGain)
+    return potentialGain
 end
 
 function Reforgenator:ReforgeItem(item, desiredStat)
@@ -337,9 +353,11 @@ function Reforgenator:ReforgeItem(item, desiredStat)
     end
 
     result.reforged = true
+    result.reforgedFrom = loserStat
+    result.reforgedTo = desiredStat
     local pool = result[loserStat]
-    result[loserStat] = math.floor(pool * 0.6)
-    result[desiredStat] = pool - result[loserStat]
+    result[desiredStat] = math.floor(pool * 0.4)
+    result[loserStat] = pool - result[desiredStat]
     return result
 end
 
@@ -362,6 +380,8 @@ function Reforgenator:deepCopy(o)
 end
 
 function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBound, ancestor)
+    self:Debug("######### Optimize Solution for " .. rating .. " #######")
+    self:Dump("ancestor", ancestor)
     soln = SolutionContext:new()
 
     for k,v in ipairs(ancestor.changes) do
@@ -378,7 +398,6 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
     end
 
     table.sort(unforged, function(a,b) return a.delta > b.delta end)
-    self:Dump("unforged", unforged)
 
     val = currentValue
     newList = {}
@@ -394,7 +413,6 @@ function Reforgenator:OptimizeSolution(rating, currentValue, lowerBound, upperBo
 	end
     end
     unforged = newList
-    self:Dump("unforged", unforged)
 
     if #unforged > 0 then
 	local v = unforged[#unforged]
