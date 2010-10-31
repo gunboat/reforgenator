@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.4"
+local version = "0.0.5"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -40,6 +40,78 @@ function Reforgenator:OnInitialize()
     Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
 
     self:RegisterChatCommand("reforgenator", "ShowState")
+
+    tinsert(UISpecialFrames, "ReforgenatorPanel")
+end
+
+function Reforgenator:OnDragStart(widget, button, ...)
+    self:Debug("### OnDragStart")
+    self:Debug("widget.ID="..widget:GetID())
+
+    GameTooltip:Hide()
+    PickupInventoryItem(widget:GetID())
+end
+
+function Reforgenator:OnEnter(widget)
+    self:Debug("### OnEnter")
+    self:Debug("### widget.ID="..widget:GetID())
+
+    if widget:GetID() ~= 0 then
+	GameTooltip:SetOwner(widget, "ANCHOR_RIGHT")
+	GameTooltip:SetHyperlink(GetInventoryItemLink("player", widget:GetID()))
+	GameTooltip:Show()
+    end
+end
+
+function Reforgenator:OnCheckbox(widget)
+    self:Debug("### OnCheckbox")
+    self:Debug("### widget.ID="..widget:GetID())
+
+    local id = widget:GetID()
+    table.remove(self.changes, id)
+    self:UpdateWindow()
+end
+
+function Reforgenator:UpdateWindow()
+    for i = 1,4 do
+	if i <= #self.changes then
+	    self:UpdateWindowItem(i, self.changes[i])
+	else
+	    self:UpdateWindowItem(i, nil)
+	end
+    end
+
+    if #self.changes == 0 then
+	if ReforgenatorPanel:IsVisible() then
+	    ReforgenatorPanel:Hide()
+	end
+    else
+	if not ReforgenatorPanel:IsVisible() then
+	    ReforgenatorPanel:Show()
+	end
+    end 
+end
+
+function Reforgenator:UpdateWindowItem(index, itemDescriptor)
+    self:Debug("### UpdateWindowItem")
+
+    if not itemDescriptor then
+	_G["ReforgenatorPanel_Item" .. index]:Hide()
+	_G["ReforgenatorPanel_Item" .. index .. "Checked"]:Hide()
+	return
+    end
+
+    local texture = select(10, GetItemInfo(itemDescriptor.itemLink))
+    _G["ReforgenatorPanel_Item" .. index .. "IconTexture"]:SetTexture(texture)
+    _G["ReforgenatorPanel_Item" .. index]:SetID(itemDescriptor.slotInfo)
+    _G["ReforgenatorPanel_Item" .. index .. "Checked"]:SetChecked(nil)
+
+    local msg = "- " .. _G[itemDescriptor.reforgedFrom] .. "\n"
+	    .. "+ " .. _G[itemDescriptor.reforgedTo]
+    _G["ReforgenatorPanel_Item" .. index .. "Name"]:SetText(msg)
+
+    _G["ReforgenatorPanel_Item" .. index]:Show()
+    _G["ReforgenatorPanel_Item" .. index .. "Checked"]:Show()
 end
 
 local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
@@ -374,12 +446,14 @@ function Reforgenator:ShowState()
     -- Get the current state of the equipment
     soln = SolutionContext:new()
     for k,v in ipairs(INVENTORY_SLOTS) do
-        local itemLink = GetInventoryItemLink("player", GetInventorySlotInfo(v))
+	local slotInfo = GetInventorySlotInfo(v)
+        local itemLink = GetInventoryItemLink("player", slotInfo)
         if itemLink then
             local stats = {}
             GetItemStats(itemLink, stats)
 	    local entry = {}
 	    entry.itemLink = itemLink
+	    entry.slotInfo = slotInfo
 
 	    if RI:IsItemReforged(itemLink) then
 		entry.reforged = true
@@ -403,6 +477,7 @@ function Reforgenator:ShowState()
 	soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], entry.cap, model.statRank, soln)
     end
 
+    -- Populate the window with the things to change
     if #soln.changes == 0 then
 	self:Print("Reforgenator has no suggestions for your gear")
     else
@@ -411,6 +486,10 @@ function Reforgenator:ShowState()
 	    self:Print("reforge " .. v.itemLink .. " to change " .. _G[v.reforgedFrom] .. " to " .. _G[v.reforgedTo])
 	end
     end
+
+    self.changes = soln.changes
+    self:Debug("#self.changes="..#self.changes)
+    self:UpdateWindow()
 
     self:Debug("all done")
 end
