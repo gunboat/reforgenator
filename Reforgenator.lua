@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.9"
+local version = "0.0.10"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -307,17 +307,25 @@ function ReforgeModel:new()
     return result
 end
 
+function Invert(list)
+    local invertedList = {}
+    for k,v in ipairs(list) do
+	invertedList[v] = k
+    end
+    return invertedList
+end
+
 function Reforgenator:TankModel(playerModel)
     local model = ReforgeModel:new()
-    model.statRank = {
-	["ITEM_MOD_HIT_RATING_SHORT"] = 1,
-	["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2,
-	["ITEM_MOD_MASTERY_RATING_SHORT"] = 3,
-	["ITEM_MOD_DODGE_RATING_SHORT"] = 4,
-	["ITEM_MOD_PARRY_RATING_SHORT"] = 5,
-	["ITEM_MOD_CRIT_RATING_SHORT"] = 6,
-	["ITEM_MOD_HASTE_RATING_SHORT"] = 7,
-	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 8,
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
     }
 
     model.reforgeOrder = {
@@ -325,7 +333,8 @@ function Reforgenator:TankModel(playerModel)
 	    cap=self:CalculateMeleeHitCap(playerModel) },
 	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
 	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
     }
 
     return model
@@ -333,21 +342,22 @@ end
 
 function Reforgenator:HunterModel(playerModel)
     local model = ReforgeModel:new()
-    model.statRank = {
-	["ITEM_MOD_HIT_RATING_SHORT"] = 1,
-	["ITEM_MOD_MASTERY_RATING_SHORT"] = 2,
-	["ITEM_MOD_CRIT_RATING_SHORT"] = 3,
-	["ITEM_MOD_HASTE_RATING_SHORT"] = 4,
-	["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 5,
-	["ITEM_MOD_DODGE_RATING_SHORT"] = 6,
-	["ITEM_MOD_PARRY_RATING_SHORT"] = 7,
-	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 8,
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
     }
 
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT",
 	    cap=self:CalculateRangedHitCap(playerModel) },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
     }
 
     return model
@@ -355,21 +365,22 @@ end
 
 function Reforgenator:BoomkinModel(playerModel)
     local model = ReforgeModel:new()
-    model.statRank = {
-	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 1,
-	["ITEM_MOD_HIT_RATING_SHORT"] = 2,
-	["ITEM_MOD_HASTE_RATING_SHORT"] = 3,
-	["ITEM_MOD_CRIT_RATING_SHORT"] = 4,
-	["ITEM_MOD_MASTERY_RATING_SHORT"] = 5,
-	["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 6,
-	["ITEM_MOD_DODGE_RATING_SHORT"] = 7,
-	["ITEM_MOD_PARRY_RATING_SHORT"] = 8,
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
     }
 
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT",
 	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap=9999 },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
     }
 
     model.useSpellHit = true
@@ -379,15 +390,15 @@ end
 
 function Reforgenator:FuryModel(playerModel)
     local model = ReforgeModel:new()
-    model.statRank = {
-	["ITEM_MOD_HIT_RATING_SHORT"] = 1,
-	["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2,
-	["ITEM_MOD_CRIT_RATING_SHORT"] = 3,
-	["ITEM_MOD_HASTE_RATING_SHORT"] = 4,
-	["ITEM_MOD_DODGE_RATING_SHORT"] = 5,
-	["ITEM_MOD_PARRY_RATING_SHORT"] = 6,
-	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 7,
-	["ITEM_MOD_MASTERY_RATING_SHORT"] = 8,
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
     }
 
     model.reforgeOrder = {
@@ -402,6 +413,36 @@ function Reforgenator:FuryModel(playerModel)
     return model
 end
 
+function Reforgenator:RogueModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateSpellHitCap(playerModel) },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
+	    cap=self:CalculateExpertiseCap(playerModel) },
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateDWMeleeHitCap(playerModel) },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+
 function Reforgenator:CalculateMeleeHitCap(playerModel)
     local hitCap = 247
 
@@ -413,6 +454,12 @@ function Reforgenator:CalculateMeleeHitCap(playerModel)
     -- Fury warriors get 3% bonus from Precision
     if playerModel.class == "WARRIOR" and playerModel.primaryTab == 2 then
 	hitCap = hitCap - 93
+    end
+
+    -- Rogues get varying amounts based on Precision talent
+    if playerModel.className == "ROGUE" then
+	local pointsInPrecision = select(5, GetTalentInfo(2,3))
+	hitCap = hitCap - math.floor(30.7548 * 2 * pointsInPrecision)
     end
 
     self:Debug("calculated melee hit cap = " .. hitCap)
@@ -431,6 +478,12 @@ function Reforgenator:CalculateDWMeleeHitCap(playerModel)
     -- Fury warriors get 3% bonus from Precision
     if playerModel.class == "WARRIOR" and playerModel.primaryTab == 2 then
 	hitCap = hitCap - 93
+    end
+
+    -- Rogues get varying amounts based on Precision talent
+    if playerModel.className == "ROGUE" then
+	local pointsInPrecision = select(5, GetTalentInfo(2,3))
+	hitCap = hitCap - math.floor(30.7548 * 2 * pointsInPrecision)
     end
 
     self:Debug("calculated DW melee hit cap = " .. hitCap)
@@ -456,7 +509,13 @@ function Reforgenator:CalculateSpellHitCap(playerModel)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
-	hitCap = 420
+	hitCap = hitCap - 27
+    end
+
+    -- Rogues get varying amounts based on Precision talent
+    if playerModel.className == "ROGUE" then
+	local pointsInPrecision = select(5, GetTalentInfo(2,3))
+	hitCap = hitCap - math.floor(26.232 * 2 * pointsInPrecision)
     end
 
     self:Debug("calculated spell hit cap = " .. hitCap)
@@ -536,6 +595,10 @@ end
 function Reforgenator:GetPlayerReforgeModel(playerModel)
     if playerModel.className == "HUNTER" then
 	return self:HunterModel(playerModel)
+    end
+
+    if playerModel.className == "ROGUE" then
+	return self:RogueModel(playerModel)
     end
 
     if playerModel.className == "WARRIOR" then
@@ -768,7 +831,14 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
 	return soln
     end
 
-    -- okay, so we actually have to do something now
+    -- If we are coming back to try to hit a hard cap, we might have
+    -- previously said we had an excess of our now-desired rating, so
+    -- clear it out
+    if soln.excessRating[rating] then
+	self:Debug("zeroing out previous excess for "..rating)
+	soln.excessRating[rating] = nil
+    end
+
     unforged = {}
     for k,v in ipairs(ancestor.items) do
 	local suggestion = self:GetBestReforge(v, rating, soln.excessRating, statRank)
