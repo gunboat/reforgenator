@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.8"
+local version = "0.0.9"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -267,6 +267,37 @@ function SolutionContext:new()
     return result
 end
 
+local PlayerModel = {}
+
+function PlayerModel:new()
+    local result = { className="", primaryTab=0, race="" }
+    setmetatable(result, self)
+    self.__index = self
+    return result
+end
+
+function Reforgenator:GetPlayerModel()
+    local playerModel = PlayerModel:new()
+
+    local function getPrimaryTab()
+	local primary = { tab=nil, points = 0, isUnlocked=true }
+	for i = 1, GetNumTalentTabs() do
+	    local _,_,_,_,points,_,_,isUnlocked = GetTalentTabInfo(i)
+	    if points > primary.points then
+		primary = {tab=i, points=points, isUnlocked=isUnlocked }
+	    end
+	end
+
+	return primary.tab
+    end
+
+    playerModel.className = select(2, UnitClass("player"))
+    playerModel.primaryTab = getPrimaryTab()
+    playerModel.race = select(2, UnitRace("player"))
+
+    return playerModel
+end
+
 local ReforgeModel = {}
 
 function ReforgeModel:new()
@@ -276,7 +307,7 @@ function ReforgeModel:new()
     return result
 end
 
-function Reforgenator:TankModel()
+function Reforgenator:TankModel(playerModel)
     local model = ReforgeModel:new()
     model.statRank = {
 	["ITEM_MOD_HIT_RATING_SHORT"] = 1,
@@ -291,16 +322,16 @@ function Reforgenator:TankModel()
 
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateMeleeHitCap() },
+	    cap=self:CalculateMeleeHitCap(playerModel) },
 	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
-	    cap=self:CalculateExpertiseCap() },
+	    cap=self:CalculateExpertiseCap(playerModel) },
 	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=9999 },
     }
 
     return model
 end
 
-function Reforgenator:HunterModel()
+function Reforgenator:HunterModel(playerModel)
     local model = ReforgeModel:new()
     model.statRank = {
 	["ITEM_MOD_HIT_RATING_SHORT"] = 1,
@@ -315,14 +346,14 @@ function Reforgenator:HunterModel()
 
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateRangedHitCap() },
+	    cap=self:CalculateRangedHitCap(playerModel) },
 	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=9999 },
     }
 
     return model
 end
 
-function Reforgenator:BoomkinModel()
+function Reforgenator:BoomkinModel(playerModel)
     local model = ReforgeModel:new()
     model.statRank = {
 	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 1,
@@ -337,7 +368,7 @@ function Reforgenator:BoomkinModel()
 
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap() },
+	    cap=self:CalculateSpellHitCap(playerModel) },
 	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap=9999 },
     }
 
@@ -346,13 +377,42 @@ function Reforgenator:BoomkinModel()
     return model
 end
 
-function Reforgenator:CalculateMeleeHitCap()
+function Reforgenator:FuryModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = {
+	["ITEM_MOD_HIT_RATING_SHORT"] = 1,
+	["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2,
+	["ITEM_MOD_CRIT_RATING_SHORT"] = 3,
+	["ITEM_MOD_HASTE_RATING_SHORT"] = 4,
+	["ITEM_MOD_DODGE_RATING_SHORT"] = 5,
+	["ITEM_MOD_PARRY_RATING_SHORT"] = 6,
+	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 7,
+	["ITEM_MOD_MASTERY_RATING_SHORT"] = 8,
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateMeleeHitCap(playerModel) },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
+	    cap=self:CalculateExpertiseCap(playerModel) },
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateDWMeleeHitCap(playerModel) },
+    }
+
+    return model
+end
+
+function Reforgenator:CalculateMeleeHitCap(playerModel)
     local hitCap = 247
 
     -- Mods to hit: Draenei get 1% bonus
-    local race, raceEn = UnitRace("player")
-    if raceEn == "Draenei" then
-	hitCap = 216
+    if playerModel.race == "Draenei" then
+	hitCap = hitCap - 31
+    end
+
+    -- Fury warriors get 3% bonus from Precision
+    if playerModel.class == "WARRIOR" and playerModel.primaryTab == 2 then
+	hitCap = hitCap - 93
     end
 
     self:Debug("calculated melee hit cap = " .. hitCap)
@@ -360,12 +420,29 @@ function Reforgenator:CalculateMeleeHitCap()
     return hitCap
 end
 
-function Reforgenator:CalculateRangedHitCap()
+function Reforgenator:CalculateDWMeleeHitCap(playerModel)
+    local hitCap = 831
+
+    -- Mods to hit: Draenei get 1% bonus
+    if playerModel.race == "Draenei" then
+	hitCap = hitCap - 31
+    end
+
+    -- Fury warriors get 3% bonus from Precision
+    if playerModel.class == "WARRIOR" and playerModel.primaryTab == 2 then
+	hitCap = hitCap - 93
+    end
+
+    self:Debug("calculated DW melee hit cap = " .. hitCap)
+
+    return hitCap
+end
+
+function Reforgenator:CalculateRangedHitCap(playerModel)
     local hitCap = 247
 
     -- Mods to hit: Draenei get 1% bonus
-    local race, raceEn = UnitRace("player")
-    if raceEn == "Draenei" then
+    if playerModel.race == "Draenei" then
 	hitCap = 216
     end
 
@@ -374,12 +451,11 @@ function Reforgenator:CalculateRangedHitCap()
     return hitCap
 end
 
-function Reforgenator:CalculateSpellHitCap()
+function Reforgenator:CalculateSpellHitCap(playerModel)
     local hitCap = 446
 
     -- Mods to hit: Draenei get 1% bonus
-    local race, raceEn = UnitRace("player")
-    if raceEn == "Draenei" then
+    if playerModel.race == "Draenei" then
 	hitCap = 420
     end
 
@@ -388,7 +464,7 @@ function Reforgenator:CalculateSpellHitCap()
     return hitCap
 end
 
-function Reforgenator:CalculateExpertiseCap()
+function Reforgenator:CalculateExpertiseCap(playerModel)
     -- Mods to expertise:
     --   (7.6887 rating per)
     --   DKs get +6 expertise from "veteran of the third war"
@@ -399,14 +475,12 @@ function Reforgenator:CalculateExpertiseCap()
     --   Paladins with "Seal of Truth" glyphed get +10 expertise
     local expertiseCap = 177
 
-    local className, classNameEN = UnitClass("player")
-    self:Debug("classNameEN="..classNameEN)
-    if classNameEN == "DEATHKNIGHT" then
+    if playerModel.className == "DEATHKNIGHT" then
 	self:Debug("reducing expertise for DK")
 	expertiseCap = expertiseCap - 46
     end
 
-    if classNameEN == "PALADIN" then
+    if playerModel.className == "PALADIN" then
 	local hasGlyph = nil
 	for i = 1,GetNumGlyphSockets() do
 	    local _,_,_,glyphSpellID = GetGlyphSocketInfo(i)
@@ -426,22 +500,20 @@ function Reforgenator:CalculateExpertiseCap()
     local _, _, _, _, _, itemType, itemSubType = GetItemInfo(mainHandLink)
     self:Debug("itemType="..itemType..", itemSubType="..itemSubType)
 
-    local raceName, raceNameEN = UnitRace("player")
-    self:Debug("raceNameEN="..raceNameEN)
-    if raceNameEN == "Orc" then
+    if playerModel.race == "Orc" then
 	if itemSubType == "One-Handed Axes"
 		or itemSubType == "Two-Handed Axes"
 		or itemSubType == "Fist Weapons" then
 	    self:Debug("reducing expertise for Orc with axe or fist")
 	    expertiseCap = expertiseCap - 23
 	end
-    elseif raceNameEN == "Dwarf" then
+    elseif playerModel.race == "Dwarf" then
 	if itemSubType == "One-Handed Maces"
 		or itemSubType == "Two-Handed Maces" then
 	    self:Debug("reducing expertise for Dwarf with mace")
 	    expertiseCap = expertiseCap - 23
 	end
-    elseif raceNameEN == "Human" then
+    elseif playerModel.race == "Human" then
 	if itemSubType == "One-Handed Swords"
 		or itemSubType == "Two-Handed Swords"
 		or itemSubType == "One-Handed Maces"
@@ -449,7 +521,7 @@ function Reforgenator:CalculateExpertiseCap()
 	    self:Debug("reducing expertise for Human with sword or mace")
 	    expertiseCap = expertiseCap - 23
 	end
-    elseif raceNameEN == "Gnome" then
+    elseif playerModel.race == "Gnome" then
 	if itemSubType == "One-Handed Swords"
 		or itemSubType == "Daggers" then
 	    self:Debug("reducing expertise for Gnome with dagger or 1H sword")
@@ -459,52 +531,38 @@ function Reforgenator:CalculateExpertiseCap()
 
     self:Debug("calculated expertise cap = " .. expertiseCap)
     return expertiseCap
-
 end
 
-function Reforgenator:GetPlayerReforgeModel()
-    local function getPrimaryTab()
-	local primary = { tab=nil, points = 0, isUnlocked=true }
-	for i = 1, GetNumTalentTabs() do
-	    local _,_,_,_,points,_,_,isUnlocked = GetTalentTabInfo(i)
-	    if points > primary.points then
-		primary = {tab=i, points=points, isUnlocked=isUnlocked }
-	    end
-	end
-
-	return primary.tab
+function Reforgenator:GetPlayerReforgeModel(playerModel)
+    if playerModel.className == "HUNTER" then
+	return self:HunterModel(playerModel)
     end
 
-    local className, classNameEN = UnitClass("player")
-    local primaryTab = getPrimaryTab()
-
-    if classNameEN == "HUNTER" then
-	return self:HunterModel()
-    end
-
-    if classNameEN == "WARRIOR" then
-	if primaryTab == 3 then
-	    return self:TankModel()
+    if playerModel.className == "WARRIOR" then
+	if playerModel.primaryTab == 2 then
+	    return self:FuryModel(playerModel)
+	elseif playerModel.primaryTab == 3 then
+	    return self:TankModel(playerModel)
 	end
     end
 
-    if classNameEN == "DEATHKNIGHT" then
-	if primaryTab == 1 then
-	    return self:TankModel()
+    if playerModel.className == "DEATHKNIGHT" then
+	if playerModel.primaryTab == 1 then
+	    return self:TankModel(playerModel)
 	end
     end
 
-    if classNameEN == "DRUID" then
-	if primaryTab == 2 then
-	    return self:TankModel()
-	elseif primaryTab == 1 then
-	    return self:BoomkinModel()
+    if playerModel.className == "DRUID" then
+	if playerModel.primaryTab == 2 then
+	    return self:TankModel(playerModel)
+	elseif playerModel.primaryTab == 1 then
+	    return self:BoomkinModel(playerModel)
 	end
     end
 
-    if classNameEN == "PALADIN" then
-	if primaryTab == 2 then
-	    return self:TankModel()
+    if playerModel.className == "PALADIN" then
+	if playerModel.primaryTab == 2 then
+	    return self:TankModel(playerModel)
 	end
     end
 
@@ -514,8 +572,9 @@ end
 function Reforgenator:ShowState()
     self:Debug("in ShowState")
 
+    local playerModel = self:GetPlayerModel()
 
-    local model = self:GetPlayerReforgeModel()
+    local model = self:GetPlayerReforgeModel(playerModel)
     if not model then
 	self:Print("Reforgenator doesn't work for your class yet.")
 	return
