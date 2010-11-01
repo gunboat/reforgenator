@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.7"
+local version = "0.0.8"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -38,6 +38,24 @@ function Reforgenator:OnInitialize()
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator", options)
 
     Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
+
+    LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
+        launcher = true,
+        icon = "Interface\\Icons\\INV_Misc_Bag_08",
+        text = "Reforgenator",
+        OnClick = function(frame, button)
+            if button == "RightButton" then
+                InterfaceOptionsFrame_OpenToCategory(Reforgenator.optionsFrame)
+            else
+                Reforgenator:ShowState()
+            end
+        end,
+        OnTooltipShow = function(tooltip)
+            tooltip:AddLine("Reforgenator |cff00ff00(v"..version..")|r");
+            tooltip:AddLine("|cffffff00".."left-click to figure out what to reforge")
+            tooltip:AddLine("|cffffff00".."right-click to configure")
+        end
+    })
 
     self:RegisterChatCommand("reforgenator", "ShowState")
 
