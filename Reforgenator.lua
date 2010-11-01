@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.6"
+local version = "0.0.7"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -119,8 +119,6 @@ local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
 function Reforgenator:Debug(...)
     if debugFrame then
         debugFrame:AddMessage(string.join(", ", ...))
-    else
-	self:Print(string.join(", ", ...))
     end
 end
 
@@ -278,7 +276,7 @@ function Reforgenator:TankModel()
 	    cap=self:CalculateMeleeHitCap() },
 	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
 	    cap=self:CalculateExpertiseCap() },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=9999 },
     }
 
     return model
@@ -300,8 +298,32 @@ function Reforgenator:HunterModel()
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT",
 	    cap=self:CalculateRangedHitCap() },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap=9999 },
     }
+
+    return model
+end
+
+function Reforgenator:BoomkinModel()
+    local model = ReforgeModel:new()
+    model.statRank = {
+	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 1,
+	["ITEM_MOD_HIT_RATING_SHORT"] = 2,
+	["ITEM_MOD_HASTE_RATING_SHORT"] = 3,
+	["ITEM_MOD_CRIT_RATING_SHORT"] = 4,
+	["ITEM_MOD_MASTERY_RATING_SHORT"] = 5,
+	["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 6,
+	["ITEM_MOD_DODGE_RATING_SHORT"] = 7,
+	["ITEM_MOD_PARRY_RATING_SHORT"] = 8,
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateSpellHitCap() },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap=9999 },
+    }
+
+    model.useSpellHit = true
 
     return model
 end
@@ -315,7 +337,7 @@ function Reforgenator:CalculateMeleeHitCap()
 	hitCap = 216
     end
 
-    self:Debug("calculated hit cap = " .. hitCap)
+    self:Debug("calculated melee hit cap = " .. hitCap)
 
     return hitCap
 end
@@ -329,7 +351,21 @@ function Reforgenator:CalculateRangedHitCap()
 	hitCap = 216
     end
 
-    self:Debug("calculated hit cap = " .. hitCap)
+    self:Debug("calculated ranged hit cap = " .. hitCap)
+
+    return hitCap
+end
+
+function Reforgenator:CalculateSpellHitCap()
+    local hitCap = 446
+
+    -- Mods to hit: Draenei get 1% bonus
+    local race, raceEn = UnitRace("player")
+    if raceEn == "Draenei" then
+	hitCap = 420
+    end
+
+    self:Debug("calculated spell hit cap = " .. hitCap)
 
     return hitCap
 end
@@ -443,6 +479,8 @@ function Reforgenator:GetPlayerReforgeModel()
     if classNameEN == "DRUID" then
 	if primaryTab == 2 then
 	    return self:TankModel()
+	elseif primaryTab == 1 then
+	    return self:BoomkinModel()
 	end
     end
 
@@ -477,6 +515,10 @@ function Reforgenator:ShowState()
 	["ITEM_MOD_HASTE_RATING_SHORT"] = 0,
 	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 0,
     }
+
+    if model.useSpellHit then
+	playerStats.ITEM_MOD_HIT_RATING_SHORT = GetCombatRating(COMBAT_RATINGS.CR_HIT_SPELL)
+    end
 
     self:Debug("hit = " .. playerStats.ITEM_MOD_HIT_RATING_SHORT)
     self:Debug("expertise = " .. playerStats.ITEM_MOD_EXPERTISE_RATING_SHORT)
