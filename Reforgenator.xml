@@ -267,5 +267,91 @@
 	</Frames>
     </Frame>
 
+    <Frame name="ReforgenatorMessageFrame"
+           toplevel="true"
+           frameStrata="DIALOG"
+           hidden="true"
+           parent="UIParent"
+           inherits="TranslucentFrameTemplate">
+	<Size>
+	    <AbsDimension x="323" y="97" />
+	</Size>
+	<Anchors>
+	    <Anchor point="CENTER">
+                <Offset>
+                    <AbsDimension x="0" y="-10"/>
+                </Offset>
+            </Anchor>
+	</Anchors>
+        <Frames>
+            <Frame name="ReforgenatorMessageTextFrame"
+                   setAllPoints="true">
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture name="ReforgenatorPortrait">
+                            <Size>
+                                <AbsDimension x="50" y="50"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT">
+                                    <Offset>
+                                        <AbsDimension x="7" y="-6"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                    <Layer level="ARTWORK">
+                        <Texture file="Interface\RaidFrame\UI-ReadyCheckFrame">
+                            <Size>
+                                <AbsDimension x="323" y="97"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="TOPLEFT"/>
+                            </Anchors>
+                            <TexCoords left="0" right="0.630859375" top="0" bottom="0.7578125"/>
+                        </Texture>
+                        <FontString name="ReforgenatorMessageText"
+                                    inherits="GameFontNormal"
+                                    justifyV="MIDDLE">
+                            <Size x="240" y="36"/>
+                            <Anchors>
+                                <Anchor point="TOP">
+                                    <Offset>
+                                        <AbsDimension x="20" y="-15"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <Frames>
+                    <Button name="ReforgenatorMessageYesButton"
+                            inherits="UIPanelButtonTemplate"
+                            text="OKAY">
+                        <Size>
+                            <AbsDimension x="109" y="24"/>
+                        </Size>
+                        <Anchors>
+                            <Anchor point="BOTTOMLEFT">
+                                <Offset>
+                                    <AbsDimension x="55" y="18"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnClick>
+                                ReforgenatorMessageFrame:Hide()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Frames>
+        <Scripts>
+            <OnLoad>Reforgenator:MessageFrame_OnLoad(self)</OnLoad>
+        </Scripts>
+    </Frame>
+
 
 </Ui>

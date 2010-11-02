@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.10"
+local version = "0.0.11"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -41,7 +41,7 @@ function Reforgenator:OnInitialize()
 
     LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
         launcher = true,
-        icon = "Interface\\Icons\\INV_Misc_Bag_08",
+        icon = "Interface\\Icons\\INV_Misc_EngGizmos_06",
         text = "Reforgenator",
         OnClick = function(frame, button)
             if button == "RightButton" then
@@ -60,6 +60,9 @@ function Reforgenator:OnInitialize()
     self:RegisterChatCommand("reforgenator", "ShowState")
 
     tinsert(UISpecialFrames, "ReforgenatorPanel")
+end
+
+function Reforgenator:MessageFrame_OnLoad(widget)
 end
 
 function Reforgenator:OnDragStart(widget, button, ...)
@@ -431,9 +434,113 @@ function Reforgenator:RogueModel(playerModel)
 	    cap=self:CalculateSpellHitCap(playerModel) },
 	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
 	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateDWMeleeHitCap(playerModel) },
 	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:CatModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateMeleeHitCap(playerModel) },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
+	    cap=self:CalculateExpertiseCap(playerModel) },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    return model
+end
+
+function Reforgenator:AffWarlockModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateSpellHitCap(playerModel) },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:DestroWarlockModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateSpellHitCap(playerModel) },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:DemoWarlockModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateSpellHitCap(playerModel) },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
 	    cap=9999 },
     }
 
@@ -617,7 +724,16 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 
     if playerModel.className == "DRUID" then
 	if playerModel.primaryTab == 2 then
-	    return self:TankModel(playerModel)
+	    local form = GetShapeshiftFormID()
+	    if not form then
+		self:MessageBox("Please shift into your combat form and re-run the Reforgenator")
+		return nil
+	    end
+	    if form == 5 then
+		return self:TankModel(playerModel)
+	    elseif form == 1 then
+		return self:CatModel(playerModel)
+	    end
 	elseif playerModel.primaryTab == 1 then
 	    return self:BoomkinModel(playerModel)
 	end
@@ -629,7 +745,24 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 	end
     end
 
+    if playerModel.className == "WARLOCK" then
+	if playerModel.primaryTab == 1 then
+	    return self:AffWarlockModel(playerModel)
+	elseif playerModel.primaryTab == 2 then
+	    return self:DemoWarlockModel(playerModel)
+	else
+	    return self:DestroWarlockModel(playerModel)
+	end
+    end
+
+    self:MessageBox("Your class/spec isn't supported yet.")
     return nil
+end
+
+function Reforgenator:MessageBox(msg)
+    SetPortraitTexture(ReforgenatorPortrait, "player")
+    ReforgenatorMessageText:SetText(msg)
+    ReforgenatorMessageFrame:Show()
 end
 
 function Reforgenator:ShowState()
@@ -639,7 +772,6 @@ function Reforgenator:ShowState()
 
     local model = self:GetPlayerReforgeModel(playerModel)
     if not model then
-	self:Print("Reforgenator doesn't work for your class yet.")
 	return
     end
 
@@ -702,7 +834,7 @@ function Reforgenator:ShowState()
 
     -- Populate the window with the things to change
     if #soln.changes == 0 then
-	self:Print("Reforgenator has no suggestions for your gear")
+	self:MessageBox("Reforgenator has no suggestions for your gear")
     else
 	for k,v in ipairs(soln.changes) do
 	    self:Debug("changed: " .. to_string(v))
