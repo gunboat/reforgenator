@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.11"
+local version = "0.0.12"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -294,9 +294,17 @@ function Reforgenator:GetPlayerModel()
 	return primary.tab
     end
 
+    local function getMainHandWeaponType()
+	local mainHandLink = GetInventoryItemLink("player", GetInventorySlotInfo("MainHandSlot"))
+	local _, _, _, _, _, itemType, itemSubType = GetItemInfo(mainHandLink)
+	self:Debug("itemType="..itemType..", itemSubType="..itemSubType)
+	return itemSubType
+    end
+
     playerModel.className = select(2, UnitClass("player"))
     playerModel.primaryTab = getPrimaryTab()
     playerModel.race = select(2, UnitRace("player"))
+    playerModel.mainHandWeaponType = getMainHandWeaponType()
 
     return playerModel
 end
@@ -549,6 +557,87 @@ function Reforgenator:DemoWarlockModel(playerModel)
     return model
 end
 
+function Reforgenator:TwoHandFrostDKModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateMeleeHitCap(playerModel) },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
+	    cap=self:CalculateExpertiseCap(playerModel) },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    return model
+end
+
+function Reforgenator:DWFrostDKModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateMeleeHitCap(playerModel) },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
+	    cap=self:CalculateExpertiseCap(playerModel) },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    return model
+end
+
+function Reforgenator:UnholyDKModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateMeleeHitCap(playerModel) },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    return model
+end
+
 
 function Reforgenator:CalculateMeleeHitCap(playerModel)
     local hitCap = 247
@@ -641,8 +730,8 @@ function Reforgenator:CalculateExpertiseCap(playerModel)
     --   Paladins with "Seal of Truth" glyphed get +10 expertise
     local expertiseCap = 177
 
-    if playerModel.className == "DEATHKNIGHT" then
-	self:Debug("reducing expertise for DK")
+    if playerModel.className == "DEATHKNIGHT" and playerModel.primaryTab == 1 then
+	self:Debug("reducing expertise for blood DK")
 	expertiseCap = expertiseCap - 46
     end
 
@@ -662,34 +751,30 @@ function Reforgenator:CalculateExpertiseCap(playerModel)
 	end
     end
 
-    local mainHandLink = GetInventoryItemLink("player", GetInventorySlotInfo("MainHandSlot"))
-    local _, _, _, _, _, itemType, itemSubType = GetItemInfo(mainHandLink)
-    self:Debug("itemType="..itemType..", itemSubType="..itemSubType)
-
     if playerModel.race == "Orc" then
-	if itemSubType == "One-Handed Axes"
-		or itemSubType == "Two-Handed Axes"
-		or itemSubType == "Fist Weapons" then
+	if playerModel.mainHandWeaponType == "One-Handed Axes"
+		or playerModel.mainHandWeaponType == "Two-Handed Axes"
+		or playerModel.mainHandWeaponType == "Fist Weapons" then
 	    self:Debug("reducing expertise for Orc with axe or fist")
 	    expertiseCap = expertiseCap - 23
 	end
     elseif playerModel.race == "Dwarf" then
-	if itemSubType == "One-Handed Maces"
-		or itemSubType == "Two-Handed Maces" then
+	if playerModel.mainHandWeaponType == "One-Handed Maces"
+		or playerModel.mainHandWeaponType == "Two-Handed Maces" then
 	    self:Debug("reducing expertise for Dwarf with mace")
 	    expertiseCap = expertiseCap - 23
 	end
     elseif playerModel.race == "Human" then
-	if itemSubType == "One-Handed Swords"
-		or itemSubType == "Two-Handed Swords"
-		or itemSubType == "One-Handed Maces"
-		or itemSubType == "Two-Handed Maces" then
+	if playerModel.mainHandWeaponType == "One-Handed Swords"
+		or playerModel.mainHandWeaponType == "Two-Handed Swords"
+		or playerModel.mainHandWeaponType == "One-Handed Maces"
+		or playerModel.mainHandWeaponType == "Two-Handed Maces" then
 	    self:Debug("reducing expertise for Human with sword or mace")
 	    expertiseCap = expertiseCap - 23
 	end
     elseif playerModel.race == "Gnome" then
-	if itemSubType == "One-Handed Swords"
-		or itemSubType == "Daggers" then
+	if playerModel.mainHandWeaponType == "One-Handed Swords"
+		or playerModel.mainHandWeaponType == "Daggers" then
 	    self:Debug("reducing expertise for Gnome with dagger or 1H sword")
 	    expertiseCap = expertiseCap - 23
 	end
@@ -719,6 +804,14 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
     if playerModel.className == "DEATHKNIGHT" then
 	if playerModel.primaryTab == 1 then
 	    return self:TankModel(playerModel)
+	elseif playerModel.primaryTab == 2 then
+	    if playerModel.mainHandWeaponType:sub(1,10) == "Two-handed" then
+		return self:TwoHandFrostDKModel(playerModel)
+	    else
+		return self:DWFrostDKModel(playerModel)
+	    end
+	else
+	    return self:UnholyDKModel(playerModel)
 	end
     end
 
@@ -781,20 +874,20 @@ function Reforgenator:ShowState()
 	["ITEM_MOD_HIT_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_HIT_MELEE),
 	["ITEM_MOD_EXPERTISE_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_EXPERTISE),
 	["ITEM_MOD_MASTERY_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_MASTERY),
-	["ITEM_MOD_DODGE_RATING_SHORT"] = 0,
-	["ITEM_MOD_PARRY_RATING_SHORT"] = 0,
-	["ITEM_MOD_CRIT_RATING_SHORT"] = 0,
-	["ITEM_MOD_HASTE_RATING_SHORT"] = 0,
+	["ITEM_MOD_DODGE_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_DODGE),
+	["ITEM_MOD_PARRY_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_PARRY),
+	["ITEM_MOD_CRIT_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_CRIT_MELEE),
+	["ITEM_MOD_HASTE_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_HASTE_MELEE),
 	["ITEM_MOD_SPIRIT_RATING_SHORT"] = 0,
     }
 
     if model.useSpellHit then
 	playerStats.ITEM_MOD_HIT_RATING_SHORT = GetCombatRating(COMBAT_RATINGS.CR_HIT_SPELL)
+	playerStats.ITEM_MOD_CRIT_RATING_SHORT = GetCombatRating(COMBAT_RATINGS.CR_CRIT_SPELL)
+	playerStats.ITEM_MOD_HASTE_RATING_SHORT = GetCombatRating(COMBAT_RATINGS.CR_HASTE_SPELL)
     end
 
-    self:Debug("hit = " .. playerStats.ITEM_MOD_HIT_RATING_SHORT)
-    self:Debug("expertise = " .. playerStats.ITEM_MOD_EXPERTISE_RATING_SHORT)
-    self:Debug("mastery = " .. playerStats.ITEM_MOD_MASTERY_RATING_SHORT)
+    self:Debug("playerStats="..to_string(playerStats))
 
 
     -- Get the current state of the equipment
