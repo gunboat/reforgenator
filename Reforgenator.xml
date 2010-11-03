@@ -72,6 +72,7 @@
 		self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 		self:RegisterForDrag("LeftButton")
 	    </OnLoad>
+	    <OnClick>Reforgenator:OnClick(self, button)</OnClick>
 	    <OnDragStart>Reforgenator:OnDragStart(self, button)</OnDragStart>
 	    <OnEnter>Reforgenator:OnEnter(self)</OnEnter>
 	    <OnLeave>GameTooltip:Hide() </OnLeave>

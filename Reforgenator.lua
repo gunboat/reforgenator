@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.12"
+local version = "0.0.13"
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -63,6 +63,14 @@ function Reforgenator:OnInitialize()
 end
 
 function Reforgenator:MessageFrame_OnLoad(widget)
+end
+
+function Reforgenator:OnClick(widget, button, ...)
+    self:Debug("### OnClick")
+    self:Debug("widget.ID="..widget:GetID())
+
+    GameTooltip:Hide()
+    PickupInventoryItem(widget:GetID())
 end
 
 function Reforgenator:OnDragStart(widget, button, ...)
@@ -638,6 +646,93 @@ function Reforgenator:UnholyDKModel(playerModel)
     return model
 end
 
+function Reforgenator:ArcaneMageModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateSpellHitCap(playerModel) },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:FrostMageModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateSpellHitCap(playerModel) },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:FireMageModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateSpellHitCap(playerModel) },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=9999 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
 
 function Reforgenator:CalculateMeleeHitCap(playerModel)
     local hitCap = 247
@@ -845,6 +940,16 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 	    return self:DemoWarlockModel(playerModel)
 	else
 	    return self:DestroWarlockModel(playerModel)
+	end
+    end
+
+    if playerModel.className == "MAGE" then
+	if playerModel.primaryTab == 1 then
+	    return self:ArcaneMageModel(playerModel)
+	elseif playerModel.primaryTab == 2 then
+	    return self:FireMageModel(playerModel)
+	else
+	    return self:FrostMageModel(playerModel)
 	end
     end
 
