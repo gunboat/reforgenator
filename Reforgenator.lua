@@ -2,7 +2,44 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.13"
+local version = "0.0.14"
+
+local function table_print (tt, indent, done)
+    done = done or {}
+    indent = indent or 0
+    if type(tt) == "table" then
+        local sb = {}
+        for key, value in pairs (tt) do
+            table.insert(sb, string.rep (" ", indent)) -- indent it
+            if type (value) == "table" and not done [value] then
+                done [value] = true
+                table.insert(sb, "{");
+                table.insert(sb, table_print (value, indent + 2, done))
+                table.insert(sb, string.rep (" ", indent)) -- indent it
+                table.insert(sb, "},\n");
+            elseif "number" == type(key) then
+                table.insert(sb, string.format("\"%s\",\n", tostring(value)))
+            else
+                table.insert(sb, string.format("%s=\"%s\",\n", tostring (key), tostring(value)))
+            end
+        end
+        return table.concat(sb)
+    else
+        return tt
+    end
+end
+
+local function to_string( tbl )
+    if  "nil"       == type( tbl ) then
+        return tostring(nil)
+    elseif  "table" == type( tbl ) then
+        return table_print(tbl)
+    elseif  "string" == type( tbl ) then
+        return tbl
+    else
+        return tostring(tbl)
+    end
+end
 
 function Reforgenator:OnEnable()
     self:Print("v"..version.." loaded")
@@ -14,12 +51,33 @@ local options = {
     handler = Reforgenator,
     desc = "Calculate what to reforge",
     args = { 
+	useMinimap = {
+	    name = "Use minimap button",
+	    desc = "Show a button on the minimap",
+	    type = "toggle",
+	    set = function(info, val)
+		Reforgenator:Debug("### useMinimap")
+		Reforgenator:Debug("### val="..to_string(val))
+		if val then
+		    Reforgenator.db.profile.minimap.hide = false
+		    Reforgenator.minimapIcon:Show("Reforgenator")
+		else
+		    Reforgenator.db.profile.minimap.hide = true
+		    Reforgenator.minimapIcon:Hide("Reforgenator")
+		end
+	    end,
+	    get = function(info)
+		return not Reforgenator.db.profile.minimap.hide
+	    end,
+	},
     },
 }
 
 local defaults = {
     profile = {
-        orientation = 1,
+        minimap = {
+	    hide = false,
+	},
     }
 }
 
@@ -39,7 +97,7 @@ function Reforgenator:OnInitialize()
 
     Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
 
-    LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
+    local broker = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
         launcher = true,
         icon = "Interface\\Icons\\INV_Misc_EngGizmos_06",
         text = "Reforgenator",
@@ -56,6 +114,15 @@ function Reforgenator:OnInitialize()
             tooltip:AddLine("|cffffff00".."right-click to configure")
         end
     })
+    Reforgenator.minimapIcon = LibStub("LibDBIcon-1.0")
+    Reforgenator.minimapIcon:Register("Reforgenator", broker, Reforgenator.db.profile.minimap)
+
+    self:Debug("### minimap.hide="..(to_string(Reforgenator.db.profile.minimap.hide or "nil")))
+    if Reforgenator.db.profile.minimap.hide then
+	Reforgenator.minimapIcon:Hide("Reforgenator")
+    else
+	Reforgenator.minimapIcon:Show("Reforgenator")
+    end
 
     self:RegisterChatCommand("reforgenator", "ShowState")
 
@@ -148,43 +215,6 @@ local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
 function Reforgenator:Debug(...)
     if debugFrame then
         debugFrame:AddMessage(string.join(", ", ...))
-    end
-end
-
-local function table_print (tt, indent, done)
-    done = done or {}
-    indent = indent or 0
-    if type(tt) == "table" then
-        local sb = {}
-        for key, value in pairs (tt) do
-            table.insert(sb, string.rep (" ", indent)) -- indent it
-            if type (value) == "table" and not done [value] then
-                done [value] = true
-                table.insert(sb, "{");
-                table.insert(sb, table_print (value, indent + 2, done))
-                table.insert(sb, string.rep (" ", indent)) -- indent it
-                table.insert(sb, "},\n");
-            elseif "number" == type(key) then
-                table.insert(sb, string.format("\"%s\",\n", tostring(value)))
-            else
-                table.insert(sb, string.format("%s=\"%s\",\n", tostring (key), tostring(value)))
-            end
-        end
-        return table.concat(sb)
-    else
-        return tt
-    end
-end
-
-local function to_string( tbl )
-    if  "nil"       == type( tbl ) then
-        return tostring(nil)
-    elseif  "table" == type( tbl ) then
-        return table_print(tbl)
-    elseif  "string" == type( tbl ) then
-        return tbl
-    else
-        return tostring(tbl)
     end
 end
 
