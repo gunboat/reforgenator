@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.14"
+local version = "0.0.15"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -763,6 +763,33 @@ function Reforgenator:FireMageModel(playerModel)
     return model
 end
 
+function Reforgenator:RetPallyModel(playerModel)
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT",
+	    cap=self:CalculateMeleeHitCap(playerModel) },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
+	    cap=self:CalculateExpertiseCap(playerModel) },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
+	    cap=750 },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
+	    cap=9999 },
+    }
+
+    return model
+end
+
 
 function Reforgenator:CalculateMeleeHitCap(playerModel)
     local hitCap = 247
@@ -960,6 +987,8 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
     if playerModel.className == "PALADIN" then
 	if playerModel.primaryTab == 2 then
 	    return self:TankModel(playerModel)
+	elseif playerModel.primaryTab == 3 then
+	    return self:RetPallyModel(playerModel)
 	end
     end
 
