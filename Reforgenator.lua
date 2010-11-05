@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.15"
+local version = "0.0.16"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -234,6 +234,14 @@ local function Set(list)
     return set
 end
 
+function Invert(list)
+    local invertedList = {}
+    for k,v in ipairs(list) do
+	invertedList[v] = k
+    end
+    return invertedList
+end
+
 local INVENTORY_SLOTS = {
     "HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot",
     "ChestSlot", "ShirtSlot", "TabardSlot", "WristSlot", "HandsSlot",
@@ -347,450 +355,6 @@ function Reforgenator:GetPlayerModel()
     return playerModel
 end
 
-local ReforgeModel = {}
-
-function ReforgeModel:new()
-    local result = { statRank={}, reforgeOrder={} }
-    setmetatable(result, self)
-    self.__index = self
-    return result
-end
-
-function Invert(list)
-    local invertedList = {}
-    for k,v in ipairs(list) do
-	invertedList[v] = k
-    end
-    return invertedList
-end
-
-function Reforgenator:TankModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateMeleeHitCap(playerModel) },
-	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
-	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    return model
-end
-
-function Reforgenator:HunterModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateRangedHitCap(playerModel) },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    return model
-end
-
-function Reforgenator:BoomkinModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    model.useSpellHit = true
-
-    return model
-end
-
-function Reforgenator:FuryModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateMeleeHitCap(playerModel) },
-	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
-	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateDWMeleeHitCap(playerModel) },
-    }
-
-    return model
-end
-
-function Reforgenator:RogueModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
-	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    model.useSpellHit = true
-
-    return model
-end
-
-function Reforgenator:CatModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateMeleeHitCap(playerModel) },
-	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
-	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    return model
-end
-
-function Reforgenator:AffWarlockModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    model.useSpellHit = true
-
-    return model
-end
-
-function Reforgenator:DestroWarlockModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    model.useSpellHit = true
-
-    return model
-end
-
-function Reforgenator:DemoWarlockModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    model.useSpellHit = true
-
-    return model
-end
-
-function Reforgenator:TwoHandFrostDKModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateMeleeHitCap(playerModel) },
-	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
-	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    return model
-end
-
-function Reforgenator:DWFrostDKModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateMeleeHitCap(playerModel) },
-	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
-	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    return model
-end
-
-function Reforgenator:UnholyDKModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateMeleeHitCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    return model
-end
-
-function Reforgenator:ArcaneMageModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    model.useSpellHit = true
-
-    return model
-end
-
-function Reforgenator:FrostMageModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    model.useSpellHit = true
-
-    return model
-end
-
-function Reforgenator:FireMageModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateSpellHitCap(playerModel) },
-	{ rating="ITEM_MOD_CRIT_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=9999 },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    model.useSpellHit = true
-
-    return model
-end
-
-function Reforgenator:RetPallyModel(playerModel)
-    local model = ReforgeModel:new()
-    model.statRank = Invert {
-	"ITEM_MOD_HIT_RATING_SHORT",
-	"ITEM_MOD_EXPERTISE_RATING_SHORT",
-	"ITEM_MOD_HASTE_RATING_SHORT",
-	"ITEM_MOD_MASTERY_RATING_SHORT",
-	"ITEM_MOD_CRIT_RATING_SHORT",
-	"ITEM_MOD_DODGE_RATING_SHORT",
-	"ITEM_MOD_PARRY_RATING_SHORT",
-	"ITEM_MOD_SPIRIT_RATING_SHORT",
-    }
-
-    model.reforgeOrder = {
-	{ rating="ITEM_MOD_HIT_RATING_SHORT",
-	    cap=self:CalculateMeleeHitCap(playerModel) },
-	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT",
-	    cap=self:CalculateExpertiseCap(playerModel) },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT",
-	    cap=750 },
-	{ rating="ITEM_MOD_MASTERY_RATING_SHORT",
-	    cap=9999 },
-    }
-
-    return model
-end
-
-
 function Reforgenator:CalculateMeleeHitCap(playerModel)
     local hitCap = 247
 
@@ -871,7 +435,7 @@ function Reforgenator:CalculateSpellHitCap(playerModel)
     return hitCap
 end
 
-function Reforgenator:CalculateExpertiseCap(playerModel)
+function Reforgenator:CalculateExpertiseSoftCap(playerModel)
     -- Mods to expertise:
     --   (7.6887 rating per)
     --   DKs get +6 expertise from "veteran of the third war"
@@ -936,34 +500,454 @@ function Reforgenator:CalculateExpertiseCap(playerModel)
     return expertiseCap
 end
 
+function Reforgenator:CalculateMaximumValue(playerModel)
+    return 9999
+end
+
+local STAT_CAPS = {
+    ["MeleeHitCap"] = function(m) return Reforgenator:CalculateMeleeHitCap(m) end,
+    ["SpellHitCap"] = function(m) return Reforgenator:CalculateSpellHitCap(m) end,
+    ["DWHitCap"] = function(m) return Reforgenator:CalculateDWMeleeHitCap(m) end,
+    ["RangedHitCap"] = function(m) return Reforgenator:CalculateRangedHitCap(m) end,
+    ["ExpertiseSoftCap"] = function(m) return Reforgenator:CalculateExpertiseSoftCap(m) end,
+    ["ExpertiseHardCap"] = function(m) return Reforgenator:CalculateExpertiseHardCap(m) end,
+    ["MaximumPossible"] = function(m) return Reforgenator:CalculateMaximumValue(m) end,
+}
+
+local ReforgeModel = {}
+
+function ReforgeModel:new()
+    local result = { statRank={}, reforgeOrder={} }
+    setmetatable(result, self)
+    self.__index = self
+    return result
+end
+
+function Reforgenator:TankModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    return model
+end
+
+function Reforgenator:HunterModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="RangedHitCap" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    return model
+end
+
+function Reforgenator:BoomkinModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:FuryModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="DWHitCap" },
+    }
+
+    return model
+end
+
+function Reforgenator:ArmsModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumValue" },
+    }
+
+    return model
+end
+
+function Reforgenator:RogueModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:CatModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    return model
+end
+
+function Reforgenator:AffWarlockModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:DestroWarlockModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:DemoWarlockModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:TwoHandFrostDKModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    return model
+end
+
+function Reforgenator:DWFrostDKModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    return model
+end
+
+function Reforgenator:UnholyDKModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    return model
+end
+
+function Reforgenator:ArcaneMageModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:FrostMageModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:FireMageModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:RetPallyModel()
+    local model = ReforgeModel:new()
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    return model
+end
+
+
 function Reforgenator:GetPlayerReforgeModel(playerModel)
     if playerModel.className == "HUNTER" then
-	return self:HunterModel(playerModel)
+	return self:HunterModel()
     end
 
     if playerModel.className == "ROGUE" then
-	return self:RogueModel(playerModel)
+	return self:RogueModel()
     end
 
     if playerModel.className == "WARRIOR" then
-	if playerModel.primaryTab == 2 then
-	    return self:FuryModel(playerModel)
+	if playerModel.primaryTab == 1 then
+	    return self:ArmsModel()
+	elseif playerModel.primaryTab == 2 then
+	    return self:FuryModel()
 	elseif playerModel.primaryTab == 3 then
-	    return self:TankModel(playerModel)
+	    return self:TankModel()
 	end
     end
 
     if playerModel.className == "DEATHKNIGHT" then
 	if playerModel.primaryTab == 1 then
-	    return self:TankModel(playerModel)
+	    return self:TankModel()
 	elseif playerModel.primaryTab == 2 then
 	    if playerModel.mainHandWeaponType:sub(1,10) == "Two-handed" then
-		return self:TwoHandFrostDKModel(playerModel)
+		return self:TwoHandFrostDKModel()
 	    else
-		return self:DWFrostDKModel(playerModel)
+		return self:DWFrostDKModel()
 	    end
 	else
-	    return self:UnholyDKModel(playerModel)
+	    return self:UnholyDKModel()
 	end
     end
 
@@ -975,40 +959,40 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 		return nil
 	    end
 	    if form == 5 then
-		return self:TankModel(playerModel)
+		return self:TankModel()
 	    elseif form == 1 then
-		return self:CatModel(playerModel)
+		return self:CatModel()
 	    end
 	elseif playerModel.primaryTab == 1 then
-	    return self:BoomkinModel(playerModel)
+	    return self:BoomkinModel()
 	end
     end
 
     if playerModel.className == "PALADIN" then
 	if playerModel.primaryTab == 2 then
-	    return self:TankModel(playerModel)
+	    return self:TankModel()
 	elseif playerModel.primaryTab == 3 then
-	    return self:RetPallyModel(playerModel)
+	    return self:RetPallyModel()
 	end
     end
 
     if playerModel.className == "WARLOCK" then
 	if playerModel.primaryTab == 1 then
-	    return self:AffWarlockModel(playerModel)
+	    return self:AffWarlockModel()
 	elseif playerModel.primaryTab == 2 then
-	    return self:DemoWarlockModel(playerModel)
+	    return self:DemoWarlockModel()
 	else
-	    return self:DestroWarlockModel(playerModel)
+	    return self:DestroWarlockModel()
 	end
     end
 
     if playerModel.className == "MAGE" then
 	if playerModel.primaryTab == 1 then
-	    return self:ArcaneMageModel(playerModel)
+	    return self:ArcaneMageModel()
 	elseif playerModel.primaryTab == 2 then
-	    return self:FireMageModel(playerModel)
+	    return self:FireMageModel()
 	else
-	    return self:FrostMageModel(playerModel)
+	    return self:FrostMageModel()
 	end
     end
 
@@ -1030,6 +1014,11 @@ function Reforgenator:ShowState()
     local model = self:GetPlayerReforgeModel(playerModel)
     if not model then
 	return
+    end
+    for k,v in ipairs(model.reforgeOrder) do
+	if not STAT_CAPS[v.cap] then
+	    self:MessageBox("model has invalid stat cap")
+	end
     end
 
     --
@@ -1086,7 +1075,9 @@ function Reforgenator:ShowState()
 
 
     for _, entry in ipairs(model.reforgeOrder) do
-	soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], entry.cap, model.statRank, soln)
+	self:Debug("### entry.cap="..entry.cap)
+	local f = STAT_CAPS[entry.cap]
+	soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel), model.statRank, soln)
     end
 
     -- Populate the window with the things to change
