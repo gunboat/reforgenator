@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.16"
+local version = "0.0.17"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -51,25 +51,46 @@ local options = {
     handler = Reforgenator,
     desc = "Calculate what to reforge",
     args = { 
-	useMinimap = {
-	    name = "Use minimap button",
-	    desc = "Show a button on the minimap",
-	    type = "toggle",
-	    set = function(info, val)
-		Reforgenator:Debug("### useMinimap")
-		Reforgenator:Debug("### val="..to_string(val))
-		if val then
-		    Reforgenator.db.profile.minimap.hide = false
-		    Reforgenator.minimapIcon:Show("Reforgenator")
-		else
-		    Reforgenator.db.profile.minimap.hide = true
-		    Reforgenator.minimapIcon:Hide("Reforgenator")
-		end
-	    end,
-	    get = function(info)
-		return not Reforgenator.db.profile.minimap.hide
-	    end,
+	config = {
+	    type = 'group',
+	    name = 'Configuration',
+	    args = {
+		useMinimap = {
+		    name = "Use minimap button",
+		    desc = "Show a button on the minimap",
+		    type = "toggle",
+		    set = function(info, val)
+			Reforgenator:Debug("### useMinimap")
+			Reforgenator:Debug("### val="..to_string(val))
+			if val then
+			    Reforgenator.db.profile.minimap.hide = false
+			    Reforgenator.minimapIcon:Show("Reforgenator")
+			else
+			    Reforgenator.db.profile.minimap.hide = true
+			    Reforgenator.minimapIcon:Hide("Reforgenator")
+			end
+		    end,
+		    get = function(info)
+			return not Reforgenator.db.profile.minimap.hide
+		    end,
+		},
+	    },
 	},
+	maint = {
+	    type = 'group',
+	    name = 'Maintenance',
+	    args = {
+		resetDatabase = {
+		    name = 'Reset database',
+		    desc = 'Reset the database to have the built-in models',
+		    type = 'execute',
+		    func = function(info)
+			Reforgenator.db.global.models = nil
+			Reforgenator:LoadDefaultModels()
+		    end,
+		},
+	    },
+	}
     },
 }
 
@@ -78,6 +99,9 @@ local defaults = {
         minimap = {
 	    hide = false,
 	},
+    },
+    global = {
+	nextModelID = 1,
     }
 }
 
@@ -127,6 +151,10 @@ function Reforgenator:OnInitialize()
     self:RegisterChatCommand("reforgenator", "ShowState")
 
     tinsert(UISpecialFrames, "ReforgenatorPanel")
+
+    if not Reforgenator.db.global.models then
+	self:LoadDefaultModels()
+    end
 end
 
 function Reforgenator:MessageFrame_OnLoad(widget)
@@ -208,6 +236,68 @@ function Reforgenator:UpdateWindowItem(index, itemDescriptor)
 
     _G["ReforgenatorPanel_Item" .. index]:Show()
     _G["ReforgenatorPanel_Item" .. index .. "Checked"]:Show()
+end
+
+function Reforgenator:ModelSelection_OnLoad()
+    self:Debug("### ModelSelection_OnLoad")
+end
+
+function Reforgenator:GetPlayerKey()
+    local key = GetUnitName("player").."-"..GetRealmName()
+    return key
+end
+
+function Reforgenator:ModelSelection_OnInitialize()
+    self:Debug("### ModelSelection_OnInitialize")
+
+    local db = Reforgenator.db
+
+    local key = self:GetPlayerKey()
+
+    local function clearPlayerFromModels()
+	for k,v in pairs(db.global.models) do
+	    if v.PerCharacterOptions[key] then
+		v.PerCharacterOptions[key] = nil
+	    end
+	end
+    end
+
+    local displayOrder = {}
+    for k,v in pairs(db.global.models) do
+	displayOrder[#displayOrder+1] = k
+    end
+    table.sort(displayOrder)
+    self:Debug("### displayOrder="..to_string(displayOrder))
+
+    local info = UIDropDownMenu_CreateInfo()
+    for _,k in ipairs(displayOrder) do
+	info.text = k
+	info.func = function(self)
+	    Reforgenator:Debug("### chose "..self.value)
+	    clearPlayerFromModels()
+	    db.global.models[self.value].PerCharacterOptions[key] = true
+	    UIDropDownMenu_SetSelectedName(ReforgenatorPanel_ModelSelection, self.value)
+	    Reforgenator:ShowState()
+	end
+	info.checked = nil
+	UIDropDownMenu_AddButton(info)
+    end
+end
+
+function Reforgenator:ModelSelection_OnShow()
+    local db = Reforgenator.db
+    local func = function() Reforgenator:ModelSelection_OnInitialize() end
+    UIDropDownMenu_Initialize(ReforgenatorPanel_ModelSelection, func)
+    UIDropDownMenu_SetWidth(ReforgenatorPanel_ModelSelection, 230)
+
+    UIDropDownMenu_ClearAll(ReforgenatorPanel_ModelSelection)
+
+    local key = self:GetPlayerKey()
+    for k,v in pairs(db.global.models) do
+	if v.PerCharacterOptions[key] then
+	    UIDropDownMenu_SetSelectedName(ReforgenatorPanel_ModelSelection, k)
+	end
+    end
 end
 
 local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
@@ -435,8 +525,7 @@ function Reforgenator:CalculateSpellHitCap(playerModel)
     return hitCap
 end
 
-function Reforgenator:CalculateExpertiseSoftCap(playerModel)
-    -- Mods to expertise:
+function Reforgenator:ExpertiseMods(playerModel)
     --   (7.6887 rating per)
     --   DKs get +6 expertise from "veteran of the third war"
     --   Orcs get +3 for axes and fist weapons
@@ -444,11 +533,11 @@ function Reforgenator:CalculateExpertiseSoftCap(playerModel)
     --   Humans get +3 for swords and maces
     --   Gnomes get +3 for daggers and 1H swords
     --   Paladins with "Seal of Truth" glyphed get +10 expertise
-    local expertiseCap = 177
+    local reduction = 0;
 
     if playerModel.className == "DEATHKNIGHT" and playerModel.primaryTab == 1 then
 	self:Debug("reducing expertise for blood DK")
-	expertiseCap = expertiseCap - 46
+	reduction = reduction + 46
     end
 
     if playerModel.className == "PALADIN" then
@@ -463,7 +552,7 @@ function Reforgenator:CalculateExpertiseSoftCap(playerModel)
 
 	if hasGlyph then
 	    self:Debug("reducing expertise for Glyph of Seal of Truth")
-	    expertiseCap = expertiseCap - 77
+	    reduction = reduction + 77
 	end
     end
 
@@ -472,13 +561,13 @@ function Reforgenator:CalculateExpertiseSoftCap(playerModel)
 		or playerModel.mainHandWeaponType == "Two-Handed Axes"
 		or playerModel.mainHandWeaponType == "Fist Weapons" then
 	    self:Debug("reducing expertise for Orc with axe or fist")
-	    expertiseCap = expertiseCap - 23
+	    reduction = reduction + 23
 	end
     elseif playerModel.race == "Dwarf" then
 	if playerModel.mainHandWeaponType == "One-Handed Maces"
 		or playerModel.mainHandWeaponType == "Two-Handed Maces" then
 	    self:Debug("reducing expertise for Dwarf with mace")
-	    expertiseCap = expertiseCap - 23
+	    reduction = reduction + 23
 	end
     elseif playerModel.race == "Human" then
 	if playerModel.mainHandWeaponType == "One-Handed Swords"
@@ -486,18 +575,37 @@ function Reforgenator:CalculateExpertiseSoftCap(playerModel)
 		or playerModel.mainHandWeaponType == "One-Handed Maces"
 		or playerModel.mainHandWeaponType == "Two-Handed Maces" then
 	    self:Debug("reducing expertise for Human with sword or mace")
-	    expertiseCap = expertiseCap - 23
+	    reduction = reduction + 23
 	end
     elseif playerModel.race == "Gnome" then
 	if playerModel.mainHandWeaponType == "One-Handed Swords"
 		or playerModel.mainHandWeaponType == "Daggers" then
 	    self:Debug("reducing expertise for Gnome with dagger or 1H sword")
-	    expertiseCap = expertiseCap - 23
+	    reduction = reduction + 23
 	end
     end
 
+    return reduction
+end
+
+function Reforgenator:CalculateExpertiseSoftCap(playerModel)
+    local expertiseCap = 177
+
+    expertiseCap = expertiseCap - self:ExpertiseMods(playerModel)
     self:Debug("calculated expertise cap = " .. expertiseCap)
     return expertiseCap
+end
+
+function Reforgenator:CalculateExpertiseHardCap(playerModel)
+    local expertiseCap = 431
+
+    expertiseCap = expertiseCap - self:ExpertiseMods(playerModel)
+    self:Debug("calculated expertise cap = " .. expertiseCap)
+    return expertiseCap
+end
+
+function Reforgenator:HasteTo1SecGCD(playerModel)
+    return 1640
 end
 
 function Reforgenator:CalculateMaximumValue(playerModel)
@@ -512,12 +620,13 @@ local STAT_CAPS = {
     ["ExpertiseSoftCap"] = function(m) return Reforgenator:CalculateExpertiseSoftCap(m) end,
     ["ExpertiseHardCap"] = function(m) return Reforgenator:CalculateExpertiseHardCap(m) end,
     ["MaximumPossible"] = function(m) return Reforgenator:CalculateMaximumValue(m) end,
+    ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(playerModel) end
 }
 
 local ReforgeModel = {}
 
 function ReforgeModel:new()
-    local result = { statRank={}, reforgeOrder={} }
+    local result = { name='', statRank={}, reforgeOrder={} }
     setmetatable(result, self)
     self.__index = self
     return result
@@ -525,6 +634,8 @@ end
 
 function Reforgenator:TankModel()
     local model = ReforgeModel:new()
+    model.ak = 'TANK'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -547,6 +658,8 @@ end
 
 function Reforgenator:HunterModel()
     local model = ReforgeModel:new()
+    model.ak = 'HUNTER'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_MASTERY_RATING_SHORT",
@@ -568,6 +681,8 @@ end
 
 function Reforgenator:BoomkinModel()
     local model = ReforgeModel:new()
+    model.ak = 'BOOMKIN'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_SPIRIT_RATING_SHORT",
 	"ITEM_MOD_HIT_RATING_SHORT",
@@ -581,7 +696,8 @@ function Reforgenator:BoomkinModel()
 
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="1SecGCD" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
     model.useSpellHit = true
@@ -591,6 +707,8 @@ end
 
 function Reforgenator:FuryModel()
     local model = ReforgeModel:new()
+    model.ak = 'FURY'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -613,6 +731,8 @@ end
 
 function Reforgenator:ArmsModel()
     local model = ReforgeModel:new()
+    model.ak = 'ARMS'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_CRIT_RATING_SHORT",
@@ -626,7 +746,7 @@ function Reforgenator:ArmsModel()
 
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
-	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumValue" },
+	{ rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
     }
 
     return model
@@ -634,6 +754,8 @@ end
 
 function Reforgenator:RogueModel()
     local model = ReforgeModel:new()
+    model.ak = 'ROGUE'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -658,6 +780,8 @@ end
 
 function Reforgenator:CatModel()
     local model = ReforgeModel:new()
+    model.ak = 'CAT'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -680,6 +804,8 @@ end
 
 function Reforgenator:AffWarlockModel()
     local model = ReforgeModel:new()
+    model.ak = 'AFF'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -704,6 +830,8 @@ end
 
 function Reforgenator:DestroWarlockModel()
     local model = ReforgeModel:new()
+    model.ak = 'DESTRO'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_MASTERY_RATING_SHORT",
@@ -727,6 +855,8 @@ end
 
 function Reforgenator:DemoWarlockModel()
     local model = ReforgeModel:new()
+    model.ak = 'DEMO'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_CRIT_RATING_SHORT",
@@ -752,6 +882,8 @@ end
 
 function Reforgenator:TwoHandFrostDKModel()
     local model = ReforgeModel:new()
+    model.ak = '2HFrost'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -775,6 +907,8 @@ end
 
 function Reforgenator:DWFrostDKModel()
     local model = ReforgeModel:new()
+    model.ak = 'DWFrost'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -798,6 +932,8 @@ end
 
 function Reforgenator:UnholyDKModel()
     local model = ReforgeModel:new()
+    model.ak = 'UNHOLY'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -821,6 +957,8 @@ end
 
 function Reforgenator:ArcaneMageModel()
     local model = ReforgeModel:new()
+    model.ak = 'ARCANE'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -846,6 +984,8 @@ end
 
 function Reforgenator:FrostMageModel()
     local model = ReforgeModel:new()
+    model.ak = 'FROST'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -871,6 +1011,8 @@ end
 
 function Reforgenator:FireMageModel()
     local model = ReforgeModel:new()
+    model.ak = 'FIRE'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_CRIT_RATING_SHORT",
@@ -896,6 +1038,8 @@ end
 
 function Reforgenator:RetPallyModel()
     local model = ReforgeModel:new()
+    model.ak = 'RET'
+    model.builtIn = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -917,86 +1061,191 @@ function Reforgenator:RetPallyModel()
     return model
 end
 
+function Reforgenator:ShadowPriestModel()
+    local model = ReforgeModel:new()
+    model.ak = 'SPRIEST'
+    model.builtIn = true
+    model.statRank = Invert {
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="1SecGCD" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    return model
+end
+
+function Reforgenator:LoadDefaultModels()
+    self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost')
+    self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost')
+    self:LoadModel(self:UnholyDKModel(), 'built-in: DK, unholy')
+    self:LoadModel(self:TankModel(), 'built-in: DK, blood')
+
+    self:LoadModel(self:BoomkinModel(), 'built-in: Druid, boomkin')
+    self:LoadModel(self:CatModel(), 'built-in: Druid, feral cat')
+    self:LoadModel(self:TankModel(), 'built-in: Druid, feral bear')
+
+    self:LoadModel(self:HunterModel(), 'huilt-in: Hunter, BM')
+    self:LoadModel(self:HunterModel(), 'huilt-in: Hunter, MM')
+    self:LoadModel(self:HunterModel(), 'huilt-in: Hunter, SV')
+
+    self:LoadModel(self:ArcaneMageModel(), 'built-in: Mage, arcane')
+    self:LoadModel(self:FireMageModel(), 'built-in: Mage, fire')
+    self:LoadModel(self:FrostMageModel(), 'built-in: Mage, frost')
+
+    self:LoadModel(self:TankModel(), 'built-in: Paladin, protection')
+    self:LoadModel(self:RetPallyModel(), 'built-in: Paladin, retribution')
+
+    self:LoadModel(self:ShadowPriestModel(), 'built-in: Priest, shadow')
+
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, assassination")
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, combat")
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, subtlely")
+
+    self:LoadModel(self:AffWarlockModel(), 'built-in: Warlock, affliction')
+    self:LoadModel(self:DemoWarlockModel(), 'built-in: Warlock, demonology')
+    self:LoadModel(self:DestroWarlockModel(), 'built-in: Warlock, destruction')
+
+    self:LoadModel(self:ArmsModel(), 'built-in: Warrior, arms')
+    self:LoadModel(self:FuryModel(), 'built-in: Warrior, fury')
+    self:LoadModel(self:TankModel(), 'built-in: Warrior, protection')
+end
+
+function Reforgenator:LoadModel(model, modelName)
+    local m = Reforgenator.db.global.models
+    if not m then
+	m = {}
+    end
+
+    if not modelName then
+	modelName = model.name
+    end
+    m[modelName] = model
+    m[modelName].PerCharacterOptions = {}
+
+    Reforgenator.db.global.models = m
+end
+
 
 function Reforgenator:GetPlayerReforgeModel(playerModel)
+    local db = Reforgenator.db
+
+    local key = self:GetPlayerKey()
+    for k,v in pairs(db.global.models) do
+	if v.PerCharacterOptions[key] then
+	    self:Debug("using previously-selected model "..v.name)
+	    return v
+	end
+    end
+
+    local ak
     if playerModel.className == "HUNTER" then
-	return self:HunterModel()
+	ak = 'HUNTER'
     end
 
     if playerModel.className == "ROGUE" then
-	return self:RogueModel()
+	ak = 'ROGUE'
     end
 
     if playerModel.className == "WARRIOR" then
 	if playerModel.primaryTab == 1 then
-	    return self:ArmsModel()
+	    ak = 'ARMS'
 	elseif playerModel.primaryTab == 2 then
-	    return self:FuryModel()
+	    ak = 'FURY'
 	elseif playerModel.primaryTab == 3 then
-	    return self:TankModel()
+	    ak = 'TANK'
 	end
     end
 
     if playerModel.className == "DEATHKNIGHT" then
 	if playerModel.primaryTab == 1 then
-	    return self:TankModel()
+	    ak = 'TANK'
 	elseif playerModel.primaryTab == 2 then
 	    if playerModel.mainHandWeaponType:sub(1,10) == "Two-handed" then
-		return self:TwoHandFrostDKModel()
+		ak = '2HFrost'
 	    else
-		return self:DWFrostDKModel()
+		ak = 'DWFrost'
 	    end
 	else
-	    return self:UnholyDKModel()
+	    ak = 'UNHOLY'
 	end
     end
 
     if playerModel.className == "DRUID" then
-	if playerModel.primaryTab == 2 then
+	if playerModel.primaryTab == 1 then
+	    ak = 'BOOMKIN'
+	elseif playerModel.primaryTab == 2 then
 	    local form = GetShapeshiftFormID()
-	    if not form then
-		self:MessageBox("Please shift into your combat form and re-run the Reforgenator")
-		return nil
-	    end
-	    if form == 5 then
-		return self:TankModel()
+	    if form == 1 then
+		ak = 'CAT'
 	    elseif form == 1 then
-		return self:CatModel()
+		ak = 'TANK'
 	    end
-	elseif playerModel.primaryTab == 1 then
-	    return self:BoomkinModel()
 	end
     end
 
     if playerModel.className == "PALADIN" then
 	if playerModel.primaryTab == 2 then
-	    return self:TankModel()
+	    ak = 'TANK'
 	elseif playerModel.primaryTab == 3 then
-	    return self:RetPallyModel()
+	    ak = 'RET'
 	end
     end
 
     if playerModel.className == "WARLOCK" then
 	if playerModel.primaryTab == 1 then
-	    return self:AffWarlockModel()
+	    ak = 'AFF'
 	elseif playerModel.primaryTab == 2 then
-	    return self:DemoWarlockModel()
+	    ak = 'DEMO'
 	else
-	    return self:DestroWarlockModel()
+	    ak = 'DESTRO'
 	end
     end
 
     if playerModel.className == "MAGE" then
 	if playerModel.primaryTab == 1 then
-	    return self:ArcaneMageModel()
+	    ak = 'ARCANE'
 	elseif playerModel.primaryTab == 2 then
-	    return self:FireMageModel()
+	    ak = 'FIRE'
 	else
-	    return self:FrostMageModel()
+	    ak = 'FROST'
 	end
     end
 
-    self:MessageBox("Your class/spec isn't supported yet.")
+    if playerModel.className == "PRIEST" then
+	if playerModel.primaryTab == 3 then
+	    ak = 'SPRIEST'
+	end
+    end
+
+    -- if playerModel.className == "SHAMAN" then
+    -- end
+
+    if not ak then
+	self:MessageBox("Your class/spec isn't supported yet.")
+	return nil
+    end
+
+    self:Debug("### searching for ak="..ak)
+    for k,v in pairs(Reforgenator.db.global.models) do
+	self:Debug("### model["..tostring(k).."].ak="..v.ak)
+	if v.ak == ak then
+	    v.PerCharacterOptions[key] = true
+	    return v
+	end
+    end
+
+    self:MessageBox("Your default model has been deleted. Please restore the database on the options panel")
     return nil
 end
 
@@ -1086,12 +1335,10 @@ function Reforgenator:ShowState()
     else
 	for k,v in ipairs(soln.changes) do
 	    self:Debug("changed: " .. to_string(v))
-	    self:Print("reforge " .. v.itemLink .. " to change " .. _G[v.reforgedFrom] .. " to " .. _G[v.reforgedTo])
 	end
     end
 
     self.changes = soln.changes
-    self:Debug("#self.changes="..#self.changes)
     self:UpdateWindow()
 
     self:Debug("all done")

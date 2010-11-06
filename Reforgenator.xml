@@ -134,7 +134,7 @@
 		<Anchors>
 		    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
 			<Offset>
-			    <AbsDimension x="-6" y="-6"/>
+			    <AbsDimension x="-6" y="0"/>
 			</Offset>
 		    </Anchor>
 		</Anchors>
@@ -147,6 +147,16 @@
 		<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
 		<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 	    </Button>
+            <Frame name="$parent_ModelSelection"
+                   inherits="UIDropDownMenuTemplate">
+                <Anchors>
+                    <Anchor point="TOP">
+                        <Offset>
+                            <AbsDimension x="0" y="-25" />
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Frame>
 	    <Button name="$parent_Item1"
 		    inherits="ReforgeItemTemplate"
 		    id="1">
@@ -266,6 +276,14 @@
 		</Scripts>
 	    </CheckButton>
 	</Frames>
+	<Scripts>
+	    <OnLoad>
+		UIDropDownMenu_Initialize(ReforgenatorPanel_ModelSelection, function(...) Reforgenator:ModelSelection_OnLoad(...) end)
+	    </OnLoad>
+	    <OnShow>
+		Reforgenator:ModelSelection_OnShow()
+	    </OnShow>
+	</Scripts>
     </Frame>
 
     <Frame name="ReforgenatorMessageFrame"

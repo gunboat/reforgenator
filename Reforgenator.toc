@@ -4,7 +4,7 @@
 ## Author: Mitchell Morris
 ## eMail: mitchell@morrisland.com
 ## URL: 
-## Version: 0.0.16
+## Version: 0.0.17
 ## SavedVariables: ReforgenatorDB
 ## OptionalDeps: Ace3, tekDebug
 
