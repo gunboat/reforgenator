@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.18"
+local version = "0.0.19"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -610,7 +610,20 @@ function Reforgenator:CalculateExpertiseHardCap(playerModel)
 end
 
 function Reforgenator:HasteTo1SecGCD(playerModel)
-    return 1640
+    local hasteCap = 1640
+    local reduction = 0
+
+    if playerModel.className == "PRIEST" then
+	local pointsInDarkness = select(5, GetTalentInfo(3,1))
+	reduction = reduction + pointsInDarkness * 40
+    end
+
+    if playerModel.className == "DRUID" then
+	local moonkinForm = select(5, GetTalentInfo(1,8))
+	reduction = reduction + moonkinForm * 5 * 40
+    end
+
+    return hasteCap - reduction
 end
 
 function Reforgenator:CalculateMaximumValue(playerModel)
@@ -625,7 +638,7 @@ local STAT_CAPS = {
     ["ExpertiseSoftCap"] = function(m) return Reforgenator:CalculateExpertiseSoftCap(m) end,
     ["ExpertiseHardCap"] = function(m) return Reforgenator:CalculateExpertiseHardCap(m) end,
     ["MaximumPossible"] = function(m) return Reforgenator:CalculateMaximumValue(m) end,
-    ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(playerModel) end
+    ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(m) end
 }
 
 local ReforgeModel = {}
@@ -1143,6 +1156,104 @@ function Reforgenator:EnhancementModel()
     return model
 end
 
+function Reforgenator:TreeModel()
+    local model = ReforgeModel:new()
+    model.ak = 'TREE'
+    model.builtIn = true
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="1SecGCD" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:DiscModel()
+    local model = ReforgeModel:new()
+    model.ak = 'DISC'
+    model.builtIn = true
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="1SecGCD" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:HolyModel()
+    local model = ReforgeModel:new()
+    model.ak = 'HOLY'
+    model.builtIn = true
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:RestoModel()
+    local model = ReforgeModel:new()
+    model.ak = 'RESTO'
+    model.builtIn = true
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="1SecGCD" },
+    }
+
+    model.useSpellHit = true
+
+    return model
+end
+
 function Reforgenator:LoadDefaultModels()
     self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost')
     self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost')
@@ -1152,10 +1263,11 @@ function Reforgenator:LoadDefaultModels()
     self:LoadModel(self:BoomkinModel(), 'built-in: Druid, boomkin')
     self:LoadModel(self:CatModel(), 'built-in: Druid, feral cat')
     self:LoadModel(self:TankModel(), 'built-in: Druid, feral bear')
+    self:LoadModel(self:TreeModel(), 'built-in: Druid, restoration')
 
-    self:LoadModel(self:HunterModel(), 'huilt-in: Hunter, BM')
-    self:LoadModel(self:HunterModel(), 'huilt-in: Hunter, MM')
-    self:LoadModel(self:HunterModel(), 'huilt-in: Hunter, SV')
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, BM')
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, MM')
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, SV')
 
     self:LoadModel(self:ArcaneMageModel(), 'built-in: Mage, arcane')
     self:LoadModel(self:FireMageModel(), 'built-in: Mage, fire')
@@ -1165,6 +1277,8 @@ function Reforgenator:LoadDefaultModels()
     self:LoadModel(self:RetPallyModel(), 'built-in: Paladin, retribution')
 
     self:LoadModel(self:ShadowPriestModel(), 'built-in: Priest, shadow')
+    self:LoadModel(self:DiscModel(), 'built-in: Priest, discipline')
+    self:LoadModel(self:HolyModel(), 'built-in: Priest, holy')
 
     self:LoadModel(self:RogueModel(), "built-in: Rogue, assassination")
     self:LoadModel(self:RogueModel(), "built-in: Rogue, combat")
@@ -1180,6 +1294,7 @@ function Reforgenator:LoadDefaultModels()
 
     self:LoadModel(self:ElementalModel(), 'built-in: Shaman, elemental')
     self:LoadModel(self:EnhancementModel(), 'built-in: Shaman, enhancement')
+    self:LoadModel(self:RestoModel(), 'built-in: Shaman, restoration')
 end
 
 function Reforgenator:LoadModel(model, modelName)
@@ -1252,6 +1367,8 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 	    elseif form == 1 then
 		ak = 'TANK'
 	    end
+	else
+	    ak = 'TREE'
 	end
     end
 
@@ -1284,7 +1401,11 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
     end
 
     if playerModel.className == "PRIEST" then
-	if playerModel.primaryTab == 3 then
+	if playerModel.primaryTab == 1 then
+	    ak = 'DISC'
+	elseif playerModel.primaryTab == 2 then
+	    ak = 'HOLY'
+	elseif playerModel.primaryTab == 3 then
 	    ak = 'SPRIEST'
 	end
     end
@@ -1294,6 +1415,8 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 	    ak = 'ELEMENTAL'
 	elseif playerModel.primaryTab == 2 then
 	    ak = 'ENHANCEMENT'
+	elseif playerModel.primaryTab == 3 then
+	    ak = 'RESTO'
 	end
     end
 
@@ -1325,6 +1448,7 @@ function Reforgenator:ShowState()
     self:Debug("in ShowState")
 
     local playerModel = self:GetPlayerModel()
+    self:Debug("playerModel="..to_string(playerModel))
 
     local model = self:GetPlayerReforgeModel(playerModel)
     if not model then
