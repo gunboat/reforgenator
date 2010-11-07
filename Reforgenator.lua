@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.19"
+local version = "0.0.20"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -638,7 +638,8 @@ local STAT_CAPS = {
     ["ExpertiseSoftCap"] = function(m) return Reforgenator:CalculateExpertiseSoftCap(m) end,
     ["ExpertiseHardCap"] = function(m) return Reforgenator:CalculateExpertiseHardCap(m) end,
     ["MaximumPossible"] = function(m) return Reforgenator:CalculateMaximumValue(m) end,
-    ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(m) end
+    ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(m) end,
+    ["Fixed"] = function(m,a) return a end,
 }
 
 local ReforgeModel = {}
@@ -652,8 +653,7 @@ end
 
 function Reforgenator:TankModel()
     local model = ReforgeModel:new()
-    model.ak = 'TANK'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -676,8 +676,7 @@ end
 
 function Reforgenator:HunterModel()
     local model = ReforgeModel:new()
-    model.ak = 'HUNTER'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_MASTERY_RATING_SHORT",
@@ -699,8 +698,7 @@ end
 
 function Reforgenator:BoomkinModel()
     local model = ReforgeModel:new()
-    model.ak = 'BOOMKIN'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_SPIRIT_RATING_SHORT",
 	"ITEM_MOD_HIT_RATING_SHORT",
@@ -725,8 +723,7 @@ end
 
 function Reforgenator:FuryModel()
     local model = ReforgeModel:new()
-    model.ak = 'FURY'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -749,8 +746,7 @@ end
 
 function Reforgenator:ArmsModel()
     local model = ReforgeModel:new()
-    model.ak = 'ARMS'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_CRIT_RATING_SHORT",
@@ -772,8 +768,7 @@ end
 
 function Reforgenator:RogueModel()
     local model = ReforgeModel:new()
-    model.ak = 'ROGUE'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -798,8 +793,7 @@ end
 
 function Reforgenator:CatModel()
     local model = ReforgeModel:new()
-    model.ak = 'CAT'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -822,8 +816,7 @@ end
 
 function Reforgenator:AffWarlockModel()
     local model = ReforgeModel:new()
-    model.ak = 'AFF'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -848,8 +841,7 @@ end
 
 function Reforgenator:DestroWarlockModel()
     local model = ReforgeModel:new()
-    model.ak = 'DESTRO'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_MASTERY_RATING_SHORT",
@@ -873,8 +865,7 @@ end
 
 function Reforgenator:DemoWarlockModel()
     local model = ReforgeModel:new()
-    model.ak = 'DEMO'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_CRIT_RATING_SHORT",
@@ -901,7 +892,7 @@ end
 function Reforgenator:TwoHandFrostDKModel()
     local model = ReforgeModel:new()
     model.ak = '2HFrost'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -926,7 +917,7 @@ end
 function Reforgenator:DWFrostDKModel()
     local model = ReforgeModel:new()
     model.ak = 'DWFrost'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -950,8 +941,7 @@ end
 
 function Reforgenator:UnholyDKModel()
     local model = ReforgeModel:new()
-    model.ak = 'UNHOLY'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -975,8 +965,7 @@ end
 
 function Reforgenator:ArcaneMageModel()
     local model = ReforgeModel:new()
-    model.ak = 'ARCANE'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -1002,8 +991,7 @@ end
 
 function Reforgenator:FrostMageModel()
     local model = ReforgeModel:new()
-    model.ak = 'FROST'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -1029,8 +1017,7 @@ end
 
 function Reforgenator:FireMageModel()
     local model = ReforgeModel:new()
-    model.ak = 'FIRE'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_CRIT_RATING_SHORT",
@@ -1056,8 +1043,7 @@ end
 
 function Reforgenator:RetPallyModel()
     local model = ReforgeModel:new()
-    model.ak = 'RET'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_EXPERTISE_RATING_SHORT",
@@ -1081,8 +1067,7 @@ end
 
 function Reforgenator:ShadowPriestModel()
     local model = ReforgeModel:new()
-    model.ak = 'SPRIEST'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -1107,8 +1092,7 @@ end
 
 function Reforgenator:ElementalModel()
     local model = ReforgeModel:new()
-    model.ak = 'ELEMENTAL'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_SPIRIT_RATING_SHORT",
 	"ITEM_MOD_HIT_RATING_SHORT",
@@ -1132,8 +1116,7 @@ end
 
 function Reforgenator:EnhancementModel()
     local model = ReforgeModel:new()
-    model.ak = 'ENHANCEMENT'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_SPIRIT_RATING_SHORT",
 	"ITEM_MOD_HIT_RATING_SHORT",
@@ -1158,8 +1141,7 @@ end
 
 function Reforgenator:TreeModel()
     local model = ReforgeModel:new()
-    model.ak = 'TREE'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_SPIRIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -1183,8 +1165,7 @@ end
 
 function Reforgenator:DiscModel()
     local model = ReforgeModel:new()
-    model.ak = 'DISC'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_SPIRIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -1208,8 +1189,7 @@ end
 
 function Reforgenator:HolyModel()
     local model = ReforgeModel:new()
-    model.ak = 'HOLY'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_SPIRIT_RATING_SHORT",
 	"ITEM_MOD_MASTERY_RATING_SHORT",
@@ -1232,8 +1212,7 @@ end
 
 function Reforgenator:RestoModel()
     local model = ReforgeModel:new()
-    model.ak = 'RESTO'
-    model.builtIn = true
+    model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_SPIRIT_RATING_SHORT",
 	"ITEM_MOD_HASTE_RATING_SHORT",
@@ -1254,50 +1233,75 @@ function Reforgenator:RestoModel()
     return model
 end
 
-function Reforgenator:LoadDefaultModels()
-    self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost')
-    self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost')
-    self:LoadModel(self:UnholyDKModel(), 'built-in: DK, unholy')
-    self:LoadModel(self:TankModel(), 'built-in: DK, blood')
+function Reforgenator:HolyPallyModel()
+    local model = ReforgeModel:new()
+    model.readOnly = true
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+    }
 
-    self:LoadModel(self:BoomkinModel(), 'built-in: Druid, boomkin')
-    self:LoadModel(self:CatModel(), 'built-in: Druid, feral cat')
-    self:LoadModel(self:TankModel(), 'built-in: Druid, feral bear')
-    self:LoadModel(self:TreeModel(), 'built-in: Druid, restoration')
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="1SecGCD" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
 
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, BM')
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, MM')
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, SV')
+    model.useSpellHit = true
 
-    self:LoadModel(self:ArcaneMageModel(), 'built-in: Mage, arcane')
-    self:LoadModel(self:FireMageModel(), 'built-in: Mage, fire')
-    self:LoadModel(self:FrostMageModel(), 'built-in: Mage, frost')
-
-    self:LoadModel(self:TankModel(), 'built-in: Paladin, protection')
-    self:LoadModel(self:RetPallyModel(), 'built-in: Paladin, retribution')
-
-    self:LoadModel(self:ShadowPriestModel(), 'built-in: Priest, shadow')
-    self:LoadModel(self:DiscModel(), 'built-in: Priest, discipline')
-    self:LoadModel(self:HolyModel(), 'built-in: Priest, holy')
-
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, assassination")
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, combat")
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, subtlely")
-
-    self:LoadModel(self:AffWarlockModel(), 'built-in: Warlock, affliction')
-    self:LoadModel(self:DemoWarlockModel(), 'built-in: Warlock, demonology')
-    self:LoadModel(self:DestroWarlockModel(), 'built-in: Warlock, destruction')
-
-    self:LoadModel(self:ArmsModel(), 'built-in: Warrior, arms')
-    self:LoadModel(self:FuryModel(), 'built-in: Warrior, fury')
-    self:LoadModel(self:TankModel(), 'built-in: Warrior, protection')
-
-    self:LoadModel(self:ElementalModel(), 'built-in: Shaman, elemental')
-    self:LoadModel(self:EnhancementModel(), 'built-in: Shaman, enhancement')
-    self:LoadModel(self:RestoModel(), 'built-in: Shaman, restoration')
+    return model
 end
 
-function Reforgenator:LoadModel(model, modelName)
+function Reforgenator:LoadDefaultModels()
+    self:LoadModel(self:TankModel(), 'built-in: DK, blood', 'DEATHKNIGHT/1')
+    self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost')
+    self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost')
+    self:LoadModel(self:UnholyDKModel(), 'built-in: DK, unholy', 'DEATHKNIGHT/3')
+
+    self:LoadModel(self:BoomkinModel(), 'built-in: Druid, boomkin', 'DRUID/1')
+    self:LoadModel(self:CatModel(), 'built-in: Druid, feral cat')
+    self:LoadModel(self:TankModel(), 'built-in: Druid, feral bear', 'DRUID/2')
+    self:LoadModel(self:TreeModel(), 'built-in: Druid, restoration', 'DRUID/3')
+
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, BM', 'HUNTER/1')
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, MM', 'HUNTER/2')
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, SV', 'HUNTER/3')
+
+    self:LoadModel(self:ArcaneMageModel(), 'built-in: Mage, arcane', 'MAGE/1')
+    self:LoadModel(self:FireMageModel(), 'built-in: Mage, fire', 'MAGE/2')
+    self:LoadModel(self:FrostMageModel(), 'built-in: Mage, frost', 'MAGE/3')
+
+    self:LoadModel(self:HolyPallyModel(), 'built-in: Paladin, holy', 'PALADIN/1')
+    self:LoadModel(self:TankModel(), 'built-in: Paladin, protection', 'PALADIN/2')
+    self:LoadModel(self:RetPallyModel(), 'built-in: Paladin, retribution', 'PALADIN/3')
+
+    self:LoadModel(self:DiscModel(), 'built-in: Priest, discipline', 'PRIEST/1')
+    self:LoadModel(self:HolyModel(), 'built-in: Priest, holy', 'PRIEST/2')
+    self:LoadModel(self:ShadowPriestModel(), 'built-in: Priest, shadow', 'PRIEST/3')
+
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, assassination", 'ROGUE/1')
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, combat", 'ROGUE/2')
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, subtlely", 'ROGUE/3')
+
+    self:LoadModel(self:ElementalModel(), 'built-in: Shaman, elemental', 'SHAMAN/1')
+    self:LoadModel(self:EnhancementModel(), 'built-in: Shaman, enhancement', 'SHAMAN/2')
+    self:LoadModel(self:RestoModel(), 'built-in: Shaman, restoration', 'SHAMAN/3')
+
+    self:LoadModel(self:AffWarlockModel(), 'built-in: Warlock, affliction', 'WARLOCK/1')
+    self:LoadModel(self:DemoWarlockModel(), 'built-in: Warlock, demonology', 'WARLOCK/2')
+    self:LoadModel(self:DestroWarlockModel(), 'built-in: Warlock, destruction', 'WARLOCK/3')
+
+    self:LoadModel(self:ArmsModel(), 'built-in: Warrior, arms', 'WARRIOR/1')
+    self:LoadModel(self:FuryModel(), 'built-in: Warrior, fury', 'WARRIOR/2')
+    self:LoadModel(self:TankModel(), 'built-in: Warrior, protection', 'WARRIOR/3')
+end
+
+function Reforgenator:LoadModel(model, modelName, ak)
     local m = Reforgenator.db.global.models
     if not m then
 	m = {}
@@ -1308,6 +1312,10 @@ function Reforgenator:LoadModel(model, modelName)
     end
     m[modelName] = model
     m[modelName].PerCharacterOptions = {}
+
+    if ak then
+	m[modelName].ak = ak
+    end
 
     Reforgenator.db.global.models = m
 end
@@ -1325,98 +1333,12 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
     end
 
     local ak
-    if playerModel.className == "HUNTER" then
-	ak = 'HUNTER'
-    end
-
-    if playerModel.className == "ROGUE" then
-	ak = 'ROGUE'
-    end
-
-    if playerModel.className == "WARRIOR" then
-	if playerModel.primaryTab == 1 then
-	    ak = 'ARMS'
-	elseif playerModel.primaryTab == 2 then
-	    ak = 'FURY'
-	elseif playerModel.primaryTab == 3 then
-	    ak = 'TANK'
-	end
-    end
-
-    if playerModel.className == "DEATHKNIGHT" then
-	if playerModel.primaryTab == 1 then
-	    ak = 'TANK'
-	elseif playerModel.primaryTab == 2 then
-	    if playerModel.mainHandWeaponType:sub(1,10) == "Two-handed" then
-		ak = '2HFrost'
-	    else
-		ak = 'DWFrost'
-	    end
+    ak = playerModel.className .. "/" .. to_string(playerModel.primaryTab)
+    if playerModel.className == "DEATHKNIGHT" and playerModel.primaryTab == 2 then
+	if playerModel.mainHandWeaponType:sub(1,10) == "Two-handed" then
+	    ak = '2HFrost'
 	else
-	    ak = 'UNHOLY'
-	end
-    end
-
-    if playerModel.className == "DRUID" then
-	if playerModel.primaryTab == 1 then
-	    ak = 'BOOMKIN'
-	elseif playerModel.primaryTab == 2 then
-	    local form = GetShapeshiftFormID()
-	    if form == 1 then
-		ak = 'CAT'
-	    elseif form == 1 then
-		ak = 'TANK'
-	    end
-	else
-	    ak = 'TREE'
-	end
-    end
-
-    if playerModel.className == "PALADIN" then
-	if playerModel.primaryTab == 2 then
-	    ak = 'TANK'
-	elseif playerModel.primaryTab == 3 then
-	    ak = 'RET'
-	end
-    end
-
-    if playerModel.className == "WARLOCK" then
-	if playerModel.primaryTab == 1 then
-	    ak = 'AFF'
-	elseif playerModel.primaryTab == 2 then
-	    ak = 'DEMO'
-	else
-	    ak = 'DESTRO'
-	end
-    end
-
-    if playerModel.className == "MAGE" then
-	if playerModel.primaryTab == 1 then
-	    ak = 'ARCANE'
-	elseif playerModel.primaryTab == 2 then
-	    ak = 'FIRE'
-	else
-	    ak = 'FROST'
-	end
-    end
-
-    if playerModel.className == "PRIEST" then
-	if playerModel.primaryTab == 1 then
-	    ak = 'DISC'
-	elseif playerModel.primaryTab == 2 then
-	    ak = 'HOLY'
-	elseif playerModel.primaryTab == 3 then
-	    ak = 'SPRIEST'
-	end
-    end
-
-    if playerModel.className == "SHAMAN" then
-	if playerModel.primaryTab == 1 then
-	    ak = 'ELEMENTAL'
-	elseif playerModel.primaryTab == 2 then
-	    ak = 'ENHANCEMENT'
-	elseif playerModel.primaryTab == 3 then
-	    ak = 'RESTO'
+	    ak = 'DWFrost'
 	end
     end
 
@@ -1516,7 +1438,7 @@ function Reforgenator:ShowState()
     for _, entry in ipairs(model.reforgeOrder) do
 	self:Debug("### entry.cap="..entry.cap)
 	local f = STAT_CAPS[entry.cap]
-	soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel), model.statRank, soln)
+	soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel, entry.userdata), model.statRank, soln)
     end
 
     -- Populate the window with the things to change
