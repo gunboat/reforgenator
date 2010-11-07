@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.17"
+local version = "0.0.18"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -81,11 +81,10 @@ local options = {
 	    name = 'Maintenance',
 	    args = {
 		resetDatabase = {
-		    name = 'Reset database',
-		    desc = 'Reset the database to have the built-in models',
+		    name = 'Reload built-in models',
+		    desc = 'Reload the built-in models from the addon',
 		    type = 'execute',
 		    func = function(info)
-			Reforgenator.db.global.models = nil
 			Reforgenator:LoadDefaultModels()
 		    end,
 		},
@@ -533,6 +532,7 @@ function Reforgenator:ExpertiseMods(playerModel)
     --   Humans get +3 for swords and maces
     --   Gnomes get +3 for daggers and 1H swords
     --   Paladins with "Seal of Truth" glyphed get +10 expertise
+    --   Enh shamans get +4 for each point in Unleashed Rage
     local reduction = 0;
 
     if playerModel.className == "DEATHKNIGHT" and playerModel.primaryTab == 1 then
@@ -583,6 +583,11 @@ function Reforgenator:ExpertiseMods(playerModel)
 	    self:Debug("reducing expertise for Gnome with dagger or 1H sword")
 	    reduction = reduction + 23
 	end
+    end
+
+    if playerModel.className == "SHAMAN" then
+	local pointsInUnleashedRage = select(5, GetTalentInfo(2,16))
+	reduction = reduction + math.floor(4 * pointsInUnleashedRage * 7.6887)
     end
 
     return reduction
@@ -1082,6 +1087,59 @@ function Reforgenator:ShadowPriestModel()
 	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
+    model.useSpellHit = true
+
+    return model
+end
+
+function Reforgenator:ElementalModel()
+    local model = ReforgeModel:new()
+    model.ak = 'ELEMENTAL'
+    model.builtIn = true
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = 1
+
+    return model
+end
+
+function Reforgenator:EnhancementModel()
+    local model = ReforgeModel:new()
+    model.ak = 'ENHANCEMENT'
+    model.builtIn = true
+    model.statRank = Invert {
+	"ITEM_MOD_SPIRIT_RATING_SHORT",
+	"ITEM_MOD_HIT_RATING_SHORT",
+	"ITEM_MOD_MASTERY_RATING_SHORT",
+	"ITEM_MOD_HASTE_RATING_SHORT",
+	"ITEM_MOD_CRIT_RATING_SHORT",
+	"ITEM_MOD_EXPERTISE_RATING_SHORT",
+	"ITEM_MOD_DODGE_RATING_SHORT",
+	"ITEM_MOD_PARRY_RATING_SHORT",
+    }
+
+    model.reforgeOrder = {
+	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
+	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
+	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+    }
+
+    model.useSpellHit = true
+
     return model
 end
 
@@ -1119,6 +1177,9 @@ function Reforgenator:LoadDefaultModels()
     self:LoadModel(self:ArmsModel(), 'built-in: Warrior, arms')
     self:LoadModel(self:FuryModel(), 'built-in: Warrior, fury')
     self:LoadModel(self:TankModel(), 'built-in: Warrior, protection')
+
+    self:LoadModel(self:ElementalModel(), 'built-in: Shaman, elemental')
+    self:LoadModel(self:EnhancementModel(), 'built-in: Shaman, enhancement')
 end
 
 function Reforgenator:LoadModel(model, modelName)
@@ -1228,8 +1289,13 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 	end
     end
 
-    -- if playerModel.className == "SHAMAN" then
-    -- end
+    if playerModel.className == "SHAMAN" then
+	if playerModel.primaryTab == 1 then
+	    ak = 'ELEMENTAL'
+	elseif playerModel.primaryTab == 2 then
+	    ak = 'ENHANCEMENT'
+	end
+    end
 
     if not ak then
 	self:MessageBox("Your class/spec isn't supported yet.")
