@@ -1058,7 +1058,7 @@ function Reforgenator:RetPallyModel()
     model.reforgeOrder = {
 	{ rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
 	{ rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed", userdata=751 },
 	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
