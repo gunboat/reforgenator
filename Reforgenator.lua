@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.20"
+local version = "0.0.21"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -51,45 +51,42 @@ local options = {
     handler = Reforgenator,
     desc = "Calculate what to reforge",
     args = { 
-	config = {
-	    type = 'group',
-	    name = 'Configuration',
-	    args = {
-		useMinimap = {
-		    name = "Use minimap button",
-		    desc = "Show a button on the minimap",
-		    type = "toggle",
-		    set = function(info, val)
-			Reforgenator:Debug("### useMinimap")
-			Reforgenator:Debug("### val="..to_string(val))
-			if val then
-			    Reforgenator.db.profile.minimap.hide = false
-			    Reforgenator.minimapIcon:Show("Reforgenator")
-			else
-			    Reforgenator.db.profile.minimap.hide = true
-			    Reforgenator.minimapIcon:Hide("Reforgenator")
-			end
-		    end,
-		    get = function(info)
-			return not Reforgenator.db.profile.minimap.hide
-		    end,
-		},
-	    },
-	},
-	maint = {
-	    type = 'group',
-	    name = 'Maintenance',
-	    args = {
-		resetDatabase = {
-		    name = 'Reload built-in models',
-		    desc = 'Reload the built-in models from the addon',
-		    type = 'execute',
-		    func = function(info)
-			Reforgenator:LoadDefaultModels()
-		    end,
-		},
-	    },
-	}
+        useMinimap = {
+            name = "Use minimap button",
+            desc = "Show a button on the minimap",
+            type = "toggle",
+            set = function(info, val)
+                Reforgenator:Debug("### useMinimap")
+                Reforgenator:Debug("### val="..to_string(val))
+                if val then
+                    Reforgenator.db.profile.minimap.hide = false
+                    Reforgenator.minimapIcon:Show("Reforgenator")
+                else
+                    Reforgenator.db.profile.minimap.hide = true
+                    Reforgenator.minimapIcon:Hide("Reforgenator")
+                end
+            end,
+            get = function(info)
+                return not Reforgenator.db.profile.minimap.hide
+            end,
+        },
+    },
+}
+
+local maintOptions = {
+    type = 'group',
+    name = "Reforgenator",
+    handler = Reforgenator,
+    desc = "Calculate what to reforge",
+    args = {
+        resetDatabase = {
+            name = 'Reload built-in models',
+            desc = 'Reload the built-in models from the addon',
+            type = 'execute',
+            func = function(info)
+                Reforgenator:LoadDefaultModels()
+            end,
+        },
     },
 }
 
@@ -117,8 +114,10 @@ function Reforgenator:OnInitialize()
     Reforgenator.db = LibStub("AceDB-3.0"):New("ReforgenatorDB", defaults, "Default")
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator", options)
-
     Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
+
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Maintenance", maintOptions)
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Maintenance", "Maintenance", "Reforgenator")
 
     local broker = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
         launcher = true,
@@ -891,7 +890,6 @@ end
 
 function Reforgenator:TwoHandFrostDKModel()
     local model = ReforgeModel:new()
-    model.ak = '2HFrost'
     model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
@@ -916,7 +914,6 @@ end
 
 function Reforgenator:DWFrostDKModel()
     local model = ReforgeModel:new()
-    model.ak = 'DWFrost'
     model.readOnly = true
     model.statRank = Invert {
 	"ITEM_MOD_HIT_RATING_SHORT",
@@ -1178,7 +1175,7 @@ function Reforgenator:DiscModel()
     }
 
     model.reforgeOrder = {
-	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="1SecGCD" },
+	{ rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed", userdata=831 },
 	{ rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
@@ -1259,8 +1256,8 @@ end
 
 function Reforgenator:LoadDefaultModels()
     self:LoadModel(self:TankModel(), 'built-in: DK, blood', 'DEATHKNIGHT/1')
-    self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost')
-    self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost')
+    self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost', '2HFrost')
+    self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost', 'DWFrost')
     self:LoadModel(self:UnholyDKModel(), 'built-in: DK, unholy', 'DEATHKNIGHT/3')
 
     self:LoadModel(self:BoomkinModel(), 'built-in: Druid, boomkin', 'DRUID/1')
@@ -1349,7 +1346,7 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 
     self:Debug("### searching for ak="..ak)
     for k,v in pairs(Reforgenator.db.global.models) do
-	self:Debug("### model["..tostring(k).."].ak="..v.ak)
+	self:Debug("### model["..tostring(k).."].ak="..(v.ak or "nil"))
 	if v.ak == ak then
 	    v.PerCharacterOptions[key] = true
 	    return v
