@@ -274,6 +274,10 @@ function Reforgenator:ModelEditorScrollbar_Update()
 	local linePlusOffset = line + FauxScrollFrame_GetOffset(sb)
 	if linePlusOffset < #keys then
 	    buttonText:SetText(keys[linePlusOffset])
+	    button:UnlockHighlight()
+	    if Reforgenator.selectedModelName and Reforgenator.selectedModelname == keys[linePlusOffset] then
+		button:LockHighlight()
+	    end
 	    button:Show()
 	else
 	    button:Hide()
@@ -286,6 +290,8 @@ function Reforgenator:ModelEditorName_OnClick(widget, button)
     for i=1,6 do
         local b = _G["ModelEditorNameButton" .. i]
         if b:GetID() == widget:GetID() then
+	    local t = _G["ModelEditorNameButton" .. i .. "Name"]
+	    Reforgenator.selectedModelName = t:GetText()
             b:LockHighlight()
         else
             b:UnlockHighlight()
