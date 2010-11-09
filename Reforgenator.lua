@@ -250,6 +250,7 @@ function Reforgenator:ModelSelection_OnInitialize()
 
     local db = Reforgenator.db
 
+    local class = select(2, UnitClass("player"))
     local key = self:GetPlayerKey()
 
     local function clearPlayerFromModels()
@@ -262,7 +263,9 @@ function Reforgenator:ModelSelection_OnInitialize()
 
     local displayOrder = {}
     for k,v in pairs(db.global.models) do
-        displayOrder[#displayOrder+1] = k
+        if v.class == class then
+            displayOrder[#displayOrder+1] = k
+        end
     end
     table.sort(displayOrder)
     self:Debug("### displayOrder="..to_string(displayOrder))
@@ -1259,50 +1262,50 @@ function Reforgenator:HolyPallyModel()
 end
 
 function Reforgenator:LoadDefaultModels()
-    self:LoadModel(self:TankModel(), 'built-in: DK, blood', 'DEATHKNIGHT/1')
-    self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost', '2HFrost')
-    self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost', 'DWFrost')
-    self:LoadModel(self:UnholyDKModel(), 'built-in: DK, unholy', 'DEATHKNIGHT/3')
+    self:LoadModel(self:TankModel(), 'built-in: DK, blood', 'DEATHKNIGHT/1', 'DEATHKNIGHT')
+    self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost', '2HFrost', 'DEATHKNIGHT')
+    self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost', 'DWFrost', 'DEATHKNIGHT')
+    self:LoadModel(self:UnholyDKModel(), 'built-in: DK, unholy', 'DEATHKNIGHT/3', 'DEATHKNIGHT')
 
-    self:LoadModel(self:BoomkinModel(), 'built-in: Druid, boomkin', 'DRUID/1')
-    self:LoadModel(self:CatModel(), 'built-in: Druid, feral cat')
-    self:LoadModel(self:TankModel(), 'built-in: Druid, feral bear', 'DRUID/2')
-    self:LoadModel(self:TreeModel(), 'built-in: Druid, restoration', 'DRUID/3')
+    self:LoadModel(self:BoomkinModel(), 'built-in: Druid, boomkin', 'DRUID/1', 'DRUID')
+    self:LoadModel(self:CatModel(), 'built-in: Druid, feral cat', nil, 'DRUID')
+    self:LoadModel(self:TankModel(), 'built-in: Druid, feral bear', 'DRUID/2', 'DRUID')
+    self:LoadModel(self:TreeModel(), 'built-in: Druid, restoration', 'DRUID/3', 'DRUID')
 
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, BM', 'HUNTER/1')
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, MM', 'HUNTER/2')
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, SV', 'HUNTER/3')
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, BM', 'HUNTER/1', 'HUNTER')
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, MM', 'HUNTER/2', 'HUNTER')
+    self:LoadModel(self:HunterModel(), 'built-in: Hunter, SV', 'HUNTER/3', 'HUNTER')
 
-    self:LoadModel(self:ArcaneMageModel(), 'built-in: Mage, arcane', 'MAGE/1')
-    self:LoadModel(self:FireMageModel(), 'built-in: Mage, fire', 'MAGE/2')
-    self:LoadModel(self:FrostMageModel(), 'built-in: Mage, frost', 'MAGE/3')
+    self:LoadModel(self:ArcaneMageModel(), 'built-in: Mage, arcane', 'MAGE/1', 'MAGE')
+    self:LoadModel(self:FireMageModel(), 'built-in: Mage, fire', 'MAGE/2', 'MAGE')
+    self:LoadModel(self:FrostMageModel(), 'built-in: Mage, frost', 'MAGE/3', 'MAGE')
 
-    self:LoadModel(self:HolyPallyModel(), 'built-in: Paladin, holy', 'PALADIN/1')
-    self:LoadModel(self:TankModel(), 'built-in: Paladin, protection', 'PALADIN/2')
-    self:LoadModel(self:RetPallyModel(), 'built-in: Paladin, retribution', 'PALADIN/3')
+    self:LoadModel(self:HolyPallyModel(), 'built-in: Paladin, holy', 'PALADIN/1', 'PALADIN')
+    self:LoadModel(self:TankModel(), 'built-in: Paladin, protection', 'PALADIN/2', 'PALADIN')
+    self:LoadModel(self:RetPallyModel(), 'built-in: Paladin, retribution', 'PALADIN/3', 'PALADIN')
 
-    self:LoadModel(self:DiscModel(), 'built-in: Priest, discipline', 'PRIEST/1')
-    self:LoadModel(self:HolyModel(), 'built-in: Priest, holy', 'PRIEST/2')
-    self:LoadModel(self:ShadowPriestModel(), 'built-in: Priest, shadow', 'PRIEST/3')
+    self:LoadModel(self:DiscModel(), 'built-in: Priest, discipline', 'PRIEST/1', 'PRIEST')
+    self:LoadModel(self:HolyModel(), 'built-in: Priest, holy', 'PRIEST/2', 'PRIEST')
+    self:LoadModel(self:ShadowPriestModel(), 'built-in: Priest, shadow', 'PRIEST/3', 'PRIEST')
 
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, assassination", 'ROGUE/1')
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, combat", 'ROGUE/2')
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, subtlely", 'ROGUE/3')
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, assassination", 'ROGUE/1', 'ROGUE')
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, combat", 'ROGUE/2', 'ROGUE')
+    self:LoadModel(self:RogueModel(), "built-in: Rogue, subtlely", 'ROGUE/3', 'ROGUE')
 
-    self:LoadModel(self:ElementalModel(), 'built-in: Shaman, elemental', 'SHAMAN/1')
-    self:LoadModel(self:EnhancementModel(), 'built-in: Shaman, enhancement', 'SHAMAN/2')
-    self:LoadModel(self:RestoModel(), 'built-in: Shaman, restoration', 'SHAMAN/3')
+    self:LoadModel(self:ElementalModel(), 'built-in: Shaman, elemental', 'SHAMAN/1', 'SHAMAN')
+    self:LoadModel(self:EnhancementModel(), 'built-in: Shaman, enhancement', 'SHAMAN/2', 'SHAMAN')
+    self:LoadModel(self:RestoModel(), 'built-in: Shaman, restoration', 'SHAMAN/3', 'SHAMAN')
 
-    self:LoadModel(self:AffWarlockModel(), 'built-in: Warlock, affliction', 'WARLOCK/1')
-    self:LoadModel(self:DemoWarlockModel(), 'built-in: Warlock, demonology', 'WARLOCK/2')
-    self:LoadModel(self:DestroWarlockModel(), 'built-in: Warlock, destruction', 'WARLOCK/3')
+    self:LoadModel(self:AffWarlockModel(), 'built-in: Warlock, affliction', 'WARLOCK/1', 'WARLOCK')
+    self:LoadModel(self:DemoWarlockModel(), 'built-in: Warlock, demonology', 'WARLOCK/2', 'WARLOCK')
+    self:LoadModel(self:DestroWarlockModel(), 'built-in: Warlock, destruction', 'WARLOCK/3', 'WARLOCK')
 
-    self:LoadModel(self:ArmsModel(), 'built-in: Warrior, arms', 'WARRIOR/1')
-    self:LoadModel(self:FuryModel(), 'built-in: Warrior, fury', 'WARRIOR/2')
-    self:LoadModel(self:TankModel(), 'built-in: Warrior, protection', 'WARRIOR/3')
+    self:LoadModel(self:ArmsModel(), 'built-in: Warrior, arms', 'WARRIOR/1', 'WARRIOR')
+    self:LoadModel(self:FuryModel(), 'built-in: Warrior, fury', 'WARRIOR/2', 'WARRIOR')
+    self:LoadModel(self:TankModel(), 'built-in: Warrior, protection', 'WARRIOR/3', 'WARRIOR')
 end
 
-function Reforgenator:LoadModel(model, modelName, ak)
+function Reforgenator:LoadModel(model, modelName, ak, class)
     local m = Reforgenator.db.global.models
     if not m then
         m = {}
@@ -1316,6 +1319,10 @@ function Reforgenator:LoadModel(model, modelName, ak)
 
     if ak then
         m[modelName].ak = ak
+    end
+
+    if class then
+        m[modelName].class = class
     end
 
     Reforgenator.db.global.models = m
@@ -1648,12 +1655,12 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     val = currentValue
     newList = {}
     for k,v in ipairs(unforged) do
+        self:Debug("### val="..val..", delta="..v.delta..", desiredValue="..desiredValue)
         if val + v.delta <= desiredValue then
             val = val + v.delta
             v.item = self:ReforgeItem(v, rating, soln.excessRating)
             soln.changes[#soln.changes + 1] = v.item
             soln.items[#soln.items + 1] = v.item
-            self:Dump("val", val)
         else
             newList[#newList + 1] = v
         end
@@ -1664,6 +1671,8 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
         local v = unforged[#unforged]
         local under = math.abs(desiredValue - val)
         local over = math.abs(desiredValue - val + v.delta)
+        self:Debug("### under="..under)
+        self:Debug("### over="..over)
         if over < under then
             v.item = self:ReforgeItem(v, rating, soln.excessRating)
             soln.items[#soln.items + 1] = v.item
