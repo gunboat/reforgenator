@@ -422,6 +422,14 @@
                         </Offset>
                     </Anchor>
                 </Anchors>
+		<Scripts>
+		    <OnVerticalScroll>
+			FauxScrollFrame_OnVerticalScroll(self, offset, 16, Reforgenator:ModelEditorScrollbar_Update)
+		    </OnVerticalScroll>
+		    <OnShow>
+			Reforgenator:ModelEditorScrollbar_Update()
+		    </OnShow>
+		</Scripts>
             </ScrollFrame>
             <Button name="ModelEditorNameButton1"
                     inherits="ReforgenatorModelNameTemplate"

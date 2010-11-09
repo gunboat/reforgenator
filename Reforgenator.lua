@@ -252,14 +252,32 @@ end
 
 function Reforgenator:ModelEditorFrame_OnShow(widget)
     self:Debug("### ModelEditorFrame_OnShow")
-    i = 1
-    for k,v in pairs(Reforgenator.db.global.models) do
-        local buttonText = _G["ModelEditorNameButton" .. i .. "Name"]
-        buttonText:SetText(k)
-        i = i + 1
-        if i > 6 then
-            break
-        end
+end
+
+function Reforgenator:ModelEditorScrollbar_Update()
+    self:Debug("### ModelEditorScrollbar_Update")
+
+    local sb = ReforgenatorModelBrowseScrollFrame
+    local models = Reforgenator.db.global.models
+
+    local keys = {}
+    for k,v in pairs(models) do
+	keys[#keys + 1] = k
+    end
+    table.sort(keys)
+
+    FauxScrollFrame_Update(sb, #keys, 6, 16)
+
+    for line = 1, 6, do
+	local button = _G["ModelEditorNameButton" .. line]
+	local buttonText = _G["ModelEditorNameButton" .. line .. "Name"]
+	local linePlusOffset = line + FauxScrollFrame_GetOffset(sb)
+	if linePlusOffset < #keys then
+	    buttonText:SetText(keys[linePlusOffset])
+	    button:Show()
+	else
+	    button:Hide()
+	end
     end
 end
 
