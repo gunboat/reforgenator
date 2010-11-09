@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.21"
+local version = "0.0.22"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -108,6 +108,10 @@ local profileOptions = {
     args = {},
 }
 
+function Reforgenator:ModelEditorPanel_OnLoad(panel)
+    self:Debug("### ModelEditorPanel_OnLoad")
+end
+
 function Reforgenator:OnInitialize()
     self:Debug("### OnInitialize")
 
@@ -118,6 +122,11 @@ function Reforgenator:OnInitialize()
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Maintenance", maintOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Maintenance", "Maintenance", "Reforgenator")
+
+    local panel = ReforgenatorModelEditorFrame
+    panel.name = 'Models'
+    panel.parent = Reforgenator.optionsFrame.name
+    InterfaceOptions_AddCategory(panel)
 
     local broker = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
         launcher = true,
@@ -153,6 +162,7 @@ function Reforgenator:OnInitialize()
     if not Reforgenator.db.global.models then
         self:LoadDefaultModels()
     end
+
 end
 
 function Reforgenator:MessageFrame_OnLoad(widget)
@@ -238,6 +248,24 @@ end
 
 function Reforgenator:ModelSelection_OnLoad()
     self:Debug("### ModelSelection_OnLoad")
+end
+
+function Reforgenator:ModelEditorFrame_OnShow(widget)
+    self:Debug("### ModelEditorFrame_OnShow")
+    i = 1
+    for k,v in pairs(Reforgenator.db.global.models) do
+        local buttonText = _G["ModelEditorNameButton" .. i .. "Name"]
+        buttonText:SetText(k)
+        i = i + 1
+        if i > 5 then
+            break
+        end
+    end
+end
+
+function Reforgenator:ModelEditorName_OnClick(widget, button)
+    self:Debug("### ModelEditorName_OnClick")
+    widget:LockHighlight()
 end
 
 function Reforgenator:GetPlayerKey()

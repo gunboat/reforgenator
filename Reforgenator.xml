@@ -1,6 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ../../FrameUI/Frame.xsd" >
-	
+        xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ../../FrameUI/Frame.xsd" >
+        
     <!-- Embeds -->
     <Script file="lib\LibStub\LibStub.lua"/>
     <Include file="lib\CallbackHandler-1.0\CallbackHandler-1.0.xml" />
@@ -20,133 +20,133 @@
 
     <!-- Item button in the Reforgenator window -->
     <Button name="ReforgeItemTemplate" virtual="true">
-	<Size>
-	    <AbsDimension x="247" y="41"/>
-	</Size>
-	<Layers>
-	    <Layer level="BACKGROUND">
-		<Texture name="$parentIconTexture">
-		    <Size>
-			<AbsDimension x="39" y="39"/>
-		    </Size>
-		    <Anchors>
-			<Anchor point="TOPLEFT">
-			    <Offset>
-				<AbsDimension x="0" y="0"/>
-			    </Offset>
-			</Anchor>
-		    </Anchors>
-		</Texture>
-		<Texture name="$parentNameFrame" file="Interface\QuestFrame\UI-QuestItemNameFrame">
-		    <Size>
-			<AbsDimension x="228" y="64"/>
-		    </Size>
-		    <Anchors>
-			<Anchor point="LEFT"
-				relativeTo="$parentIconTexture"
-				relativePoint="LEFT">
-			    <Offset>
-				<AbsDimension x="23" y="0"/>
-			    </Offset>
-			</Anchor>
-		    </Anchors>
-		</Texture>
-		<FontString name="$parentName" inherits="GameFontHighlight" justifyH="LEFT">
-		    <Size>
-			<AbsDimension x="228" y="64"/>
-		    </Size>
-		    <Anchors>
-			<Anchor point="TOPLEFT"
-				relativeTo="$parentNameFrame"
-				relativePoint="TOPLEFT">
-			    <Offset>
-				<AbsDimension x="23" y="0"/>
-			    </Offset>
-			</Anchor>
-		    </Anchors>
-		</FontString>
-	    </Layer>
-	</Layers>
-	<Scripts>
-	    <OnLoad>
-		self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-		self:RegisterForDrag("LeftButton")
-	    </OnLoad>
-	    <OnClick>Reforgenator:OnClick(self, button)</OnClick>
-	    <OnDragStart>Reforgenator:OnDragStart(self, button)</OnDragStart>
-	    <OnEnter>Reforgenator:OnEnter(self)</OnEnter>
-	    <OnLeave>GameTooltip:Hide() </OnLeave>
-	</Scripts>
+        <Size>
+            <AbsDimension x="247" y="41"/>
+        </Size>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentIconTexture">
+                    <Size>
+                        <AbsDimension x="39" y="39"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="0" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </Texture>
+                <Texture name="$parentNameFrame" file="Interface\QuestFrame\UI-QuestItemNameFrame">
+                    <Size>
+                        <AbsDimension x="228" y="64"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="LEFT"
+                                relativeTo="$parentIconTexture"
+                                relativePoint="LEFT">
+                            <Offset>
+                                <AbsDimension x="23" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </Texture>
+                <FontString name="$parentName" inherits="GameFontHighlight" justifyH="LEFT">
+                    <Size>
+                        <AbsDimension x="228" y="64"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPLEFT"
+                                relativeTo="$parentNameFrame"
+                                relativePoint="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="23" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnLoad>
+                self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+                self:RegisterForDrag("LeftButton")
+            </OnLoad>
+            <OnClick>Reforgenator:OnClick(self, button)</OnClick>
+            <OnDragStart>Reforgenator:OnDragStart(self, button)</OnDragStart>
+            <OnEnter>Reforgenator:OnEnter(self)</OnEnter>
+            <OnLeave>GameTooltip:Hide() </OnLeave>
+        </Scripts>
     </Button>
 
     <!-- The "Reforgenator" output window -->
     <Frame name="ReforgenatorPanel"
-	    toplevel="true"
-	    movable="true"
-	    enableMouse="true"
-	    hidden="true"
-	    parent="UIParent">
-	<Size>
-	    <AbsDimension x="270" y="235"/>
-	</Size>
-	<Anchors>
-	    <Anchor point="CENTER" />
-	</Anchors>
-	<HitRectInsets>
-	    <AbsInset left="5" right="5" top="5" bottom="5" />
-	</HitRectInsets>
-	<TitleRegion setAllPoints="true"/>
-	<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Border"
-		tile="true">
-	    <EdgeSize>
-		<AbsValue val="16"/>
-	    </EdgeSize>
-	    <TileSize>
-		<AbsValue val="32"/>
-	    </TileSize>
-	    <BackgroundInsets>
-		<AbsInset left="5" right="5" top="5" bottom="5"/>
-	    </BackgroundInsets>
-	</Backdrop>
-	<Layers>
-	    <Layer level="BACKGROUND">
-		<Texture>
-		    <Color r="0" g="0" b="0" a="1"/>
-		</Texture>
-	    </Layer>
-	    <Layer level="ARTWORK">
-		<FontString inherits="GameFontNormalLarge" text="Reforgenator">
-		    <Anchors>
-			<Anchor point="TOP">
-			    <Offset>
-				<AbsDimension x="0" y="-10"/>
-			    </Offset>
-			</Anchor>
-		    </Anchors>
-		</FontString>
-	    </Layer>
-	</Layers>
-	<Frames>
-	    <Button name="$parent_CloseButton">
-		<Size>
-		    <AbsDimension x="32" y="32"/>
-		</Size>
-		<Anchors>
-		    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
-			<Offset>
-			    <AbsDimension x="-6" y="0"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-		<Scripts>
-		    <OnClick>
-			HideUIPanel(ReforgenatorPanel)
-		    </OnClick>
-		</Scripts>
-		<NormalTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
-		<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
-		<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
-	    </Button>
+            toplevel="true"
+            movable="true"
+            enableMouse="true"
+            hidden="true"
+            parent="UIParent">
+        <Size>
+            <AbsDimension x="270" y="235"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER" />
+        </Anchors>
+        <HitRectInsets>
+            <AbsInset left="5" right="5" top="5" bottom="5" />
+        </HitRectInsets>
+        <TitleRegion setAllPoints="true"/>
+        <Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Border"
+                tile="true">
+            <EdgeSize>
+                <AbsValue val="16"/>
+            </EdgeSize>
+            <TileSize>
+                <AbsValue val="32"/>
+            </TileSize>
+            <BackgroundInsets>
+                <AbsInset left="5" right="5" top="5" bottom="5"/>
+            </BackgroundInsets>
+        </Backdrop>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture>
+                    <Color r="0" g="0" b="0" a="1"/>
+                </Texture>
+            </Layer>
+            <Layer level="ARTWORK">
+                <FontString inherits="GameFontNormalLarge" text="Reforgenator">
+                    <Anchors>
+                        <Anchor point="TOP">
+                            <Offset>
+                                <AbsDimension x="0" y="-10"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parent_CloseButton">
+                <Size>
+                    <AbsDimension x="32" y="32"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-6" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        HideUIPanel(ReforgenatorPanel)
+                    </OnClick>
+                </Scripts>
+                <NormalTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
+                <PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
+                <HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+            </Button>
             <Frame name="$parent_ModelSelection"
                    inherits="UIDropDownMenuTemplate">
                 <Anchors>
@@ -157,133 +157,133 @@
                     </Anchor>
                 </Anchors>
             </Frame>
-	    <Button name="$parent_Item1"
-		    inherits="ReforgeItemTemplate"
-		    id="1">
-		<Anchors>
-		    <Anchor point="TOPLEFT">
-			<Offset>
-			    <AbsDimension x="30" y="-53"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-	    </Button>
-	    <Button name="$parent_Item2"
-		    inherits="ReforgeItemTemplate"
-		    id="2">
-		<Anchors>
-		    <Anchor point="TOP"
-			    relativeTo="$parent_Item1"
-			    relativePoint="BOTTOM">
-			<Offset>
-			    <AbsDimension x="0" y="-4"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-	    </Button>
-	    <Button name="$parent_Item3"
-		    inherits="ReforgeItemTemplate"
-		    id="3">
-		<Anchors>
-		    <Anchor point="TOP"
-			    relativeTo="$parent_Item2"
-			    relativePoint="BOTTOM">
-			<Offset>
-			    <AbsDimension x="0" y="-4"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-	    </Button>
-	    <Button name="$parent_Item4"
-		    inherits="ReforgeItemTemplate"
-		    id="4">
-		<Anchors>
-		    <Anchor point="TOP"
-			    relativeTo="$parent_Item3"
-			    relativePoint="BOTTOM">
-			<Offset>
-			    <AbsDimension x="0" y="-4"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-	    </Button>
-	    <CheckButton name="$parent_Item1Checked"
-			inherits="InterfaceOptionsSmallCheckButtonTemplate"
-			id="1">
-		<Anchors>
-		    <Anchor point="TOPLEFT"
-			    relativeTo="$parent_Item1">
-			<Offset>
-			    <AbsDimension x="-25" y="-5"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-		<Scripts>
-		    <OnClick>
-			Reforgenator:OnCheckbox(self)
-		    </OnClick>
-		</Scripts>
-	    </CheckButton>
-	    <CheckButton name="$parent_Item2Checked"
-			inherits="InterfaceOptionsSmallCheckButtonTemplate"
-			id="2">
-		<Anchors>
-		    <Anchor point="TOPLEFT"
-			    relativeTo="$parent_Item2">
-			<Offset>
-			    <AbsDimension x="-25" y="-5"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-		<Scripts>
-		    <OnClick>
-			Reforgenator:OnCheckbox(self)
-		    </OnClick>
-		</Scripts>
-	    </CheckButton>
-	    <CheckButton name="$parent_Item3Checked"
-			inherits="InterfaceOptionsSmallCheckButtonTemplate"
-			id="3">
-		<Anchors>
-		    <Anchor point="TOPLEFT"
-			    relativeTo="$parent_Item3">
-			<Offset>
-			    <AbsDimension x="-25" y="-5"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-		<Scripts>
-		    <OnClick>
-			Reforgenator:OnCheckbox(self)
-		    </OnClick>
-		</Scripts>
-	    </CheckButton>
-	    <CheckButton name="$parent_Item4Checked"
-			inherits="InterfaceOptionsSmallCheckButtonTemplate"
-			id="4">
-		<Anchors>
-		    <Anchor point="TOPLEFT"
-			    relativeTo="$parent_Item4">
-			<Offset>
-			    <AbsDimension x="-25" y="-5"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-		<Scripts>
-		    <OnClick>
-			Reforgenator:OnCheckbox(self)
-		    </OnClick>
-		</Scripts>
-	    </CheckButton>
-	</Frames>
-	<Scripts>
-	    <OnLoad>
-		UIDropDownMenu_Initialize(ReforgenatorPanel_ModelSelection, function(...) Reforgenator:ModelSelection_OnLoad(...) end)
-	    </OnLoad>
-	    <OnShow>
-		Reforgenator:ModelSelection_OnShow()
-	    </OnShow>
-	</Scripts>
+            <Button name="$parent_Item1"
+                    inherits="ReforgeItemTemplate"
+                    id="1">
+                <Anchors>
+                    <Anchor point="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="30" y="-53"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="$parent_Item2"
+                    inherits="ReforgeItemTemplate"
+                    id="2">
+                <Anchors>
+                    <Anchor point="TOP"
+                            relativeTo="$parent_Item1"
+                            relativePoint="BOTTOM">
+                        <Offset>
+                            <AbsDimension x="0" y="-4"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="$parent_Item3"
+                    inherits="ReforgeItemTemplate"
+                    id="3">
+                <Anchors>
+                    <Anchor point="TOP"
+                            relativeTo="$parent_Item2"
+                            relativePoint="BOTTOM">
+                        <Offset>
+                            <AbsDimension x="0" y="-4"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="$parent_Item4"
+                    inherits="ReforgeItemTemplate"
+                    id="4">
+                <Anchors>
+                    <Anchor point="TOP"
+                            relativeTo="$parent_Item3"
+                            relativePoint="BOTTOM">
+                        <Offset>
+                            <AbsDimension x="0" y="-4"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <CheckButton name="$parent_Item1Checked"
+                        inherits="InterfaceOptionsSmallCheckButtonTemplate"
+                        id="1">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="$parent_Item1">
+                        <Offset>
+                            <AbsDimension x="-25" y="-5"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        Reforgenator:OnCheckbox(self)
+                    </OnClick>
+                </Scripts>
+            </CheckButton>
+            <CheckButton name="$parent_Item2Checked"
+                        inherits="InterfaceOptionsSmallCheckButtonTemplate"
+                        id="2">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="$parent_Item2">
+                        <Offset>
+                            <AbsDimension x="-25" y="-5"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        Reforgenator:OnCheckbox(self)
+                    </OnClick>
+                </Scripts>
+            </CheckButton>
+            <CheckButton name="$parent_Item3Checked"
+                        inherits="InterfaceOptionsSmallCheckButtonTemplate"
+                        id="3">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="$parent_Item3">
+                        <Offset>
+                            <AbsDimension x="-25" y="-5"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        Reforgenator:OnCheckbox(self)
+                    </OnClick>
+                </Scripts>
+            </CheckButton>
+            <CheckButton name="$parent_Item4Checked"
+                        inherits="InterfaceOptionsSmallCheckButtonTemplate"
+                        id="4">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="$parent_Item4">
+                        <Offset>
+                            <AbsDimension x="-25" y="-5"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnClick>
+                        Reforgenator:OnCheckbox(self)
+                    </OnClick>
+                </Scripts>
+            </CheckButton>
+        </Frames>
+        <Scripts>
+            <OnLoad>
+                UIDropDownMenu_Initialize(ReforgenatorPanel_ModelSelection, function(...) Reforgenator:ModelSelection_OnLoad(...) end)
+            </OnLoad>
+            <OnShow>
+                Reforgenator:ModelSelection_OnShow()
+            </OnShow>
+        </Scripts>
     </Frame>
 
     <Frame name="ReforgenatorMessageFrame"
@@ -292,16 +292,16 @@
            hidden="true"
            parent="UIParent"
            inherits="TranslucentFrameTemplate">
-	<Size>
-	    <AbsDimension x="323" y="97" />
-	</Size>
-	<Anchors>
-	    <Anchor point="CENTER">
+        <Size>
+            <AbsDimension x="323" y="97" />
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER">
                 <Offset>
                     <AbsDimension x="0" y="-10"/>
                 </Offset>
             </Anchor>
-	</Anchors>
+        </Anchors>
         <Frames>
             <Frame name="ReforgenatorMessageTextFrame"
                    setAllPoints="true">
@@ -372,5 +372,127 @@
         </Scripts>
     </Frame>
 
+    <Button name="ReforgenatorModelNameTemplate" virtual="true">
+        <Size>
+            <AbsDimension x="298" y="16"/>
+        </Size>
+        <Layers>
+            <Layer level="BORDER">
+                <FontString name="$parentName" inherits="GameFontNormalSmall" justifyH="LEFT">
+                    <Size>
+                        <AbsDimension x="200" y="14"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="10" y="-3"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD" parentKey="highlight" />
+        <Scripts>
+            <OnLoad>
+                self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+            </OnLoad>
+            <OnClick>
+                Reforgenator:ModelEditorName_OnClick(self, button)
+            </OnClick>
+        </Scripts>
+    </Button>
+
+    <Frame name="ReforgenatorModelEditorFrame"
+           toplevel="true"
+           frameStrata="DIALOG"
+           hidden="true"
+           parent="UIParent"
+           inherits="TranslucentFrameTemplate">
+        <Frames>
+            <ScrollFrame name="ReforgenatorModelBrowseScrollFrame"
+                    inherits="FauxScrollFrameTemplate">
+                <Size>
+                    <AbsDimension x="100" y="100"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-35" y="-25"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </ScrollFrame>
+            <Button name="ModelEditorNameButton1"
+                    inherits="ReforgenatorModelNameTemplate"
+                    id="1">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="ReforgenatorModelEditorFrame">
+                        <Offset>
+                            <AbsDimension x="5" y="-10"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="ModelEditorNameButton2"
+                    inherits="ReforgenatorModelNameTemplate"
+                    id="2">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="ModelEditorNameButton1"
+                            relativePoint="BOTTOMLEFT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="ModelEditorNameButton3"
+                    inherits="ReforgenatorModelNameTemplate"
+                    id="3">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="ModelEditorNameButton2"
+                            relativePoint="BOTTOMLEFT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="ModelEditorNameButton4"
+                    inherits="ReforgenatorModelNameTemplate"
+                    id="4">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="ModelEditorNameButton3"
+                            relativePoint="BOTTOMLEFT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="ModelEditorNameButton5"
+                    inherits="ReforgenatorModelNameTemplate"
+                    id="5">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="ModelEditorNameButton4"
+                            relativePoint="BOTTOMLEFT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+        </Frames>
+        <Scripts>
+            <OnShow>
+                Reforgenator:ModelEditorFrame_OnShow(self)
+            </OnShow>
+        </Scripts>
+    </Frame>
 
 </Ui>
