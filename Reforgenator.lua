@@ -257,7 +257,7 @@ function Reforgenator:ModelEditorFrame_OnShow(widget)
         local buttonText = _G["ModelEditorNameButton" .. i .. "Name"]
         buttonText:SetText(k)
         i = i + 1
-        if i > 5 then
+        if i > 6 then
             break
         end
     end
@@ -265,7 +265,14 @@ end
 
 function Reforgenator:ModelEditorName_OnClick(widget, button)
     self:Debug("### ModelEditorName_OnClick")
-    widget:LockHighlight()
+    for i=1,6 do
+        local b = _G["ModelEditorNameButton" .. i]
+        if b:GetID() == widget:GetID() then
+            b:LockHighlight()
+        else
+            b:UnlockHighlight()
+        end
+    end
 end
 
 function Reforgenator:GetPlayerKey()

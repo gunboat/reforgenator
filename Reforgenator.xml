@@ -418,7 +418,7 @@
                 <Anchors>
                     <Anchor point="TOPRIGHT">
                         <Offset>
-                            <AbsDimension x="-35" y="-25"/>
+                            <AbsDimension x="-35" y="-15"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
@@ -430,7 +430,7 @@
                     <Anchor point="TOPLEFT"
                             relativeTo="ReforgenatorModelEditorFrame">
                         <Offset>
-                            <AbsDimension x="5" y="-10"/>
+                            <AbsDimension x="5" y="-15"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
@@ -480,6 +480,19 @@
                 <Anchors>
                     <Anchor point="TOPLEFT"
                             relativeTo="ModelEditorNameButton4"
+                            relativePoint="BOTTOMLEFT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="ModelEditorNameButton6"
+                    inherits="ReforgenatorModelNameTemplate"
+                    id="6">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="ModelEditorNameButton5"
                             relativePoint="BOTTOMLEFT">
                         <Offset>
                             <AbsDimension x="0" y="0"/>
