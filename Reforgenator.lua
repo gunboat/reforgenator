@@ -1551,7 +1551,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     self:Debug("### Optimize Solution")
     self:Debug("### rating="..rating)
     self:Debug("### currentValue="..currentValue)
-    self:Debug("### desiredValue="..desiredValue)
+    self:Debug("### desiredValue="..to_string(desiredValue))
 
     soln = SolutionContext:new()
 
@@ -1563,7 +1563,19 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     end
 
     -- already over cap?
-    if currentValue > desiredValue then
+    local overCap = nil
+    if type(desiredValue) == "table" then
+        local vec = self:deepCopy(desiredValue)
+        table.sort(vec, function(a,b) return a > b end)
+        if currentValue > vec[1] then
+            overCap = true
+        end
+    else
+        if currentValue > desiredValue then
+            overCap = true
+        end
+    end
+    if overCap then
         soln.excessRating[rating] = currentValue - desiredValue
         for k,v in ipairs(ancestor.items) do
             soln.items[#soln.items + 1] = v
@@ -1609,6 +1621,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
         self:Debug("### max reforged ="..val)
 
         while vec[1] and vec[1] > val do
+            self:Debug("### is it bigger than " .. vec[1] .. "?")
             table.remove(vec, 1)
         end
 
@@ -1616,9 +1629,11 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
             self:Debug("### can't reach first breakpoint ... go for max")
             vec[1] = val
         end
-        self:Debug("### breakpoint ="..val)
+        self:Debug("### breakpoint ="..vec[1])
 
-        for k,v in ipairs(unforged) do
+        for n = #unforged, 1, -1 do
+            local v = unforged[n]
+            self:Debug("### can we lose " .. v.delta .. "?")
             if val - v.delta < vec[1] then
                 break
             end
