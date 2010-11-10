@@ -268,15 +268,16 @@ function Reforgenator:ModelEditorScrollbar_Update()
 
     FauxScrollFrame_Update(sb, #keys, 6, 16)
 
-    for line = 1, 6, do
+    for line = 1, 6 do
 	local button = _G["ModelEditorNameButton" .. line]
 	local buttonText = _G["ModelEditorNameButton" .. line .. "Name"]
 	local linePlusOffset = line + FauxScrollFrame_GetOffset(sb)
 	if linePlusOffset < #keys then
 	    buttonText:SetText(keys[linePlusOffset])
-	    button:UnlockHighlight()
-	    if Reforgenator.selectedModelName and Reforgenator.selectedModelname == keys[linePlusOffset] then
+	    if Reforgenator.selectedModelName and Reforgenator.selectedModelName == keys[linePlusOffset] then
 		button:LockHighlight()
+            else
+                button:UnlockHighlight()
 	    end
 	    button:Show()
 	else
@@ -292,10 +293,49 @@ function Reforgenator:ModelEditorName_OnClick(widget, button)
         if b:GetID() == widget:GetID() then
 	    local t = _G["ModelEditorNameButton" .. i .. "Name"]
 	    Reforgenator.selectedModelName = t:GetText()
+            self:ModelEditor_UpdateFields()
             b:LockHighlight()
         else
             b:UnlockHighlight()
         end
+    end
+end
+
+function Reforgenator:ModelEditor_UpdateFields()
+    local name = Reforgenator.selectedModelName
+    if not name then
+        return
+    end
+
+    local models = Reforgenator.db.global.models
+    ReforgenatorModelEditorModelName:SetText(name)
+end
+
+function Reforgenator:RuleTemplateStat_OnLoad(widget)
+    self:Debug("### RuleTemplateStat_OnLoad")
+    local func = function() Reforgenator:RuleTemplateStat_OnInitialize() end
+    UIDropDownMenu_Initialize(widget, func)
+end
+
+function Reforgenator:RuleTemplateStat_OnInitialize()
+    for k,v in pairs(ITEM_STATS) do
+        local info = UIDrownDownMenu_CreateInfo()
+        info.text = _G[k]
+        UIDropDownMenu_AddButton(info)
+    end
+end
+
+function Reforgenator:RuleTemplateScheme_OnLoad(widget)
+    self:Debug("### RuleTemplateScheme_OnLoad")
+    local func = function() Reforgenator:RuleTemplateScheme_OnInitialize() end
+    UIDropDownMenu_Initialize(widget, func)
+end
+
+function Reforgenator:RuleTemplateScheme_OnInitialize()
+    for k,v in pairs(STAT_CAPS) do
+        local info = UIDrownDownMenu_CreateInfo()
+        info.text = k
+        UIDropDownMenu_AddButton(info)
     end
 end
 
