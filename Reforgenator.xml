@@ -377,52 +377,54 @@
         <Size>
             <AbsDimension x="275" y="40"/>
         </Size>
-        <Frame name="$parentStat" inherits="UIDropDownMenuTemplate">
-            <Size>
-                <AbsDimension x="100" y="16"/>
-            </Size>
-            <Scripts>
-                <OnShow>
-                    Reforgenator:RuleTemplateStat_OnLoad(self)
-                </OnShow>
-            </Scripts>
-        </Frame>
-        <Frame name="$parentScheme" inherits="UIDropDownMenuTemplate">
-            <Size>
-                <AbsDimension x="100" y="16"/>
-            </Size>
-            <Anchors>
-                <Anchor point="TOPLEFT"
-                        relativeTo="$parentStat"
-                        relativePoint="TOPRIGHT">
-                    <Offset>
-                        <AbsDimension x="0" y="0"/>
-                    </Offset>
-                </Anchor>
-            </Anchors>
-            <Scripts>
-                <OnShow>
-                    Reforgenator:RuleTemplateScheme_OnLoad(self)
-                </OnShow>
-            </Scripts>
-        </Frame>
-        <EditBox name="$parentUserdata"
-                historyLines="1"
-                inherits="AutoCompleteEditBoxTemplate">
-            <Size>
-                <AbsDimension x="200" y="20" />
-            </Size>
-            <Anchors>
-                <Anchor point="TOPLEFT"
-                        relativeTo="$parentStat"
-                        relativePoint="BOTTOMLEFT">
-                    <Offset>
-                        <AbsDimension x="0" y="0"/>
-                    </Offset>
-                </Anchor>
-            </Anchors>
-            <FontString inherits="ChatFontNormal"/>
-        </EditBox>
+	<Frames>
+	    <Frame name="$parentStat" inherits="UIDropDownMenuTemplate">
+		<Size>
+		    <AbsDimension x="100" y="16"/>
+		</Size>
+		<Scripts>
+		    <OnShow>
+			Reforgenator:RuleTemplateStat_OnLoad(self)
+		    </OnShow>
+		</Scripts>
+	    </Frame>
+	    <Frame name="$parentScheme" inherits="UIDropDownMenuTemplate">
+		<Size>
+		    <AbsDimension x="100" y="16"/>
+		</Size>
+		<Anchors>
+		    <Anchor point="TOPLEFT"
+			    relativeTo="$parentStat"
+			    relativePoint="TOPRIGHT">
+			<Offset>
+			    <AbsDimension x="0" y="0"/>
+			</Offset>
+		    </Anchor>
+		</Anchors>
+		<Scripts>
+		    <OnShow>
+			Reforgenator:RuleTemplateScheme_OnLoad(self)
+		    </OnShow>
+		</Scripts>
+	    </Frame>
+	    <EditBox name="$parentUserdata"
+		    historyLines="1"
+		    inherits="AutoCompleteEditBoxTemplate">
+		<Size>
+		    <AbsDimension x="200" y="20" />
+		</Size>
+		<Anchors>
+		    <Anchor point="TOPLEFT"
+			    relativeTo="$parentStat"
+			    relativePoint="BOTTOMLEFT">
+			<Offset>
+			    <AbsDimension x="0" y="0"/>
+			</Offset>
+		    </Anchor>
+		</Anchors>
+		<FontString inherits="ChatFontNormal"/>
+	    </EditBox>
+	</Frames>
     </Frame>
 
     <Button name="ReforgenatorModelNameTemplate" virtual="true">
