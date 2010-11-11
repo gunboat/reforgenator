@@ -403,6 +403,59 @@
         </Scripts>
     </Button>
 
+    <Frame name="ReforgenatorStatRankTemplate" virtual="true">
+	<Layers>
+	    <Layer level="BACKGROUND">
+		<FontString name="$parent_Name" inherits="GameFontHighlight" justifyH="LEFT">
+		    <Size>
+			<AbsDimension x="228" y="64"/>
+		    </Size>
+		    <Anchors>
+			<Anchor point="TOPLEFT" />
+		    </Anchors>
+		</FontString>
+	    </Layer>
+	</Layers>
+	<Frames>
+	    <Button name="$parent_UpButton">
+		<Size>
+		    <AbsDimension x="16" y="16"/>
+		</Size>
+		<Anchors>
+		    <Anchor point="TOPRIGHT" relativeTo="$parent_Name" relativePoint="TOPRIGHT">
+			<Offset>
+			    <AbsDimension x="-10" y="2"/>
+			</Offset>
+		    </Anchor>
+		</Anchors>
+		<Scripts>
+		    <OnClick>
+			Reforgenator:StatRankUpButton_OnClick(self)
+		    </OnClick>
+		</Scripts>
+		<NormalTexture file="Interface\Buttons\Arrow-Up-Up"/>
+		<PushedTexture file="Interface\Buttons\Arrow-Up-Down"/>
+		<DisabledTexture file="Interface\Buttons\Arrow-Up-Disabled"/>
+	    </Button>
+	    <Button name="$parent_DownButton">
+		<Size>
+		    <AbsDimension x="16" y="16"/>
+		</Size>
+		<Anchors>
+		    <Anchor point="TOP" relativeTo="$parent_UpButton" relativePoint="BOTTOM"/>
+		</Anchors>
+		<Scripts>
+		    <OnClick>
+			Reforgenator:StatRankDownButton_OnClick(self)
+		    </OnClick>
+		</Scripts>
+		<NormalTexture file="Interface\Buttons\Arrow-Down-Up"/>
+		<PushedTexture file="Interface\Buttons\Arrow-Down-Down"/>
+		<DisabledTexture file="Interface\Buttons\Arrow-Down-Disabled"/>
+	    </Button>
+	</Frames>
+    </Frame>
+
     <Frame name="ReforgenatorRuleTemplate" virtual="true">
         <Size>
             <AbsDimension x="250" y="60"/>
@@ -594,11 +647,95 @@
                 </Anchors>
             </Button>
 
+	    <Frame name="ModelEditorStatRank1"
+		    virtual="true"
+		    inherits="ReforgenatorStatRankTemplate"
+		    id="1">
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="ModelEditorNameButton6">
+                        <Offset>
+                            <AbsDimension x="0" y="-40"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+	    </Frame>
+	    <Frame name="ModelEditorStatRank2"
+		    virtual="true"
+		    inherits="ReforgenatorStatRankTemplate"
+		    id="2">
+                <Anchors>
+                    <Anchor point="TOP"
+			relativeTo="ModelEditorStatRank1"
+			relativePoint="BOTTOM"/>
+                </Anchors>
+	    </Frame>
+	    <Frame name="ModelEditorStatRank3"
+		    virtual="true"
+		    inherits="ReforgenatorStatRankTemplate"
+		    id="3">
+                <Anchors>
+                    <Anchor point="TOP"
+			relativeTo="ModelEditorStatRank2"
+			relativePoint="BOTTOM"/>
+                </Anchors>
+	    </Frame>
+	    <Frame name="ModelEditorStatRank4"
+		    virtual="true"
+		    inherits="ReforgenatorStatRankTemplate"
+		    id="4">
+                <Anchors>
+                    <Anchor point="TOP"
+			relativeTo="ModelEditorStatRank3"
+			relativePoint="BOTTOM"/>
+                </Anchors>
+	    </Frame>
+	    <Frame name="ModelEditorStatRank5"
+		    virtual="true"
+		    inherits="ReforgenatorStatRankTemplate"
+		    id="5">
+                <Anchors>
+                    <Anchor point="TOP"
+			relativeTo="ModelEditorStatRank4"
+			relativePoint="BOTTOM"/>
+                </Anchors>
+	    </Frame>
+	    <Frame name="ModelEditorStatRank6"
+		    virtual="true"
+		    inherits="ReforgenatorStatRankTemplate"
+		    id="6">
+                <Anchors>
+                    <Anchor point="TOP"
+			relativeTo="ModelEditorStatRank5"
+			relativePoint="BOTTOM"/>
+                </Anchors>
+	    </Frame>
+	    <Frame name="ModelEditorStatRank7"
+		    virtual="true"
+		    inherits="ReforgenatorStatRankTemplate"
+		    id="7">
+                <Anchors>
+                    <Anchor point="TOP"
+			relativeTo="ModelEditorStatRank6"
+			relativePoint="BOTTOM"/>
+                </Anchors>
+	    </Frame>
+	    <Frame name="ModelEditorStatRank8"
+		    virtual="true"
+		    inherits="ReforgenatorStatRankTemplate"
+		    id="8">
+                <Anchors>
+                    <Anchor point="TOP"
+			relativeTo="ModelEditorStatRank7"
+			relativePoint="BOTTOM"/>
+                </Anchors>
+	    </Frame>
+
             <Frame name="ModelEditorRule1" virtual="true"
                     inherits="ReforgenatorRuleTemplate">
                 <Anchors>
                     <Anchor point="TOPLEFT"
-                            relativeTo="ModelEditorNameButton6">
+                            relativeTo="ModelEditorStatRank8">
                         <Offset>
                             <AbsDimension x="0" y="-40"/>
                         </Offset>
