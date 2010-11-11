@@ -338,23 +338,6 @@ function Reforgenator:ModelSelection_OnLoad()
     self:Debug("### ModelSelection_OnLoad")
 end
 
-function Reforgenator:ModelEditorFrame_OnShow(widget)
-    self:Debug("### ModelEditorFrame_OnShow")
-
-    for i = 1, 4 do
-        local stem = "ModelEditorRule"..i
-        _G[stem]:Show()
-
-        local stat = _G[stem.."_Stat"]
-        Reforgenator:RuleTemplateStat_OnLoad(stat)
-        stat:Show()
-
-        local scheme = _G[stem.."_Scheme"]
-        Reforgenator:RuleTemplateScheme_OnLoad(scheme)
-        scheme:Show()
-    end
-end
-
 function Reforgenator:ModelEditorScrollbar_Update()
     self:Debug("### ModelEditorScrollbar_Update")
 
@@ -387,6 +370,20 @@ function Reforgenator:ModelEditorScrollbar_Update()
     end
 end
 
+function Reforgenator:ModelEditorFrame_OnShow(widget)
+    self:Debug("### ModelEditorFrame_OnShow")
+
+    for i = 1, 4 do
+        local stem = "ModelEditorRule"..i
+
+        local stat = _G[stem.."_Stat"]
+        Reforgenator:RuleTemplateStat_OnLoad(stat)
+
+        local scheme = _G[stem.."_Scheme"]
+        Reforgenator:RuleTemplateScheme_OnLoad(scheme)
+    end
+end
+
 function Reforgenator:ModelEditorName_OnClick(widget, button)
     self:Debug("### ModelEditorName_OnClick")
     for i=1,6 do
@@ -403,6 +400,7 @@ function Reforgenator:ModelEditorName_OnClick(widget, button)
 end
 
 function Reforgenator:ModelEditor_UpdateFields()
+    self:Debug("### ModelEditor_UpdateFields")
     local name = Reforgenator.selectedModelName
     if not name then
         return
@@ -410,6 +408,26 @@ function Reforgenator:ModelEditor_UpdateFields()
 
     local models = Reforgenator.db.global.models
     -- ReforgenatorModelEditorModelName:SetText(name)
+    for i = 1, 4 do
+        local stem = "ModelEditorRule"..i
+        local rule = _G[stem]
+        local stat = _G[stem.."_Stat"]
+        local scheme = _G[stem.."_Scheme"]
+        local userdata = _G[stem.."_Userdata"]
+
+        UIDropDownMenu_ClearAll(stat)
+        UIDropDownMenu_ClearAll(scheme)
+        userdata:SetText("")
+        userdata:ClearFocus()
+
+        if models[name].reforgeOrder[i] then
+            UIDropDownMenu_SetSelectedName(stat, _G[models[name].reforgeOrder[i].rating])
+            UIDropDownMenu_SetSelectedName(scheme, models[name].reforgeOrder[i].cap)
+            if models[name].reforgeOrder[i].userdata then
+                userdata:SetText(models[name].reforgeOrder[i].userdata)
+            end
+        end
+    end
 end
 
 function Reforgenator:RuleTemplateStat_OnLoad(widget)
