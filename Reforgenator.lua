@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.22"
+local version = "0.0.23"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -39,6 +39,20 @@ local function to_string( tbl )
     else
         return tostring(tbl)
     end
+end
+
+local function Set(list)
+    local set = {}
+    for _, l in ipairs(list) do set[tostring(l)] = true end
+    return set
+end
+
+function Invert(list)
+    local invertedList = {}
+    for k,v in ipairs(list) do
+        invertedList[v] = k
+    end
+    return invertedList
 end
 
 function Reforgenator:OnEnable()
@@ -117,6 +131,10 @@ function Reforgenator:OnInitialize()
 
     Reforgenator.db = LibStub("AceDB-3.0"):New("ReforgenatorDB", defaults, "Default")
 
+    Reforgenator:InitializeConstants()
+
+    Reforgenator:InitializeWidgets()
+
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator", options)
     Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
 
@@ -162,6 +180,76 @@ function Reforgenator:OnInitialize()
     if not Reforgenator.db.global.models then
         self:LoadDefaultModels()
     end
+
+end
+
+function Reforgenator:InitializeConstants()
+    Reforgenator.constants = {}
+    local c = Reforgenator.constants
+
+    c.INVENTORY_SLOTS = {
+        "HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot",
+        "ChestSlot", "ShirtSlot", "TabardSlot", "WristSlot", "HandsSlot",
+        "WaistSlot", "LegsSlot", "FeetSlot", "Finger0Slot", "Finger1Slot",
+        "Trinket0Slot", "Trinket1Slot", "MainHandSlot", "SecondaryHandSlot",
+        "RangedSlot" }
+
+    c.COMBAT_RATINGS = {
+        CR_WEAPON_SKILL = 1,
+        CR_DEFENSE_SKILL = 2,
+        CR_DODGE = 3,
+        CR_PARRY = 4,
+        CR_BLOCK = 5,
+        CR_HIT_MELEE = 6,
+        CR_HIT_RANGED = 7,
+        CR_HIT_SPELL = 8,
+        CR_CRIT_MELEE = 9,
+        CR_CRIT_RANGED = 10,
+        CR_CRIT_SPELL = 11,
+        CR_HIT_TAKEN_MELEE = 12,
+        CR_HIT_TAKEN_RANGED = 13,
+        CR_HIT_TAKEN_SPELL = 14,
+        COMBAT_RATING_RESILIENCE_CRIT_TAKEN = 15,
+        COMBAT_RATING_RESILIENCE_PLAYER_DAMAGE_TAKEN = 16,
+        CR_CRIT_TAKEN_SPELL = 17,
+        CR_HASTE_MELEE = 18,
+        CR_HASTE_RANGED = 19,
+        CR_HASTE_SPELL = 20,
+        CR_WEAPON_SKILL_MAINHAND = 21,
+        CR_WEAPON_SKILL_OFFHAND = 22,
+        CR_WEAPON_SKILL_RANGED = 23,
+        CR_EXPERTISE = 24,
+        CR_ARMOR_PENETRATION = 25,
+        CR_MASTERY = 26
+    }
+
+    c.ITEM_STATS = Set {
+        "ITEM_MOD_CRIT_RATING_SHORT",
+        "ITEM_MOD_DODGE_RATING_SHORT",
+        "ITEM_MOD_EXPERTISE_RATING_SHORT",
+        "ITEM_MOD_HASTE_RATING_SHORT",
+        "ITEM_MOD_HIT_RATING_SHORT",
+        "ITEM_MOD_MASTERY_RATING_SHORT",
+        "ITEM_MOD_PARRY_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
+    }
+
+    c.STAT_CAPS = {
+        ["MeleeHitCap"] = function(m) return Reforgenator:CalculateMeleeHitCap(m) end,
+        ["SpellHitCap"] = function(m) return Reforgenator:CalculateSpellHitCap(m) end,
+        ["DWHitCap"] = function(m) return Reforgenator:CalculateDWMeleeHitCap(m) end,
+        ["RangedHitCap"] = function(m) return Reforgenator:CalculateRangedHitCap(m) end,
+        ["ExpertiseSoftCap"] = function(m) return Reforgenator:CalculateExpertiseSoftCap(m) end,
+        ["ExpertiseHardCap"] = function(m) return Reforgenator:CalculateExpertiseHardCap(m) end,
+        ["MaximumPossible"] = function(m) return Reforgenator:CalculateMaximumValue(m) end,
+        ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(m) end,
+        ["Fixed"] = function(m,a) return a end,
+    }
+
+end
+
+function Reforgenator:InitializeWidgets()
+    self:Debug("### InitializeWidgets")
 
 end
 
@@ -252,6 +340,19 @@ end
 
 function Reforgenator:ModelEditorFrame_OnShow(widget)
     self:Debug("### ModelEditorFrame_OnShow")
+
+    for i = 1, 4 do
+        local stem = "ModelEditorRule"..i
+        _G[stem]:Show()
+
+        local stat = _G[stem.."_Stat"]
+        Reforgenator:RuleTemplateStat_OnLoad(stat)
+        stat:Show()
+
+        local scheme = _G[stem.."_Scheme"]
+        Reforgenator:RuleTemplateScheme_OnLoad(scheme)
+        scheme:Show()
+    end
 end
 
 function Reforgenator:ModelEditorScrollbar_Update()
@@ -308,7 +409,7 @@ function Reforgenator:ModelEditor_UpdateFields()
     end
 
     local models = Reforgenator.db.global.models
-    ReforgenatorModelEditorModelName:SetText(name)
+    -- ReforgenatorModelEditorModelName:SetText(name)
 end
 
 function Reforgenator:RuleTemplateStat_OnLoad(widget)
@@ -318,8 +419,9 @@ function Reforgenator:RuleTemplateStat_OnLoad(widget)
 end
 
 function Reforgenator:RuleTemplateStat_OnInitialize()
-    for k,v in pairs(ITEM_STATS) do
-        local info = UIDrownDownMenu_CreateInfo()
+    self:Debug("### RuleTemplateStat_OnInitialize")
+    for k,v in pairs(Reforgenator.constants.ITEM_STATS) do
+        local info = UIDropDownMenu_CreateInfo()
         info.text = _G[k]
         UIDropDownMenu_AddButton(info)
     end
@@ -332,8 +434,9 @@ function Reforgenator:RuleTemplateScheme_OnLoad(widget)
 end
 
 function Reforgenator:RuleTemplateScheme_OnInitialize()
-    for k,v in pairs(STAT_CAPS) do
-        local info = UIDrownDownMenu_CreateInfo()
+    self:Debug("### RuleTemplateScheme_OnInitialize")
+    for k,v in pairs(Reforgenator.constants.STAT_CAPS) do
+        local info = UIDropDownMenu_CreateInfo()
         info.text = k
         UIDropDownMenu_AddButton(info)
     end
@@ -417,67 +520,6 @@ function Reforgenator:Dump(name, t)
         self:Debug(name.."=" .. to_string(t))
     end
 end
-
-local function Set(list)
-    local set = {}
-    for _, l in ipairs(list) do set[tostring(l)] = true end
-    return set
-end
-
-function Invert(list)
-    local invertedList = {}
-    for k,v in ipairs(list) do
-        invertedList[v] = k
-    end
-    return invertedList
-end
-
-local INVENTORY_SLOTS = {
-    "HeadSlot", "NeckSlot", "ShoulderSlot", "BackSlot",
-    "ChestSlot", "ShirtSlot", "TabardSlot", "WristSlot", "HandsSlot",
-    "WaistSlot", "LegsSlot", "FeetSlot", "Finger0Slot", "Finger1Slot",
-    "Trinket0Slot", "Trinket1Slot", "MainHandSlot", "SecondaryHandSlot",
-    "RangedSlot" }
-
-local COMBAT_RATINGS = {
-    CR_WEAPON_SKILL = 1,
-    CR_DEFENSE_SKILL = 2,
-    CR_DODGE = 3,
-    CR_PARRY = 4,
-    CR_BLOCK = 5,
-    CR_HIT_MELEE = 6,
-    CR_HIT_RANGED = 7,
-    CR_HIT_SPELL = 8,
-    CR_CRIT_MELEE = 9,
-    CR_CRIT_RANGED = 10,
-    CR_CRIT_SPELL = 11,
-    CR_HIT_TAKEN_MELEE = 12,
-    CR_HIT_TAKEN_RANGED = 13,
-    CR_HIT_TAKEN_SPELL = 14,
-    COMBAT_RATING_RESILIENCE_CRIT_TAKEN = 15,
-    COMBAT_RATING_RESILIENCE_PLAYER_DAMAGE_TAKEN = 16,
-    CR_CRIT_TAKEN_SPELL = 17,
-    CR_HASTE_MELEE = 18,
-    CR_HASTE_RANGED = 19,
-    CR_HASTE_SPELL = 20,
-    CR_WEAPON_SKILL_MAINHAND = 21,
-    CR_WEAPON_SKILL_OFFHAND = 22,
-    CR_WEAPON_SKILL_RANGED = 23,
-    CR_EXPERTISE = 24,
-    CR_ARMOR_PENETRATION = 25,
-    CR_MASTERY = 26
-}
-
-local ITEM_STATS = Set {
-    "ITEM_MOD_CRIT_RATING_SHORT",
-    "ITEM_MOD_DODGE_RATING_SHORT",
-    "ITEM_MOD_EXPERTISE_RATING_SHORT",
-    "ITEM_MOD_HASTE_RATING_SHORT",
-    "ITEM_MOD_HIT_RATING_SHORT",
-    "ITEM_MOD_MASTERY_RATING_SHORT",
-    "ITEM_MOD_PARRY_RATING_SHORT",
-    "ITEM_MOD_SPIRIT_RATING_SHORT",
-}
 
 function Reforgenator:deepCopy(o)
     local lut = {}
@@ -731,18 +773,6 @@ function Reforgenator:CalculateMaximumValue(playerModel)
     return 9999
 end
 
-local STAT_CAPS = {
-    ["MeleeHitCap"] = function(m) return Reforgenator:CalculateMeleeHitCap(m) end,
-    ["SpellHitCap"] = function(m) return Reforgenator:CalculateSpellHitCap(m) end,
-    ["DWHitCap"] = function(m) return Reforgenator:CalculateDWMeleeHitCap(m) end,
-    ["RangedHitCap"] = function(m) return Reforgenator:CalculateRangedHitCap(m) end,
-    ["ExpertiseSoftCap"] = function(m) return Reforgenator:CalculateExpertiseSoftCap(m) end,
-    ["ExpertiseHardCap"] = function(m) return Reforgenator:CalculateExpertiseHardCap(m) end,
-    ["MaximumPossible"] = function(m) return Reforgenator:CalculateMaximumValue(m) end,
-    ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(m) end,
-    ["Fixed"] = function(m,a) return a end,
-}
-
 local ReforgeModel = {}
 
 function ReforgeModel:new()
@@ -763,7 +793,7 @@ function Reforgenator:TankModel()
         "ITEM_MOD_PARRY_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
     }
 
     model.reforgeOrder = {
@@ -786,7 +816,7 @@ function Reforgenator:HunterModel()
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
     }
 
     model.reforgeOrder = {
@@ -801,7 +831,7 @@ function Reforgenator:BoomkinModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statRank = Invert {
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_HIT_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
@@ -832,7 +862,7 @@ function Reforgenator:FuryModel()
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
     }
 
@@ -855,7 +885,7 @@ function Reforgenator:ArmsModel()
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
     }
 
@@ -877,7 +907,7 @@ function Reforgenator:RogueModel()
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
     }
 
@@ -903,7 +933,7 @@ function Reforgenator:CatModel()
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
     }
 
     model.reforgeOrder = {
@@ -922,7 +952,7 @@ function Reforgenator:AffWarlockModel()
         "ITEM_MOD_HIT_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
@@ -948,7 +978,7 @@ function Reforgenator:DestroWarlockModel()
         "ITEM_MOD_MASTERY_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
@@ -972,7 +1002,7 @@ function Reforgenator:DemoWarlockModel()
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
@@ -1001,7 +1031,7 @@ function Reforgenator:TwoHandFrostDKModel()
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
     }
 
     model.reforgeOrder = {
@@ -1025,7 +1055,7 @@ function Reforgenator:DWFrostDKModel()
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
     }
 
     model.reforgeOrder = {
@@ -1049,7 +1079,7 @@ function Reforgenator:UnholyDKModel()
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
     }
 
     model.reforgeOrder = {
@@ -1070,7 +1100,7 @@ function Reforgenator:ArcaneMageModel()
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
@@ -1096,7 +1126,7 @@ function Reforgenator:FrostMageModel()
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
@@ -1122,7 +1152,7 @@ function Reforgenator:FireMageModel()
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
@@ -1151,7 +1181,7 @@ function Reforgenator:RetPallyModel()
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
     }
 
     model.reforgeOrder = {
@@ -1175,7 +1205,7 @@ function Reforgenator:ShadowPriestModel()
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
         "ITEM_MOD_PARRY_RATING_SHORT",
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
     }
 
     model.reforgeOrder = {
@@ -1193,7 +1223,7 @@ function Reforgenator:ElementalModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statRank = Invert {
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_HIT_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
@@ -1217,7 +1247,7 @@ function Reforgenator:EnhancementModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statRank = Invert {
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_HIT_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
@@ -1242,7 +1272,7 @@ function Reforgenator:TreeModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statRank = Invert {
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
@@ -1270,7 +1300,7 @@ function Reforgenator:DiscModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statRank = Invert {
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
@@ -1294,7 +1324,7 @@ function Reforgenator:HolyModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statRank = Invert {
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
@@ -1317,7 +1347,7 @@ function Reforgenator:RestoModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statRank = Invert {
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
@@ -1340,7 +1370,7 @@ function Reforgenator:HolyPallyModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statRank = Invert {
-        "ITEM_MOD_SPIRIT_RATING_SHORT",
+        "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
         "ITEM_MOD_CRIT_RATING_SHORT",
@@ -1491,21 +1521,22 @@ function Reforgenator:ShowState()
 
     --
     -- Get the character's current ratings
+    local c = Reforgenator.constants
     local playerStats = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_HIT_MELEE),
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_EXPERTISE),
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_MASTERY),
-        ["ITEM_MOD_DODGE_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_DODGE),
-        ["ITEM_MOD_PARRY_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_PARRY),
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_CRIT_MELEE),
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = GetCombatRating(COMBAT_RATINGS.CR_HASTE_MELEE),
-        ["ITEM_MOD_SPIRIT_RATING_SHORT"] = 0,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_HIT_MELEE),
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_EXPERTISE),
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_MASTERY),
+        ["ITEM_MOD_DODGE_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_DODGE),
+        ["ITEM_MOD_PARRY_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_PARRY),
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_CRIT_MELEE),
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_HASTE_MELEE),
+        ["ITEM_MOD_SPIRIT_SHORT"] = 0,
     }
 
     if model.useSpellHit then
-        playerStats.ITEM_MOD_HIT_RATING_SHORT = GetCombatRating(COMBAT_RATINGS.CR_HIT_SPELL)
-        playerStats.ITEM_MOD_CRIT_RATING_SHORT = GetCombatRating(COMBAT_RATINGS.CR_CRIT_SPELL)
-        playerStats.ITEM_MOD_HASTE_RATING_SHORT = GetCombatRating(COMBAT_RATINGS.CR_HASTE_SPELL)
+        playerStats.ITEM_MOD_HIT_RATING_SHORT = GetCombatRating(c.COMBAT_RATINGS.CR_HIT_SPELL)
+        playerStats.ITEM_MOD_CRIT_RATING_SHORT = GetCombatRating(c.COMBAT_RATINGS.CR_CRIT_SPELL)
+        playerStats.ITEM_MOD_HASTE_RATING_SHORT = GetCombatRating(c.COMBAT_RATINGS.CR_HASTE_SPELL)
     end
 
     self:Debug("playerStats="..to_string(playerStats))
@@ -1513,7 +1544,7 @@ function Reforgenator:ShowState()
 
     -- Get the current state of the equipment
     soln = SolutionContext:new()
-    for k,v in ipairs(INVENTORY_SLOTS) do
+    for k,v in ipairs(Reforgenator.constants.INVENTORY_SLOTS) do
         local slotInfo = GetInventorySlotInfo(v)
         local itemLink = GetInventoryItemLink("player", slotInfo)
         if itemLink then
@@ -1531,7 +1562,7 @@ function Reforgenator:ShowState()
             end
 
             for k,v in pairs(stats) do
-                if ITEM_STATS[k] then
+                if Reforgenator.constants.ITEM_STATS[k] then
                     entry[k] = v
                 end
             end

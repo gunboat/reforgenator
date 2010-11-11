@@ -372,61 +372,6 @@
         </Scripts>
     </Frame>
 
-    <!-- The reforging rules template -->
-    <Frame name="ReforgenatorRuleTemplate" virtual="true">
-        <Size>
-            <AbsDimension x="275" y="40"/>
-        </Size>
-	<Frames>
-	    <Frame name="$parentStat" inherits="UIDropDownMenuTemplate">
-		<Size>
-		    <AbsDimension x="100" y="16"/>
-		</Size>
-		<Scripts>
-		    <OnShow>
-			Reforgenator:RuleTemplateStat_OnLoad(self)
-		    </OnShow>
-		</Scripts>
-	    </Frame>
-	    <Frame name="$parentScheme" inherits="UIDropDownMenuTemplate">
-		<Size>
-		    <AbsDimension x="100" y="16"/>
-		</Size>
-		<Anchors>
-		    <Anchor point="TOPLEFT"
-			    relativeTo="$parentStat"
-			    relativePoint="TOPRIGHT">
-			<Offset>
-			    <AbsDimension x="0" y="0"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-		<Scripts>
-		    <OnShow>
-			Reforgenator:RuleTemplateScheme_OnLoad(self)
-		    </OnShow>
-		</Scripts>
-	    </Frame>
-	    <EditBox name="$parentUserdata"
-		    historyLines="1"
-		    inherits="AutoCompleteEditBoxTemplate">
-		<Size>
-		    <AbsDimension x="200" y="20" />
-		</Size>
-		<Anchors>
-		    <Anchor point="TOPLEFT"
-			    relativeTo="$parentStat"
-			    relativePoint="BOTTOMLEFT">
-			<Offset>
-			    <AbsDimension x="0" y="0"/>
-			</Offset>
-		    </Anchor>
-		</Anchors>
-		<FontString inherits="ChatFontNormal"/>
-	    </EditBox>
-	</Frames>
-    </Frame>
-
     <Button name="ReforgenatorModelNameTemplate" virtual="true">
         <Size>
             <AbsDimension x="298" y="16"/>
@@ -457,6 +402,88 @@
             </OnClick>
         </Scripts>
     </Button>
+
+    <Frame name="ReforgenatorRuleTemplate" virtual="true">
+        <Size>
+            <AbsDimension x="250" y="60"/>
+        </Size>
+        <Frames>
+            <Frame name="$parent_Stat" inherits="UIDropDownMenuTemplate">
+                <Size>
+                    <AbsDimension x="100" y="16"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT"/>
+                </Anchors>
+            </Frame>
+            <Frame name="$parent_Scheme" inherits="UIDropDownMenuTemplate">
+                <Size>
+                    <AbsDimension x="100" y="16"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="$parent_Stat"
+                            relativePoint="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="30" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Frame>
+            <EditBox name="$parent_Userdata"
+                    font="ChatFontNormal"
+                    autoFocus="false">
+                <Size>
+                    <AbsDimension x="190" y="20"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="TOPLEFT"
+                            relativeTo="$parent_Stat"
+                            relativePoint="BOTTOMLEFT">
+                        <Offset>
+                            <AbsDimension x="85" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture name="$parentLeft" file="Interface\Common\Common-Input-Border">
+                            <Size>
+                                <AbsDimension x="8" y="20"/>
+                            </Size>    
+                            <Anchors>
+                                <Anchor point="TOPLEFT">
+                                    <Offset x="-10" y="0"/>
+                                </Anchor>   
+                            </Anchors> 
+                            <TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
+                        </Texture>
+                        <Texture name="$parentRight" file="Interface\Common\Common-Input-Border">
+                            <Size>
+                                <AbsDimension x="8" y="20"/>
+                            </Size>  
+                            <Anchors>  
+                                <Anchor point="RIGHT">
+                                    <Offset x="0" y="0"/>
+                                </Anchor> 
+                            </Anchors>   
+                            <TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
+                        </Texture>
+                        <Texture name="$parentMiddle" file="Interface\Common\Common-Input-Border">
+                            <Size> 
+                                <AbsDimension x="0" y="20"/>
+                            </Size>
+                            <Anchors>
+                                <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+                                <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
+                            </Anchors>
+                            <TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
+                        </Texture>
+                    </Layer>
+                </Layers>
+            </EditBox>
+        </Frames>
+    </Frame>
 
     <Frame name="ReforgenatorModelEditorFrame"
            toplevel="true"
@@ -567,68 +594,55 @@
                 </Anchors>
             </Button>
 
-            <EditBox name="ReforgenatorModelEditorModelName"
-                    historyLines="1"
-                    inherits="AutoCompleteEditBoxTemplate">
-                <Size>
-                    <AbsDimension x="200" y="20" />
-                </Size>
-                <Anchors>
-                    <Anchor point="TOP"
-                            relativeTo="ModelEditorNameButton6"
-                            relativePoint="BOTTOM">
-                        <Offset>
-                            <AbsDimension x="0" y="-20"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <FontString inherits="ChatFontNormal"/>
-            </EditBox>
-
-            <Frame name="ModelEditorRule1" inherits="ReforgenatorRuleTemplate" id="1">
+            <Frame name="ModelEditorRule1" virtual="true"
+                    inherits="ReforgenatorRuleTemplate">
                 <Anchors>
                     <Anchor point="TOPLEFT"
-                            relativeTo="ModelEditorNameButton6"
-                            relativePoint="BOTTOMLEFT">
+                            relativeTo="ModelEditorNameButton6">
                         <Offset>
                             <AbsDimension x="0" y="-40"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
             </Frame>
-            <Frame name="ModelEditorRule2" inherits="ReforgenatorRuleTemplate" id="2">
+            <Frame name="ModelEditorRule2" virtual="true"
+                    inherits="ReforgenatorRuleTemplate">
                 <Anchors>
-                    <Anchor point="TOPLEFT"
+                    <Anchor point="TOP"
                             relativeTo="ModelEditorRule1"
-                            relativePoint="BOTTOMLEFT">
+                            relativePoint="BOTTOM">
                         <Offset>
-                            <AbsDimension x="0" y="00"/>
+                            <AbsDimension x="0" y="-10"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
             </Frame>
-            <Frame name="ModelEditorRule3" inherits="ReforgenatorRuleTemplate" id="3">
+            <Frame name="ModelEditorRule3" virtual="true"
+                    inherits="ReforgenatorRuleTemplate">
                 <Anchors>
-                    <Anchor point="TOPLEFT"
+                    <Anchor point="TOP"
                             relativeTo="ModelEditorRule2"
-                            relativePoint="BOTTOMLEFT">
+                            relativePoint="BOTTOM">
                         <Offset>
-                            <AbsDimension x="0" y="00"/>
+                            <AbsDimension x="0" y="-10"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
             </Frame>
-            <Frame name="ModelEditorRule4" inherits="ReforgenatorRuleTemplate" id="4">
+            <Frame name="ModelEditorRule4" virtual="true"
+                    inherits="ReforgenatorRuleTemplate">
                 <Anchors>
-                    <Anchor point="TOPLEFT"
+                    <Anchor point="TOP"
                             relativeTo="ModelEditorRule3"
-                            relativePoint="BOTTOMLEFT">
+                            relativePoint="BOTTOM">
                         <Offset>
-                            <AbsDimension x="0" y="00"/>
+                            <AbsDimension x="0" y="-10"/>
                         </Offset>
                     </Anchor>
                 </Anchors>
             </Frame>
+
+
         </Frames>
         <Scripts>
             <OnShow>
