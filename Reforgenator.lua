@@ -408,6 +408,16 @@ function Reforgenator:ModelEditor_UpdateFields()
 
     local models = Reforgenator.db.global.models
     -- ReforgenatorModelEditorModelName:SetText(name)
+
+    for k,v in pairs(models[name].statRank) do
+        self:Debug("### stat rank #"..(v or "nil"))
+        self:Debug("###    rating="..(k or "nil"))
+        if k then
+            self:Debug("###    _G=".._G[k])
+        end
+        _G["ModelEditorStatRank"..v.."_Name"]:SetText(_G[k])
+    end
+
     for i = 1, 4 do
         local stem = "ModelEditorRule"..i
         local rule = _G[stem]
@@ -428,6 +438,16 @@ function Reforgenator:ModelEditor_UpdateFields()
             end
         end
     end
+end
+
+function Reforgenator:StatRankUpButton_OnClick(widget)
+    self:Debug("### up button for widget"..to_string(widget:GetID() or "nil"))
+    self:Debug("### widget="..to_string(widget))
+end
+
+function Reforgenator:StatRankDownButton_OnClick(widget)
+    self:Debug("### down button for widget"..to_string(widget:GetID() or "nil"))
+    self:Debug("### widget="..to_string(widget))
 end
 
 function Reforgenator:RuleTemplateStat_OnLoad(widget)
