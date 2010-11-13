@@ -106,66 +106,8 @@ local maintOptions = {
 
 local modelOptions = {
     type = 'group',
-    args = {
-        rule_1 = {
-            type = 'group',
-            name = 'Rule #1',
-            args = {},
-        },
-        rule_2 = {
-            type = 'group',
-            name = 'Rule #2',
-            args = {},
-        },
-        rule_3 = {
-            type = 'group',
-            name = 'Rule #3',
-            args = {},
-        },
-        rule_4 = {
-            type = 'group',
-            name = 'Rule #4',
-            args = {},
-        },
-    },
+    args = {},
 }
-
-modelOptions.args.rule_1 = {
-    type = 'group',
-    name = 'rule-1',
-    handler = Reforgenator,
-    desc = 'First rule of reforging',
-    args = {
-        stat = {
-            type = 'select',
-            name = 'Stat',
-            desc = 'Statistic to reforge for',
-            values = {
-                _G["ITEM_MOD_HIT_RATING_SHORT"],
-                _G["ITEM_MOD_EXPERTISE_RATING_SHORT"],
-                _G["ITEM_MOD_MASTERY_RATING_SHORT"],
-                _G["ITEM_MOD_DODGE_RATING_SHORT"],
-                _G["ITEM_MOD_PARRY_RATING_SHORT"],
-                _G["ITEM_MOD_CRIT_RATING_SHORT"],
-                _G["ITEM_MOD_HASTE_RATING_SHORT"],
-                _G["ITEM_MOD_SPIRIT_SHORT"]
-            },
-        },
-        cap = {
-            type = 'select',
-            name = 'Cap',
-            desc = 'When to stop reforging for this stat',
-            values = {
-                "MeleeHitCap",
-                "ExpertiseSoftCap",
-                "ExpertiseHardCap",
-                "RangedHitCap",
-                "SpellHitCap",
-            },
-        },
-    },
-}
-
 
 local defaults = {
     profile = {
@@ -201,6 +143,8 @@ function Reforgenator:OnInitialize()
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Maintenance", maintOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Maintenance", "Maintenance", "Reforgenator")
+
+    Reforgenator:InitializeModelOptions()
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Models", modelOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Models", "Models", "Reforgenator")
@@ -310,6 +254,63 @@ function Reforgenator:InitializeConstants()
         ["Fixed"] = function(m,a) return a end,
     }
 
+end
+
+function Reforgenator:InitializeModelOptions()
+    local c = Reforgenator.constants
+    local models = Reforgenator.db.global.models
+    local n = 1
+    for k,v in pairs(models) do
+        local key = 'model_' .. n
+        n = n + 1
+
+        modelOptions.args[key] = {
+            type = 'group',
+            name = k,
+            handler = Reforgenator,
+            desc = 'First rule of reforging',
+            args = {},
+        }
+
+        for i = 1, 4 do
+            local a = modelOptions.args[key].args
+
+            a["h"..i] = {
+                type = 'header',
+                name = 'Rule #'..i,
+                order = n,
+            }
+            n = n + 1
+
+            a['stat'..i] = {
+                type = 'select',
+                name = 'Stat',
+                desc = 'Reforge to get this stat to the specified cap',
+                order = n,
+                values = {}
+            }
+            n = n + 1
+
+            local arr = a['stat'..i].values
+            for k2,v2 in pairs(c.ITEM_STATS) do
+                arr[#arr + 1] = _G[k2]
+            end
+
+            a['cap'..i] = {
+                type = 'select',
+                name = 'Cap',
+                desc = "Desired value for the stat we're currently reforging for",
+                order = n,
+                values = {}
+            }
+            n = n + 1
+
+            arr = a['cap'..i].values
+            for k2,v2 in pairs(c.STAT_CAPS) do
+                arr[#arr + 1] = k2
+            end
+        end
+    end
 end
 
 function Reforgenator:MessageFrame_OnLoad(widget)
