@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.24"
+local version = "0.0.25"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -272,24 +272,25 @@ function Reforgenator:InitializeModelOptions()
             args = {},
         }
 
+        local seq = 1
         for i = 1, 4 do
             local a = modelOptions.args[key].args
 
             a["h"..i] = {
                 type = 'header',
                 name = 'Rule #'..i,
-                order = n,
+                order = seq,
             }
-            n = n + 1
+            seq = seq + 1
 
             a['stat'..i] = {
                 type = 'select',
                 name = 'Stat',
                 desc = 'Reforge to get this stat to the specified cap',
-                order = n,
+                order = seq,
                 values = {}
             }
-            n = n + 1
+            seq = seq + 1
 
             local arr = a['stat'..i].values
             for k2,v2 in pairs(c.ITEM_STATS) do
@@ -300,10 +301,10 @@ function Reforgenator:InitializeModelOptions()
                 type = 'select',
                 name = 'Cap',
                 desc = "Desired value for the stat we're currently reforging for",
-                order = n,
+                order = seq,
                 values = {}
             }
-            n = n + 1
+            seq = seq + 1
 
             arr = a['cap'..i].values
             for k2,v2 in pairs(c.STAT_CAPS) do
@@ -1602,6 +1603,7 @@ function Reforgenator:MessageBox(msg)
 end
 
 function Reforgenator:ShowState()
+    local c = Reforgenator.constants
     self:Debug("in ShowState")
 
     local playerModel = self:GetPlayerModel()
@@ -1612,14 +1614,13 @@ function Reforgenator:ShowState()
         return
     end
     for k,v in ipairs(model.reforgeOrder) do
-        if not STAT_CAPS[v.cap] then
+        if not c.STAT_CAPS[v.cap] then
             self:MessageBox("model has invalid stat cap")
         end
     end
 
     --
     -- Get the character's current ratings
-    local c = Reforgenator.constants
     local playerStats = {
         ["ITEM_MOD_HIT_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_HIT_MELEE),
         ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = GetCombatRating(c.COMBAT_RATINGS.CR_EXPERTISE),
