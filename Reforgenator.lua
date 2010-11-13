@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.26"
+local version = "0.0.27"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -1564,7 +1564,7 @@ function Reforgenator:LoadDefaultModels()
     local models = Reforgenator.db.global.models
     local cull = {}
     for k,v in pairs(models) do
-        if k:find('^built%-in: ') then
+        if k:find('^built%-in: ') or v.readOnly then
             cull[#cull + 1] = k
         end
     end
@@ -1600,7 +1600,7 @@ function Reforgenator:LoadDefaultModels()
 
     self:LoadModel(self:RogueModel(), "Rogue, assassination", 'ROGUE/1', 'ROGUE')
     self:LoadModel(self:RogueModel(), "Rogue, combat", 'ROGUE/2', 'ROGUE')
-    self:LoadModel(self:RogueModel(), "Rogue, subtlely", 'ROGUE/3', 'ROGUE')
+    self:LoadModel(self:RogueModel(), "Rogue, subtlety", 'ROGUE/3', 'ROGUE')
 
     self:LoadModel(self:ElementalModel(), 'Shaman, elemental', 'SHAMAN/1', 'SHAMAN')
     self:LoadModel(self:EnhancementModel(), 'Shaman, enhancement', 'SHAMAN/2', 'SHAMAN')
@@ -1756,7 +1756,7 @@ function Reforgenator:ShowState()
 
     for _, entry in ipairs(model.reforgeOrder) do
         self:Debug("### entry.cap="..entry.cap)
-        local f = STAT_CAPS[entry.cap]
+        local f = c.STAT_CAPS[entry.cap]
         soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel, entry.userdata), model.statRank, soln)
     end
 
