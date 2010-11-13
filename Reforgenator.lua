@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.25"
+local version = "0.0.26"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -144,8 +144,8 @@ function Reforgenator:OnInitialize()
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Maintenance", maintOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Maintenance", "Maintenance", "Reforgenator")
 
+    Reforgenator:LoadDefaultModels()
     Reforgenator:InitializeModelOptions()
-
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Models", modelOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Models", "Models", "Reforgenator")
 
@@ -184,11 +184,6 @@ function Reforgenator:OnInitialize()
     self:RegisterChatCommand("reforgenator", "ShowState")
 
     tinsert(UISpecialFrames, "ReforgenatorPanel")
-
-    if not Reforgenator.db.global.models then
-        self:LoadDefaultModels()
-    end
-
 end
 
 function Reforgenator:InitializeConstants()
@@ -252,66 +247,142 @@ function Reforgenator:InitializeConstants()
         ["MaximumPossible"] = function(m) return Reforgenator:CalculateMaximumValue(m) end,
         ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(m) end,
         ["Fixed"] = function(m,a) return a end,
+        ["Maintain"] = function(m) return nil end,
     }
 
 end
 
 function Reforgenator:InitializeModelOptions()
-    local c = Reforgenator.constants
     local models = Reforgenator.db.global.models
     local n = 1
+    local key = nil
+
+    -- User-defined models
     for k,v in pairs(models) do
-        local key = 'model_' .. n
-        n = n + 1
+        if not v.readOnly then
+            key = 'model_' .. n
+            n = n + 1
 
-        modelOptions.args[key] = {
-            type = 'group',
-            name = k,
-            handler = Reforgenator,
-            desc = 'First rule of reforging',
-            args = {},
-        }
-
-        local seq = 1
-        for i = 1, 4 do
-            local a = modelOptions.args[key].args
-
-            a["h"..i] = {
-                type = 'header',
-                name = 'Rule #'..i,
-                order = seq,
-            }
-            seq = seq + 1
-
-            a['stat'..i] = {
-                type = 'select',
-                name = 'Stat',
-                desc = 'Reforge to get this stat to the specified cap',
-                order = seq,
-                values = {}
-            }
-            seq = seq + 1
-
-            local arr = a['stat'..i].values
-            for k2,v2 in pairs(c.ITEM_STATS) do
-                arr[#arr + 1] = _G[k2]
-            end
-
-            a['cap'..i] = {
-                type = 'select',
-                name = 'Cap',
-                desc = "Desired value for the stat we're currently reforging for",
-                order = seq,
-                values = {}
-            }
-            seq = seq + 1
-
-            arr = a['cap'..i].values
-            for k2,v2 in pairs(c.STAT_CAPS) do
-                arr[#arr + 1] = k2
-            end
+            modelOptions.args[key] = self:ModelToModelOption(k,v)
         end
     end
+
+    -- Built-in models
+    key = 'model_' .. n
+    n = n + 1
+    modelOptions.args[key] = {
+        type = 'header',
+        name = 'Built-in models',
+    }
+
+    for k,v in pairs(models) do
+        if v.readOnly then
+            key = 'model_' .. n
+            n = n + 1
+
+            modelOptions.args[key] = self:ModelToModelOption(k,v)
+        end
+    end
+end
+
+function Reforgenator:ModelToModelOption(modelName, model)
+    local c = Reforgenator.constants
+
+    local option = {
+        type = 'group',
+        name = modelName,
+        handler = Reforgenator,
+        args = {},
+    }
+
+    local seq = 1
+
+    option.args['useSpellHit'] = {
+        type = 'toggle',
+        name = 'Use spell hit',
+        desc = 'Use spell hit instead of melee/ranged hit',
+        order = seq,
+        get = function()
+            return model.useSpellHit
+        end,
+        set = function(self, info) end
+    }
+    seq = seq + 1
+
+    for i = 1, 6 do
+        option.args["h"..i] = {
+            type = 'header',
+            name = 'Rule #'..i,
+            order = seq,
+        }
+        seq = seq + 1
+
+        option.args['rating'..i] = {
+            type = 'select',
+            name = 'Rating',
+            desc = 'Reforge to get this rating to the specified cap',
+            order = seq,
+            values = {},
+            get = function()
+                Reforgenator:Debug("### rating.get, modelName=["..modelName.."], i="..i)
+                Reforgenator:Debug("### model.reforgeOrder[i]="..to_string(model.reforgeOrder[i]))
+                return model.reforgeOrder[i] and model.reforgeOrder[i].rating or nil
+            end,
+            set = function(info,key) end
+        }
+        seq = seq + 1
+
+        local arr = option.args['rating'..i].values
+        for k2,v2 in pairs(c.ITEM_STATS) do
+            arr[k2] = _G[k2]
+        end
+
+        option.args['cap'..i] = {
+            type = 'select',
+            name = 'Cap',
+            desc = "Desired value for the stat we're currently reforging for",
+            order = seq,
+            get = function()
+                Reforgenator:Debug("### cap.get, modelName=["..modelName.."], i="..i)
+                Reforgenator:Debug("### model.reforgeOrder[i]="..to_string(model.reforgeOrder[i]))
+                return model.reforgeOrder[i] and model.reforgeOrder[i].cap or nil
+            end,
+            set = function(info,key)
+            end,
+            values = {}
+        }
+        seq = seq + 1
+
+        arr = option.args['cap'..i].values
+        for k2,v2 in pairs(c.STAT_CAPS) do
+            arr[k2] = k2
+        end
+
+        option.args['userdata'..i] = {
+            type = 'input',
+            name = 'Values',
+            desc = 'Value, or list of values, to reforge to',
+            order = seq,
+            hidden = not (model.reforgeOrder[i] and model.reforgeOrder[i].cap == "Fixed"),
+            get = function()
+                if not model.reforgeOrder[i] then
+                    return nil
+                end
+
+                if type(model.reforgeOrder[i].userdata) == "table" then
+                    return table.concat(model.reforgeOrder[i].userdata, ', ')
+                elseif model.reforgeOrder[i].userdata then
+                    return to_string(model.reforgeOrder[i].userdata)
+                else
+                    return nil
+                end
+            end,
+            set = function(info, key) end,
+        }
+        seq = seq + 1
+    end
+
+    return option
 end
 
 function Reforgenator:MessageFrame_OnLoad(widget)
@@ -1490,47 +1561,58 @@ function Reforgenator:HolyPallyModel()
 end
 
 function Reforgenator:LoadDefaultModels()
-    self:LoadModel(self:TankModel(), 'built-in: DK, blood', 'DEATHKNIGHT/1', 'DEATHKNIGHT')
-    self:LoadModel(self:TwoHandFrostDKModel(), 'built-in: DK, 2H frost', '2HFrost', 'DEATHKNIGHT')
-    self:LoadModel(self:DWFrostDKModel(), 'built-in: DK, DW frost', 'DWFrost', 'DEATHKNIGHT')
-    self:LoadModel(self:UnholyDKModel(), 'built-in: DK, unholy', 'DEATHKNIGHT/3', 'DEATHKNIGHT')
+    local models = Reforgenator.db.global.models
+    local cull = {}
+    for k,v in pairs(models) do
+        if k:find('^built%-in: ') then
+            cull[#cull + 1] = k
+        end
+    end
+    for _,v in ipairs(cull) do
+        models[v] = nil
+    end
 
-    self:LoadModel(self:BoomkinModel(), 'built-in: Druid, boomkin', 'DRUID/1', 'DRUID')
-    self:LoadModel(self:CatModel(), 'built-in: Druid, feral cat', nil, 'DRUID')
-    self:LoadModel(self:TankModel(), 'built-in: Druid, feral bear', 'DRUID/2', 'DRUID')
-    self:LoadModel(self:TreeModel(), 'built-in: Druid, restoration', 'DRUID/3', 'DRUID')
+    self:LoadModel(self:TankModel(), 'DK, blood', 'DEATHKNIGHT/1', 'DEATHKNIGHT')
+    self:LoadModel(self:TwoHandFrostDKModel(), 'DK, 2H frost', '2HFrost', 'DEATHKNIGHT')
+    self:LoadModel(self:DWFrostDKModel(), 'DK, DW frost', 'DWFrost', 'DEATHKNIGHT')
+    self:LoadModel(self:UnholyDKModel(), 'DK, unholy', 'DEATHKNIGHT/3', 'DEATHKNIGHT')
 
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, BM', 'HUNTER/1', 'HUNTER')
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, MM', 'HUNTER/2', 'HUNTER')
-    self:LoadModel(self:HunterModel(), 'built-in: Hunter, SV', 'HUNTER/3', 'HUNTER')
+    self:LoadModel(self:BoomkinModel(), 'Druid, boomkin', 'DRUID/1', 'DRUID')
+    self:LoadModel(self:CatModel(), 'Druid, feral cat', nil, 'DRUID')
+    self:LoadModel(self:TankModel(), 'Druid, feral bear', 'DRUID/2', 'DRUID')
+    self:LoadModel(self:TreeModel(), 'Druid, restoration', 'DRUID/3', 'DRUID')
 
-    self:LoadModel(self:ArcaneMageModel(), 'built-in: Mage, arcane', 'MAGE/1', 'MAGE')
-    self:LoadModel(self:FireMageModel(), 'built-in: Mage, fire', 'MAGE/2', 'MAGE')
-    self:LoadModel(self:FrostMageModel(), 'built-in: Mage, frost', 'MAGE/3', 'MAGE')
+    self:LoadModel(self:HunterModel(), 'Hunter, BM', 'HUNTER/1', 'HUNTER')
+    self:LoadModel(self:HunterModel(), 'Hunter, MM', 'HUNTER/2', 'HUNTER')
+    self:LoadModel(self:HunterModel(), 'Hunter, SV', 'HUNTER/3', 'HUNTER')
 
-    self:LoadModel(self:HolyPallyModel(), 'built-in: Paladin, holy', 'PALADIN/1', 'PALADIN')
-    self:LoadModel(self:TankModel(), 'built-in: Paladin, protection', 'PALADIN/2', 'PALADIN')
-    self:LoadModel(self:RetPallyModel(), 'built-in: Paladin, retribution', 'PALADIN/3', 'PALADIN')
+    self:LoadModel(self:ArcaneMageModel(), 'Mage, arcane', 'MAGE/1', 'MAGE')
+    self:LoadModel(self:FireMageModel(), 'Mage, fire', 'MAGE/2', 'MAGE')
+    self:LoadModel(self:FrostMageModel(), 'Mage, frost', 'MAGE/3', 'MAGE')
 
-    self:LoadModel(self:DiscModel(), 'built-in: Priest, discipline', 'PRIEST/1', 'PRIEST')
-    self:LoadModel(self:HolyModel(), 'built-in: Priest, holy', 'PRIEST/2', 'PRIEST')
-    self:LoadModel(self:ShadowPriestModel(), 'built-in: Priest, shadow', 'PRIEST/3', 'PRIEST')
+    self:LoadModel(self:HolyPallyModel(), 'Paladin, holy', 'PALADIN/1', 'PALADIN')
+    self:LoadModel(self:TankModel(), 'Paladin, protection', 'PALADIN/2', 'PALADIN')
+    self:LoadModel(self:RetPallyModel(), 'Paladin, retribution', 'PALADIN/3', 'PALADIN')
 
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, assassination", 'ROGUE/1', 'ROGUE')
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, combat", 'ROGUE/2', 'ROGUE')
-    self:LoadModel(self:RogueModel(), "built-in: Rogue, subtlely", 'ROGUE/3', 'ROGUE')
+    self:LoadModel(self:DiscModel(), 'Priest, discipline', 'PRIEST/1', 'PRIEST')
+    self:LoadModel(self:HolyModel(), 'Priest, holy', 'PRIEST/2', 'PRIEST')
+    self:LoadModel(self:ShadowPriestModel(), 'Priest, shadow', 'PRIEST/3', 'PRIEST')
 
-    self:LoadModel(self:ElementalModel(), 'built-in: Shaman, elemental', 'SHAMAN/1', 'SHAMAN')
-    self:LoadModel(self:EnhancementModel(), 'built-in: Shaman, enhancement', 'SHAMAN/2', 'SHAMAN')
-    self:LoadModel(self:RestoModel(), 'built-in: Shaman, restoration', 'SHAMAN/3', 'SHAMAN')
+    self:LoadModel(self:RogueModel(), "Rogue, assassination", 'ROGUE/1', 'ROGUE')
+    self:LoadModel(self:RogueModel(), "Rogue, combat", 'ROGUE/2', 'ROGUE')
+    self:LoadModel(self:RogueModel(), "Rogue, subtlely", 'ROGUE/3', 'ROGUE')
 
-    self:LoadModel(self:AffWarlockModel(), 'built-in: Warlock, affliction', 'WARLOCK/1', 'WARLOCK')
-    self:LoadModel(self:DemoWarlockModel(), 'built-in: Warlock, demonology', 'WARLOCK/2', 'WARLOCK')
-    self:LoadModel(self:DestroWarlockModel(), 'built-in: Warlock, destruction', 'WARLOCK/3', 'WARLOCK')
+    self:LoadModel(self:ElementalModel(), 'Shaman, elemental', 'SHAMAN/1', 'SHAMAN')
+    self:LoadModel(self:EnhancementModel(), 'Shaman, enhancement', 'SHAMAN/2', 'SHAMAN')
+    self:LoadModel(self:RestoModel(), 'Shaman, restoration', 'SHAMAN/3', 'SHAMAN')
 
-    self:LoadModel(self:ArmsModel(), 'built-in: Warrior, arms', 'WARRIOR/1', 'WARRIOR')
-    self:LoadModel(self:FuryModel(), 'built-in: Warrior, fury', 'WARRIOR/2', 'WARRIOR')
-    self:LoadModel(self:TankModel(), 'built-in: Warrior, protection', 'WARRIOR/3', 'WARRIOR')
+    self:LoadModel(self:AffWarlockModel(), 'Warlock, affliction', 'WARLOCK/1', 'WARLOCK')
+    self:LoadModel(self:DemoWarlockModel(), 'Warlock, demonology', 'WARLOCK/2', 'WARLOCK')
+    self:LoadModel(self:DestroWarlockModel(), 'Warlock, destruction', 'WARLOCK/3', 'WARLOCK')
+
+    self:LoadModel(self:ArmsModel(), 'Warrior, arms', 'WARRIOR/1', 'WARRIOR')
+    self:LoadModel(self:FuryModel(), 'Warrior, fury', 'WARRIOR/2', 'WARRIOR')
+    self:LoadModel(self:TankModel(), 'Warrior, protection', 'WARRIOR/3', 'WARRIOR')
 end
 
 function Reforgenator:LoadModel(model, modelName, ak, class)
@@ -1796,6 +1878,15 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     end
     for k,v in ipairs(ancestor.changes) do
         soln.changes[#soln.changes + 1] = v
+    end
+
+    -- nil desiredValue means maintain the current level
+    if not desiredValue then
+        soln.excessRating[rating] = 0
+        for k,v in ipairs(ancestor.items) do
+            soln.items[#soln.items + 1] = v
+        end
+        return soln
     end
 
     -- already over cap?
