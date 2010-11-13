@@ -104,6 +104,69 @@ local maintOptions = {
     },
 }
 
+local modelOptions = {
+    type = 'group',
+    args = {
+        rule_1 = {
+            type = 'group',
+            name = 'Rule #1',
+            args = {},
+        },
+        rule_2 = {
+            type = 'group',
+            name = 'Rule #2',
+            args = {},
+        },
+        rule_3 = {
+            type = 'group',
+            name = 'Rule #3',
+            args = {},
+        },
+        rule_4 = {
+            type = 'group',
+            name = 'Rule #4',
+            args = {},
+        },
+    },
+}
+
+modelOptions.args.rule_1 = {
+    type = 'group',
+    name = 'rule-1',
+    handler = Reforgenator,
+    desc = 'First rule of reforging',
+    args = {
+        stat = {
+            type = 'select',
+            name = 'Stat',
+            desc = 'Statistic to reforge for',
+            values = {
+                _G["ITEM_MOD_HIT_RATING_SHORT"],
+                _G["ITEM_MOD_EXPERTISE_RATING_SHORT"],
+                _G["ITEM_MOD_MASTERY_RATING_SHORT"],
+                _G["ITEM_MOD_DODGE_RATING_SHORT"],
+                _G["ITEM_MOD_PARRY_RATING_SHORT"],
+                _G["ITEM_MOD_CRIT_RATING_SHORT"],
+                _G["ITEM_MOD_HASTE_RATING_SHORT"],
+                _G["ITEM_MOD_SPIRIT_SHORT"]
+            },
+        },
+        cap = {
+            type = 'select',
+            name = 'Cap',
+            desc = 'When to stop reforging for this stat',
+            values = {
+                "MeleeHitCap",
+                "ExpertiseSoftCap",
+                "ExpertiseHardCap",
+                "RangedHitCap",
+                "SpellHitCap",
+            },
+        },
+    },
+}
+
+
 local defaults = {
     profile = {
         minimap = {
@@ -133,18 +196,19 @@ function Reforgenator:OnInitialize()
 
     Reforgenator:InitializeConstants()
 
-    Reforgenator:InitializeWidgets()
-
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator", options)
     Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Maintenance", maintOptions)
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Maintenance", "Maintenance", "Reforgenator")
 
-    local panel = ReforgenatorModelEditorFrame
-    panel.name = 'Models'
-    panel.parent = Reforgenator.optionsFrame.name
-    InterfaceOptions_AddCategory(panel)
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Models", modelOptions)
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Models", "Models", "Reforgenator")
+
+--    local panel = ReforgenatorModelEditorFrame
+--    panel.name = 'Models'
+--    panel.parent = Reforgenator.optionsFrame.name
+--    InterfaceOptions_AddCategory(panel)
 
     local broker = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
         launcher = true,
@@ -245,11 +309,6 @@ function Reforgenator:InitializeConstants()
         ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(m) end,
         ["Fixed"] = function(m,a) return a end,
     }
-
-end
-
-function Reforgenator:InitializeWidgets()
-    self:Debug("### InitializeWidgets")
 
 end
 
