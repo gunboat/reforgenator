@@ -41,6 +41,28 @@ local function to_string( tbl )
     end
 end
 
+function string:split(sSeparator, nMax, bRegexp)
+    local aRecord = {}
+
+    if self:len() > 0 then
+        local bPlain = not bRegexp
+        nMax = nMax or -1
+
+        local nField=1 nStart=1
+        local nFirst,nLast = self:find(sSeparator, nStart, bPlain)
+        while nFirst and nMax ~= 0 do
+            aRecord[nField] = self:sub(nStart, nFirst-1)
+            nField = nField+1
+            nStart = nLast+1
+            nFirst,nLast = self:find(sSeparator, nStart, bPlain)
+            nMax = nMax-1
+        end
+        aRecord[nField] = self:sub(nStart)
+    end
+
+    return aRecord
+end
+
 local function Set(list)
     local set = {}
     for _, l in ipairs(list) do set[tostring(l)] = true end
@@ -109,6 +131,100 @@ local modelOptions = {
     args = {},
 }
 
+local createName = ''
+local className = ''
+local sourceName = ''
+local addOptions = {
+    type = 'group',
+    name = 'Add new model',
+    handler = Reforgenator,
+    desc = 'Add new model',
+    args = {
+        name = {
+            order = 1,
+            type = 'input',
+            name = 'Model name',
+            desc = 'Name of the new model',
+            get = function() return createName end,
+            set = function(info,val) createName = strtrim(val) end,
+            validate = function(info,val)
+                local nm = strtrim(val)
+                if nm == '' then
+                    return 'No name given'
+                end
+                if Reforgenator.db.global.models[nm] then
+                    return 'There is already a model with that name'
+                end
+                return true
+            end
+        },
+        empty_group = {
+            order = 2,
+            type = 'group',
+            name = 'Empty model',
+            desc = 'Create a new empty model',
+            args = {
+                class = {
+                    order = 1,
+                    type = 'select',
+                    name = 'Class',
+                    desc = 'Class the model applies to',
+                    values = {
+                        ["WARRIOR"] = 'Warrior',
+                        ["DEATHKNIGHT"] = 'Death knight',
+                        ["PALADIN"] = 'Paladin',
+                        ["PRIEST"] = 'Priest',
+                        ["SHAMAN"] = 'Shaman',
+                        ["DRUID"] = 'Druid',
+                        ["ROGUE"] = 'Rogue',
+                        ["MAGE"] = 'Mage',
+                        ["WARLOCK"] = 'Warlock',
+                        ["HUNTER"] = 'Hunter',
+                    },
+                    get = function() return className end,
+                    set = function(info,key) className = key end,
+                },
+                doEet = {
+                    order = 2,
+                    type = 'execute',
+                    name = 'Create model',
+                    desc = 'Create the new empty model',
+                    func = function()
+                        Reforgenator:Debug("### new empty model named ["..createName.."] for class ["..className.."]")
+                    end,
+                },
+            },
+        },
+        copyGroup = {
+            order = 3,
+            type = 'group',
+            name = 'Copy existing model',
+            desc = 'Copy an existing model',
+            args = {
+                source = {
+                    order = 1,
+                    type = 'select',
+                    name = 'Source',
+                    desc = 'Name of the model to copy',
+                    values = {
+                    },
+                    get = function() return sourceName end,
+                    set = function(info,key) sourceName = key end,
+                },
+                doEet = {
+                    order = 2,
+                    type = 'execute',
+                    name = 'Create model',
+                    desc = 'Make a copy of the existing model',
+                    func = function()
+                        Reforgenator:Debug("### new model named ["..createName.."] copied from ["..sourceName.."]")
+                    end,
+                },
+            },
+        },
+    },
+}
+
 local defaults = {
     profile = {
         minimap = {
@@ -138,16 +254,22 @@ function Reforgenator:OnInitialize()
 
     Reforgenator:InitializeConstants()
 
-    LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator", options)
-    Reforgenator.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator", "Reforgenator")
+    local AC = LibStub('AceConfig-3.0')
+    local ACD = LibStub('AceConfigDialog-3.0')
 
-    LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Maintenance", maintOptions)
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Maintenance", "Maintenance", "Reforgenator")
+    AC:RegisterOptionsTable("Reforgenator", options)
+    Reforgenator.optionsFrame = ACD:AddToBlizOptions("Reforgenator", "Reforgenator")
+
+    AC:RegisterOptionsTable("Reforgenator Maintenance", maintOptions)
+    ACD:AddToBlizOptions("Reforgenator Maintenance", "Maintenance", "Reforgenator")
+
+    AC:RegisterOptionsTable('Reforgenator Add', addOptions)
+    ACD:AddToBlizOptions('Reforgenator Add', 'New model', 'Reforgenator')
 
     Reforgenator:LoadDefaultModels()
     Reforgenator:InitializeModelOptions()
-    LibStub("AceConfig-3.0"):RegisterOptionsTable("Reforgenator Models", modelOptions)
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Reforgenator Models", "Models", "Reforgenator")
+    AC:RegisterOptionsTable("Reforgenator Models", modelOptions)
+    ACD:AddToBlizOptions("Reforgenator Models", "Models", "Reforgenator")
 
 --    local panel = ReforgenatorModelEditorFrame
 --    panel.name = 'Models'
@@ -260,7 +382,7 @@ function Reforgenator:InitializeModelOptions()
     -- User-defined models
     for k,v in pairs(models) do
         if not v.readOnly then
-            key = 'model_' .. n
+            key = string.format('model_%03d', n)
             n = n + 1
 
             modelOptions.args[key] = self:ModelToModelOption(k,v)
@@ -269,7 +391,7 @@ function Reforgenator:InitializeModelOptions()
 
     -- Built-in models
     key = 'model_' .. n
-    n = n + 1
+    n = 101
     modelOptions.args[key] = {
         type = 'header',
         name = 'Built-in models',
@@ -277,7 +399,7 @@ function Reforgenator:InitializeModelOptions()
 
     for k,v in pairs(models) do
         if v.readOnly then
-            key = 'model_' .. n
+            key = string.format('model_%03d', n)
             n = n + 1
 
             modelOptions.args[key] = self:ModelToModelOption(k,v)
@@ -328,7 +450,13 @@ function Reforgenator:ModelToModelOption(modelName, model)
                 Reforgenator:Debug("### model.reforgeOrder[i]="..to_string(model.reforgeOrder[i]))
                 return model.reforgeOrder[i] and model.reforgeOrder[i].rating or nil
             end,
-            set = function(info,key) end
+            set = function(info,key)
+                if model.readOnly then
+                    return
+                end
+
+                model.reforgeOrder[i].rating = key
+            end,
         }
         seq = seq + 1
 
@@ -340,7 +468,7 @@ function Reforgenator:ModelToModelOption(modelName, model)
         option.args['cap'..i] = {
             type = 'select',
             name = 'Cap',
-            desc = "Desired value for the stat we're currently reforging for",
+            desc = "Desired value for the stat we're currently reforging",
             order = seq,
             get = function()
                 Reforgenator:Debug("### cap.get, modelName=["..modelName.."], i="..i)
@@ -348,6 +476,12 @@ function Reforgenator:ModelToModelOption(modelName, model)
                 return model.reforgeOrder[i] and model.reforgeOrder[i].cap or nil
             end,
             set = function(info,key)
+                if model.readOnly then
+                    return
+                end
+
+                model.reforgeOrder[i].cap = key
+                options.args['userdata'..i].hidden = key ~= "Fixed";
             end,
             values = {}
         }
@@ -377,7 +511,22 @@ function Reforgenator:ModelToModelOption(modelName, model)
                     return nil
                 end
             end,
-            set = function(info, key) end,
+            set = function(info, key)
+                if model.readOnly then
+                    return
+                end
+
+                if not key then
+                    model.reforgeOrder[i].userdata = nil
+                else
+                    t = key:split(',%s*', nil, true)
+                    if #t == 1 then
+                        model.reforgeOrder[i].userdata = t[1]
+                    else
+                        model.reforgeOrder[i].userdata = t
+                    end
+                end
+            end,
         }
         seq = seq + 1
     end
