@@ -308,6 +308,27 @@ function Reforgenator:InitializeModelOptions()
     end
 end
 
+function Reforgenator:rebuildStatRank(model)
+    local n = 1
+    local statRank = {}
+    for _, v in ipairs(model.reforgeOrder) do
+        if not statRank[v.rating] then
+            statRank[v.rating] = n
+            n = n + 1
+        end
+    end
+
+    local c = Reforgenator.constants
+    for k,v in pairs(c.ITEM_STATS) do
+        if not statRank[k] then
+            statRank[k] = n
+            n = n + 1
+        end
+    end
+
+    model.statRank = statRank
+end
+
 function Reforgenator:ModelToModelOption(modelName, model)
     local c = Reforgenator.constants
 
@@ -396,6 +417,7 @@ function Reforgenator:ModelToModelOption(modelName, model)
                 end
 
                 model.reforgeOrder[i].rating = key
+                Reforgenator:rebuildStatRank(model)
             end,
         }
         seq = seq + 1
