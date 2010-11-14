@@ -630,6 +630,19 @@ function Reforgenator:InitializeAddOptions()
                     desc = 'Make a copy of the existing model',
                     func = function()
                         Reforgenator:Debug("### new model named ["..createName.."] copied from ["..sourceName.."]")
+
+                        local model = Reforgenator:deepCopy(Reforgenator.db.global.models[sourceName])
+                        model.class = className
+                        model.readOnly = nil
+                        model.ak = nil
+                        Reforgenator:LoadModel(model, createName)
+                        local opt = Reforgenator:ModelToModelOption(createName, model)
+                        local key = string.format('model_%03d', nextAvailableSequence)
+                        opt.order = nextAvailableSequence
+                        modelOptions.args[key] = opt
+                        nextAvailableSequence = nextAvailableSequence + 1
+
+                        createName = ''
                     end,
                 },
             },
