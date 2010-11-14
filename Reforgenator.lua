@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.27"
+local version = "0.0.28"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -41,23 +41,19 @@ local function to_string( tbl )
     end
 end
 
-function string:split(sSeparator, nMax, bRegexp)
+local function stringSplit(str, pat)
     local aRecord = {}
 
-    if self:len() > 0 then
-        local bPlain = not bRegexp
-        nMax = nMax or -1
-
+    if str:len() > 0 then
         local nField=1 nStart=1
-        local nFirst,nLast = self:find(sSeparator, nStart, bPlain)
-        while nFirst and nMax ~= 0 do
-            aRecord[nField] = self:sub(nStart, nFirst-1)
+        local nFirst,nLast = str:find(pat, nStart, false)
+        while nFirst do
+            aRecord[nField] = str:sub(nStart, nFirst-1)
             nField = nField+1
             nStart = nLast+1
-            nFirst,nLast = self:find(sSeparator, nStart, bPlain)
-            nMax = nMax-1
+            nFirst,nLast = str:find(pat, nStart, false)
         end
-        aRecord[nField] = self:sub(nStart)
+        aRecord[nField] = str:sub(nStart)
     end
 
     return aRecord
@@ -75,6 +71,15 @@ function Invert(list)
         invertedList[v] = k
     end
     return invertedList
+end
+
+local ReforgeModel = {}
+
+function ReforgeModel:new()
+    local result = { ak='', class='', statRank={}, reforgeOrder={} }
+    setmetatable(result, self)
+    self.__index = self
+    return result
 end
 
 function Reforgenator:OnEnable()
@@ -109,24 +114,12 @@ local options = {
     },
 }
 
-local maintOptions = {
+local modelOptions = {
     type = 'group',
-    name = "Reforgenator",
-    handler = Reforgenator,
-    desc = "Calculate what to reforge",
-    args = {
-        resetDatabase = {
-            name = 'Reload built-in models',
-            desc = 'Reload the built-in models from the addon',
-            type = 'execute',
-            func = function(info)
-                Reforgenator:LoadDefaultModels()
-            end,
-        },
-    },
+    args = {},
 }
 
-local modelOptions = {
+local builtInModelOptions = {
     type = 'group',
     args = {},
 }
@@ -139,90 +132,7 @@ local addOptions = {
     name = 'Add new model',
     handler = Reforgenator,
     desc = 'Add new model',
-    args = {
-        name = {
-            order = 1,
-            type = 'input',
-            name = 'Model name',
-            desc = 'Name of the new model',
-            get = function() return createName end,
-            set = function(info,val) createName = strtrim(val) end,
-            validate = function(info,val)
-                local nm = strtrim(val)
-                if nm == '' then
-                    return 'No name given'
-                end
-                if Reforgenator.db.global.models[nm] then
-                    return 'There is already a model with that name'
-                end
-                return true
-            end
-        },
-        empty_group = {
-            order = 2,
-            type = 'group',
-            name = 'Empty model',
-            desc = 'Create a new empty model',
-            args = {
-                class = {
-                    order = 1,
-                    type = 'select',
-                    name = 'Class',
-                    desc = 'Class the model applies to',
-                    values = {
-                        ["WARRIOR"] = 'Warrior',
-                        ["DEATHKNIGHT"] = 'Death knight',
-                        ["PALADIN"] = 'Paladin',
-                        ["PRIEST"] = 'Priest',
-                        ["SHAMAN"] = 'Shaman',
-                        ["DRUID"] = 'Druid',
-                        ["ROGUE"] = 'Rogue',
-                        ["MAGE"] = 'Mage',
-                        ["WARLOCK"] = 'Warlock',
-                        ["HUNTER"] = 'Hunter',
-                    },
-                    get = function() return className end,
-                    set = function(info,key) className = key end,
-                },
-                doEet = {
-                    order = 2,
-                    type = 'execute',
-                    name = 'Create model',
-                    desc = 'Create the new empty model',
-                    func = function()
-                        Reforgenator:Debug("### new empty model named ["..createName.."] for class ["..className.."]")
-                    end,
-                },
-            },
-        },
-        copyGroup = {
-            order = 3,
-            type = 'group',
-            name = 'Copy existing model',
-            desc = 'Copy an existing model',
-            args = {
-                source = {
-                    order = 1,
-                    type = 'select',
-                    name = 'Source',
-                    desc = 'Name of the model to copy',
-                    values = {
-                    },
-                    get = function() return sourceName end,
-                    set = function(info,key) sourceName = key end,
-                },
-                doEet = {
-                    order = 2,
-                    type = 'execute',
-                    name = 'Create model',
-                    desc = 'Make a copy of the existing model',
-                    func = function()
-                        Reforgenator:Debug("### new model named ["..createName.."] copied from ["..sourceName.."]")
-                    end,
-                },
-            },
-        },
-    },
+    args = {}
 }
 
 local defaults = {
@@ -253,6 +163,9 @@ function Reforgenator:OnInitialize()
     Reforgenator.db = LibStub("AceDB-3.0"):New("ReforgenatorDB", defaults, "Default")
 
     Reforgenator:InitializeConstants()
+    Reforgenator:LoadDefaultModels()
+    Reforgenator:InitializeModelOptions()
+    Reforgenator:InitializeAddOptions()
 
     local AC = LibStub('AceConfig-3.0')
     local ACD = LibStub('AceConfigDialog-3.0')
@@ -260,21 +173,14 @@ function Reforgenator:OnInitialize()
     AC:RegisterOptionsTable("Reforgenator", options)
     Reforgenator.optionsFrame = ACD:AddToBlizOptions("Reforgenator", "Reforgenator")
 
-    AC:RegisterOptionsTable("Reforgenator Maintenance", maintOptions)
-    ACD:AddToBlizOptions("Reforgenator Maintenance", "Maintenance", "Reforgenator")
-
     AC:RegisterOptionsTable('Reforgenator Add', addOptions)
     ACD:AddToBlizOptions('Reforgenator Add', 'New model', 'Reforgenator')
 
-    Reforgenator:LoadDefaultModels()
-    Reforgenator:InitializeModelOptions()
     AC:RegisterOptionsTable("Reforgenator Models", modelOptions)
     ACD:AddToBlizOptions("Reforgenator Models", "Models", "Reforgenator")
 
---    local panel = ReforgenatorModelEditorFrame
---    panel.name = 'Models'
---    panel.parent = Reforgenator.optionsFrame.name
---    InterfaceOptions_AddCategory(panel)
+    AC:RegisterOptionsTable('Reforgenator built-in models', builtInModelOptions)
+    ACD:AddToBlizOptions('Reforgenator built-in models', 'Built-in models', 'Reforgenator')
 
     local broker = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
         launcher = true,
@@ -376,8 +282,8 @@ end
 
 function Reforgenator:InitializeModelOptions()
     local models = Reforgenator.db.global.models
-    local n = 1
     local key = nil
+    local n = 1
 
     -- User-defined models
     for k,v in pairs(models) do
@@ -390,19 +296,13 @@ function Reforgenator:InitializeModelOptions()
     end
 
     -- Built-in models
-    key = 'model_' .. n
-    n = 101
-    modelOptions.args[key] = {
-        type = 'header',
-        name = 'Built-in models',
-    }
-
+    n = 1
     for k,v in pairs(models) do
         if v.readOnly then
             key = string.format('model_%03d', n)
             n = n + 1
 
-            modelOptions.args[key] = self:ModelToModelOption(k,v)
+            builtInModelOptions.args[key] = self:ModelToModelOption(k,v)
         end
     end
 end
@@ -419,6 +319,35 @@ function Reforgenator:ModelToModelOption(modelName, model)
 
     local seq = 1
 
+    option.args['class'] = {
+        type = 'select',
+        name = 'Class',
+        desc = 'Class this model applies to',
+        order = seq,
+        values = {
+            ["WARRIOR"] = 'Warrior',
+            ["DEATHKNIGHT"] = 'Death knight',
+            ["PALADIN"] = 'Paladin',
+            ["PRIEST"] = 'Priest',
+            ["SHAMAN"] = 'Shaman',
+            ["DRUID"] = 'Druid',
+            ["ROGUE"] = 'Rogue',
+            ["MAGE"] = 'Mage',
+            ["WARLOCK"] = 'Warlock',
+            ["HUNTER"] = 'Hunter',
+        },
+        get = function() return model.class end,
+        set = function(info, key)
+            if model.readOnly then
+                return
+            end
+
+            model.class = key
+            model.PerCharacterOptions = {}
+        end,
+    }
+    seq = seq + 1
+
     option.args['useSpellHit'] = {
         type = 'toggle',
         name = 'Use spell hit',
@@ -427,7 +356,13 @@ function Reforgenator:ModelToModelOption(modelName, model)
         get = function()
             return model.useSpellHit
         end,
-        set = function(self, info) end
+        set = function(info, key)
+            if model.readOnly then
+                return
+            end
+
+            model.useSpellHit = key
+        end
     }
     seq = seq + 1
 
@@ -455,6 +390,10 @@ function Reforgenator:ModelToModelOption(modelName, model)
                     return
                 end
 
+                if not model.reforgeOrder[i] then
+                    model.reforgeOrder[i] = {}
+                end
+
                 model.reforgeOrder[i].rating = key
             end,
         }
@@ -480,8 +419,12 @@ function Reforgenator:ModelToModelOption(modelName, model)
                     return
                 end
 
+                if not model.reforgeOrder[i] then
+                    model.reforgeOrder[i] = {}
+                end
+
                 model.reforgeOrder[i].cap = key
-                options.args['userdata'..i].hidden = key ~= "Fixed";
+                option.args['userdata'..i].hidden = key ~= "Fixed";
             end,
             values = {}
         }
@@ -503,6 +446,7 @@ function Reforgenator:ModelToModelOption(modelName, model)
                     return nil
                 end
 
+                self:Debug("### userdata="..to_string(model.reforgeOrder[i].userdata))
                 if type(model.reforgeOrder[i].userdata) == "table" then
                     return table.concat(model.reforgeOrder[i].userdata, ', ')
                 elseif model.reforgeOrder[i].userdata then
@@ -516,10 +460,13 @@ function Reforgenator:ModelToModelOption(modelName, model)
                     return
                 end
 
+                self:Debug("### new userdata="..to_string(key))
+
                 if not key then
                     model.reforgeOrder[i].userdata = nil
                 else
-                    t = key:split(',%s*', nil, true)
+                    t = stringSplit(strtrim(key), ',%s*')
+                    self:Debug("### parsed new userdata="..to_string(t))
                     if #t == 1 then
                         model.reforgeOrder[i].userdata = t[1]
                     else
@@ -532,6 +479,124 @@ function Reforgenator:ModelToModelOption(modelName, model)
     end
 
     return option
+end
+
+function Reforgenator:InitializeAddOptions()
+    local name, nameEN = UnitClass("player")
+    className = nameEN
+
+    addOptions.args = {
+        name = {
+            order = 1,
+            type = 'input',
+            name = 'Model name',
+            desc = 'Name of the new model',
+            get = function() return createName end,
+            set = function(info,val) createName = strtrim(val) end,
+            validate = function(info,val)
+                local nm = strtrim(val)
+                if nm == '' then
+                    Reforgenator:MessageBox('Please enter a name')
+                    return 'No name given'
+                end
+                if Reforgenator.db.global.models[nm] then
+                    Reforgenator:MessageBox('There is already a model with that name')
+                    return 'There is already a model with that name'
+                end
+                return true
+            end
+        },
+        emptyGroup = {
+            order = 2,
+            type = 'group',
+            name = 'Empty model',
+            desc = 'Create a new empty model',
+            args = {
+                class = {
+                    order = 1,
+                    type = 'select',
+                    name = 'Class',
+                    desc = 'Class the model applies to',
+                    values = {
+                        ["WARRIOR"] = 'Warrior',
+                        ["DEATHKNIGHT"] = 'Death knight',
+                        ["PALADIN"] = 'Paladin',
+                        ["PRIEST"] = 'Priest',
+                        ["SHAMAN"] = 'Shaman',
+                        ["DRUID"] = 'Druid',
+                        ["ROGUE"] = 'Rogue',
+                        ["MAGE"] = 'Mage',
+                        ["WARLOCK"] = 'Warlock',
+                        ["HUNTER"] = 'Hunter',
+                    },
+                    get = function() return className end,
+                    set = function(info,key) className = key end,
+                },
+                doEet = {
+                    order = 2,
+                    type = 'execute',
+                    name = 'Create model',
+                    desc = 'Create the new empty model',
+                    func = function()
+                        if createName == '' or strtrim(createName) == '' then
+                            Reforgenator:MessageBox('Please enter a name for the new model')
+                            return
+                        end
+
+                        Reforgenator:Debug("### new empty model named ["..createName.."] for class ["..className.."]")
+                        local model = ReforgeModel:new()
+                        model.class = className
+                        Reforgenator:LoadModel(model, createName)
+                        local opt = Reforgenator:ModelToModelOptions(createName, model)
+                        local key = string.format('model_%03d', nextAvailableSequence)
+                        opt.order = nextAvailableSequence
+                        modelOptions.args[key] = opt
+                        nextAvailableSequence = nextAvailableSequence + 1
+
+                        createName = ''
+                    end,
+                },
+            },
+        },
+        copyGroup = {
+            order = 3,
+            type = 'group',
+            name = 'Copy existing model',
+            desc = 'Copy an existing model',
+            args = {
+                source = {
+                    order = 1,
+                    type = 'select',
+                    name = 'Source',
+                    desc = 'Name of the model to copy',
+                    values = {
+                    },
+                    get = function() return sourceName end,
+                    set = function(info,key) sourceName = key end,
+                },
+                doEet = {
+                    order = 2,
+                    type = 'execute',
+                    name = 'Create model',
+                    desc = 'Make a copy of the existing model',
+                    func = function()
+                        Reforgenator:Debug("### new model named ["..createName.."] copied from ["..sourceName.."]")
+                    end,
+                },
+            },
+        },
+    }
+
+    local models = Reforgenator.db.global.models
+    local values = addOptions.args.copyGroup.args.source.values
+    for k,v in pairs(models) do
+        if sourceName == '' then
+            sourceName = k
+        end
+
+        values[k] = k
+    end
+
 end
 
 function Reforgenator:MessageFrame_OnLoad(widget)
@@ -1090,15 +1155,6 @@ end
 
 function Reforgenator:CalculateMaximumValue(playerModel)
     return 9999
-end
-
-local ReforgeModel = {}
-
-function ReforgeModel:new()
-    local result = { name='', statRank={}, reforgeOrder={} }
-    setmetatable(result, self)
-    self.__index = self
-    return result
 end
 
 function Reforgenator:TankModel()
@@ -1798,7 +1854,7 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
     local key = self:GetPlayerKey()
     for k,v in pairs(db.global.models) do
         if v.PerCharacterOptions[key] then
-            self:Debug("using previously-selected model "..v.name)
+            self:Debug("using previously-selected model "..k)
             return v
         end
     end
