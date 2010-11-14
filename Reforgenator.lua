@@ -1562,14 +1562,20 @@ end
 
 function Reforgenator:LoadDefaultModels()
     local models = Reforgenator.db.global.models
-    local cull = {}
-    for k,v in pairs(models) do
-        if k:find('^built%-in: ') or v.readOnly then
-            cull[#cull + 1] = k
+    if not models then
+        models = {}
+    else        
+        local cull = {}
+        for k,v in pairs(models) do
+            if k:find('^built%-in: ') or v.readOnly then
+                cull[#cull + 1] = k
+            end
         end
-    end
-    for _,v in ipairs(cull) do
-        models[v] = nil
+        for _,v in ipairs(cull) do
+            models[v] = nil
+        end
+
+        Reforgenator.db.global.models = models
     end
 
     self:LoadModel(self:TankModel(), 'DK, blood', 'DEATHKNIGHT/1', 'DEATHKNIGHT')
