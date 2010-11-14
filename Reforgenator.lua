@@ -114,6 +114,7 @@ local options = {
     },
 }
 
+local nextAvailableSequence = 1
 local modelOptions = {
     type = 'group',
     args = {},
@@ -288,8 +289,8 @@ function Reforgenator:InitializeModelOptions()
     -- User-defined models
     for k,v in pairs(models) do
         if not v.readOnly then
-            key = string.format('model_%03d', n)
-            n = n + 1
+            key = string.format('model_%03d', nextAvailableSequence)
+            nextAvailableSequence = nextAvailableSequence + 1
 
             modelOptions.args[key] = self:ModelToModelOption(k,v)
         end
@@ -478,6 +479,32 @@ function Reforgenator:ModelToModelOption(modelName, model)
         seq = seq + 1
     end
 
+    if not model.readOnly then
+        option.args.maintHeader = {
+            type = 'header',
+            name = 'Maintenance',
+            order = seq,
+        }
+        seq = seq + 1
+
+        option.args.deleteButton = {
+            type = 'execute',
+            name = 'Delete',
+            desc = 'Delete this model',
+            order = seq,
+            func = function()
+                Reforgenator.db.global.models[modelName] = nil
+                for k,v in pairs(modelOptions.args) do
+                    if v.type == 'group' and v.name == modelName then
+                        modelOptions.args[k] = nil
+                        break
+                    end
+                end
+            end,
+        }
+        seq = seq + 1
+    end
+
     return option
 end
 
@@ -547,7 +574,7 @@ function Reforgenator:InitializeAddOptions()
                         local model = ReforgeModel:new()
                         model.class = className
                         Reforgenator:LoadModel(model, createName)
-                        local opt = Reforgenator:ModelToModelOptions(createName, model)
+                        local opt = Reforgenator:ModelToModelOption(createName, model)
                         local key = string.format('model_%03d', nextAvailableSequence)
                         opt.order = nextAvailableSequence
                         modelOptions.args[key] = opt
@@ -647,15 +674,9 @@ function Reforgenator:UpdateWindow()
         end
     end
 
-    if #self.changes == 0 then
-        if ReforgenatorPanel:IsVisible() then
-            ReforgenatorPanel:Hide()
-        end
-    else
-        if not ReforgenatorPanel:IsVisible() then
-            ReforgenatorPanel:Show()
-        end
-    end 
+    if not ReforgenatorPanel:IsVisible() then
+        ReforgenatorPanel:Show()
+    end
 end
 
 function Reforgenator:UpdateWindowItem(index, itemDescriptor)
