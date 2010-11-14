@@ -1562,9 +1562,7 @@ end
 
 function Reforgenator:LoadDefaultModels()
     local models = Reforgenator.db.global.models
-    if not models then
-        models = {}
-    else        
+    if models ~= nil then
         local cull = {}
         for k,v in pairs(models) do
             if k:find('^built%-in: ') or v.readOnly then
