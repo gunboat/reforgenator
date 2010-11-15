@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.28"
+local version = "0.0.29"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -1392,7 +1392,8 @@ function Reforgenator:AffWarlockModel()
 
     model.reforgeOrder = {
         { rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
-        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed",
+            userdata={ 157, 781, 1406, 2030 } },
         { rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
@@ -1430,9 +1431,9 @@ function Reforgenator:DemoWarlockModel()
     model.readOnly = true
     model.statRank = Invert {
         "ITEM_MOD_HIT_RATING_SHORT",
-        "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_HASTE_RATING_SHORT",
         "ITEM_MOD_MASTERY_RATING_SHORT",
+        "ITEM_MOD_CRIT_RATING_SHORT",
         "ITEM_MOD_SPIRIT_SHORT",
         "ITEM_MOD_EXPERTISE_RATING_SHORT",
         "ITEM_MOD_DODGE_RATING_SHORT",
@@ -1441,8 +1442,8 @@ function Reforgenator:DemoWarlockModel()
 
     model.reforgeOrder = {
         { rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
-        { rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
-        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="MaximumPossible" },
+        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed",
+            userdata={ 157, 781, 1406, 2030 } },
         { rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
