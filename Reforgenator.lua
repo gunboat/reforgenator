@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "0.0.30"
+local version = "0.0.31"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -491,9 +491,11 @@ function Reforgenator:ModelToModelOption(modelName, model)
                     t = stringSplit(strtrim(key), ',%s*')
                     self:Debug("### parsed new userdata="..to_string(t))
                     if #t == 1 then
-                        model.reforgeOrder[i].userdata = t[1]
+                        model.reforgeOrder[i].userdata = math.floor(tonumber(t[1]))
                     else
-                        model.reforgeOrder[i].userdata = t
+                        local result = {}
+                        for k,v in ipairs(t) do result[#result+1] = math.floor(tonumber(v)) end
+                        model.reforgeOrder[i].userdata = result
                     end
                 end
             end,
@@ -769,116 +771,6 @@ function Reforgenator:ModelEditorScrollbar_Update()
 	else
 	    button:Hide()
 	end
-    end
-end
-
-function Reforgenator:ModelEditorFrame_OnShow(widget)
-    self:Debug("### ModelEditorFrame_OnShow")
-
-    for i = 1, 4 do
-        local stem = "ModelEditorRule"..i
-
-        local stat = _G[stem.."_Stat"]
-        Reforgenator:RuleTemplateStat_OnLoad(stat)
-
-        local scheme = _G[stem.."_Scheme"]
-        Reforgenator:RuleTemplateScheme_OnLoad(scheme)
-    end
-end
-
-function Reforgenator:ModelEditorName_OnClick(widget, button)
-    self:Debug("### ModelEditorName_OnClick")
-    for i=1,6 do
-        local b = _G["ModelEditorNameButton" .. i]
-        if b:GetID() == widget:GetID() then
-	    local t = _G["ModelEditorNameButton" .. i .. "Name"]
-	    Reforgenator.selectedModelName = t:GetText()
-            self:ModelEditor_UpdateFields()
-            b:LockHighlight()
-        else
-            b:UnlockHighlight()
-        end
-    end
-end
-
-function Reforgenator:ModelEditor_UpdateFields()
-    self:Debug("### ModelEditor_UpdateFields")
-    local name = Reforgenator.selectedModelName
-    if not name then
-        return
-    end
-
-    local models = Reforgenator.db.global.models
-    -- ReforgenatorModelEditorModelName:SetText(name)
-
-    for k,v in pairs(models[name].statRank) do
-        self:Debug("### stat rank #"..(v or "nil"))
-        self:Debug("###    rating="..(k or "nil"))
-        if k then
-            self:Debug("###    _G=".._G[k])
-        end
-        _G["ModelEditorStatRank"..v.."_Name"]:SetText(_G[k])
-    end
-
-    for i = 1, 4 do
-        local stem = "ModelEditorRule"..i
-        local rule = _G[stem]
-        local stat = _G[stem.."_Stat"]
-        local scheme = _G[stem.."_Scheme"]
-        local userdata = _G[stem.."_Userdata"]
-
-        UIDropDownMenu_ClearAll(stat)
-        UIDropDownMenu_ClearAll(scheme)
-        userdata:SetText("")
-        userdata:ClearFocus()
-
-        if models[name].reforgeOrder[i] then
-            UIDropDownMenu_SetSelectedName(stat, _G[models[name].reforgeOrder[i].rating])
-            UIDropDownMenu_SetSelectedName(scheme, models[name].reforgeOrder[i].cap)
-            if models[name].reforgeOrder[i].userdata then
-                userdata:SetText(models[name].reforgeOrder[i].userdata)
-            end
-        end
-    end
-end
-
-function Reforgenator:StatRankUpButton_OnClick(widget)
-    self:Debug("### up button for widget"..to_string(widget:GetID() or "nil"))
-    self:Debug("### widget="..to_string(widget))
-end
-
-function Reforgenator:StatRankDownButton_OnClick(widget)
-    self:Debug("### down button for widget"..to_string(widget:GetID() or "nil"))
-    self:Debug("### widget="..to_string(widget))
-end
-
-function Reforgenator:RuleTemplateStat_OnLoad(widget)
-    self:Debug("### RuleTemplateStat_OnLoad")
-    local func = function() Reforgenator:RuleTemplateStat_OnInitialize() end
-    UIDropDownMenu_Initialize(widget, func)
-end
-
-function Reforgenator:RuleTemplateStat_OnInitialize()
-    self:Debug("### RuleTemplateStat_OnInitialize")
-    for k,v in pairs(Reforgenator.constants.ITEM_STATS) do
-        local info = UIDropDownMenu_CreateInfo()
-        info.text = _G[k]
-        UIDropDownMenu_AddButton(info)
-    end
-end
-
-function Reforgenator:RuleTemplateScheme_OnLoad(widget)
-    self:Debug("### RuleTemplateScheme_OnLoad")
-    local func = function() Reforgenator:RuleTemplateScheme_OnInitialize() end
-    UIDropDownMenu_Initialize(widget, func)
-end
-
-function Reforgenator:RuleTemplateScheme_OnInitialize()
-    self:Debug("### RuleTemplateScheme_OnInitialize")
-    for k,v in pairs(Reforgenator.constants.STAT_CAPS) do
-        local info = UIDropDownMenu_CreateInfo()
-        info.text = k
-        UIDropDownMenu_AddButton(info)
     end
 end
 
