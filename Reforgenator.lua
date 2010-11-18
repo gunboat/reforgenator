@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "1.0.0"
+local version = "1.0.1"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -703,9 +703,12 @@ function Reforgenator:OnCheckbox(widget)
 end
 
 function Reforgenator:UpdateWindow()
+    FauxScrollFrame_Update(ReforgeListScrollFrame, #self.changes, 4, 41) 
+
     for i = 1,4 do
-        if i <= #self.changes then
-            self:UpdateWindowItem(i, self.changes[i])
+        local linePlusOffset = i + FauxScrollFrame_GetOffset(ReforgeListScrollFrame)
+        if linePlusOffset <= #self.changes then
+            self:UpdateWindowItem(i, self.changes[linePlusOffset])
         else
             self:UpdateWindowItem(i, nil)
         end

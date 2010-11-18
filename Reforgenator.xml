@@ -88,7 +88,7 @@
          hidden="true"
          parent="UIParent">
     <Size>
-      <AbsDimension x="270" y="235"/>
+      <AbsDimension x="301" y="235"/>
     </Size>
     <Anchors>
       <Anchor point="CENTER"/>
@@ -158,6 +158,56 @@
           </Anchor>
         </Anchors>
       </Frame>
+      <ScrollFrame name="ReforgeListScrollFrame" inherits="FauxScrollFrameTemplate">
+        <Size>
+          <AbsDimension x="31" y="163"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPRIGHT">
+            <Offset>
+              <AbsDimension x="-36" y="-60"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnVerticalScroll>
+            FauxScrollFrame_OnVerticalScroll(self, offset, 41, function() Reforgenator:UpdateWindow() end)
+          </OnVerticalScroll>
+          <OnShow>
+            Reforgenator:UpdateWindow()
+          </OnShow>
+        </Scripts>
+        <Layers>
+          <Layer level="BACKGROUND">
+            <Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+              <Size>
+                <AbsDimension x="31" y="163"/>
+              </Size>
+              <Anchors>
+                <Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+                  <Offset>
+                    <AbsDimension x="-2" y="5"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+              <TexCoords left="0" right="0.484375" top="0" bottom="1.0"/>
+            </Texture>
+            <Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+              <Size>
+                <AbsDimension x="31" y="108"/>
+              </Size>
+              <Anchors>
+                <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+                  <Offset>
+                    <AbsDimension x="-2" y="-4"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+              <TexCoords left="0.515625" right="1.0" top="0" bottom="0.421875"/>
+            </Texture>
+          </Layer>
+        </Layers>
+      </ScrollFrame>
       <Button name="$parent_Item1"
               inherits="ReforgeItemTemplate"
               id="1">
