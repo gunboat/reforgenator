@@ -423,6 +423,7 @@ function Reforgenator:ModelToModelOption(modelName, model)
         seq = seq + 1
 
         local arr = option.args['rating'..i].values
+        arr[""] = ""
         for k2,v2 in pairs(c.ITEM_STATS) do
             arr[k2] = _G[k2]
         end
@@ -454,6 +455,7 @@ function Reforgenator:ModelToModelOption(modelName, model)
         seq = seq + 1
 
         arr = option.args['cap'..i].values
+        arr[""] = ""
         for k2,v2 in pairs(c.STAT_CAPS) do
             arr[k2] = k2
         end
@@ -1856,11 +1858,6 @@ function Reforgenator:ShowState()
     if not model then
         return
     end
-    for k,v in ipairs(model.reforgeOrder) do
-        if not c.STAT_CAPS[v.cap] then
-            self:MessageBox("model has invalid stat cap")
-        end
-    end
 
     --
     -- Get the character's current ratings
@@ -1918,7 +1915,9 @@ function Reforgenator:ShowState()
     for _, entry in ipairs(model.reforgeOrder) do
         self:Debug("### entry.cap="..entry.cap)
         local f = c.STAT_CAPS[entry.cap]
-        soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel, entry.userdata), model.statRank, soln)
+        if f then
+          soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel, entry.userdata), model.statRank, soln)
+        end
     end
 
     -- Populate the window with the things to change
