@@ -147,6 +147,64 @@ local defaults = {
     }
 }
 
+local help_options = {
+    type = 'group',
+    name = 'Help',
+    args = {
+      header = {
+        type = 'header',
+        name = 'Help',
+      },
+      help = {
+        type = 'description',
+        name = [=[|cffffd200What do all the caps mean?
+|r
+|cffffd200MeleeHitCap|r: the melee hit cap, normally 8% but is affected by various modifiers.
+|cffffd200SpellHitCap|r: the spell hit cap, normally 17% but is affected by various modifiers.
+|cffffd200DWHitCap|r: the dual-wield hit cap, normally 27% but is affected by various modifiers.
+|cffffd200RangedHitCap|r: the ranged hit cap, normally 8% but is affected by various modifiers.
+|cffffd200ExpertiseSoftCap|r: the expertise soft cap where dodge is pushed off the attack table. Currently 23 for 4.0.3.
+|cffffd200ExpertiseHardCap|r: the expertise hard cap where parry is pushed off the attack table. Currently 55 for 4.0.3.
+|cffffd200MaximumPossible|r: reforge to get as much of this stat as is possible.
+|cffffd2001SecGCD|r: the value of haste rating necessary to reduce the GCD to one second.
+|cffffd200Fixed|r: Reforge up to or down to the value. You can enter a set of numbers separated by commas. If there are several numbers that means you want to reforge to just hit one of them. It will reforge to reach and just exceed the largest number in the field that it can.
+|cffffd200Maintain|r: don't reforge this stat up or down, but don't reforge it away to satisfy later rules.
+
+|cffffd200
+Give me an example of the 'fixed' rule
+|r
+Okay. Haste affects DOTs now by shortening the space between ticks. When the ticks are close enough that 50% of another tick fits in the spell duration, the game adds another whole tick. This means there are plateaus for haste where a tiny bit more haste adds a whole tick, so that's where you want to get your haste up to.
+
+According to Elitist Jerks, a destruction warlock in a raid environment will get a whole tick of 'Immolate' added when his haste is at 157, 781, 1406, and 2030. So ideally you'd get your haste to at least one of those numbers, but haste past one of those numbers that doesn't get to the next one is "wasted" and could be spent somewhere else.
+
+This is what the "fixed" cap is intended to do. If you provide one number, like "781", then it reforges the stat up or down to get as close to that number as it can. If you provide a list of numbers, like "157, 781, 1406, 2030" then it reforges to get the stat as close to one of the numbers on the list, and will choose the largest number it can get to, and will always be at or above the number.
+
+|cffffd200
+What's the difference between 'fixed' and 'maintain'?
+|r
+"Maintain" means to leave this stat alone. "Fixed" means to reforge the stat up or down to get to some value.
+
+|cffffd200
+How does the order of rules matter?
+|r
+The addon applies the rules in order. Whichever stat appears in the first rule is most important, and it will reforge other stats to get it if needed. Then it goes to the next rule. So if you want to keep whatever you currently have of a stat, choose 'maintain'. If you want a specific value of the stat, then choose 'fixed'.
+
+So "Hit rating: SpellHitCap, Crit rating: maintain" will be willing to reforge crit to get up to the hit cap, but "Crit rating: maintain, Hit rating: spellHitCap" wouldn't change your crit even if you're under the hit cap.
+
+|cffffd200
+What if I need more rules?
+|r
+At the moment, you can't have more than six rules. If you really need more rules, open a ticket on the CurseForge page.
+
+|cffffd200
+What if I need a different kind of rule, like reforging dodge and parry to the same rating?
+|r
+If you need another rule and have a link to a theorycrafting post, open a ticket on the CurseForge page with the link.
+]=],
+        }
+    }
+  }
+
 local profileOptions = {
     name = "Profiles",
     type = "group",
@@ -173,6 +231,9 @@ function Reforgenator:OnInitialize()
 
     AC:RegisterOptionsTable("Reforgenator", options)
     Reforgenator.optionsFrame = ACD:AddToBlizOptions("Reforgenator", "Reforgenator")
+
+    AC:RegisterOptionsTable('Reforgenator help', help_options)
+    ACD:AddToBlizOptions('Reforgenator help', 'Help', 'Reforgenator')
 
     AC:RegisterOptionsTable('Reforgenator Add', addOptions)
     ACD:AddToBlizOptions('Reforgenator Add', 'New model', 'Reforgenator')
