@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "1.0.1"
+local version = "1.0.2"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -1004,6 +1004,12 @@ function Reforgenator:CalculateMeleeHitCap(playerModel)
         hitCap = hitCap - math.floor(30.7548 * 2 * pointsInPrecision)
     end
 
+    -- Frost DKs get varying amounts if they're DW and have Nerves of Cold Steel
+    if playerModel.className == "DEATHKNIGHT" and playerModel.mainHandWeaponType:sub(1,10) ~= "Two-handed" then
+        local pointsInNoCS = select(5, GetTalentInfo(2, 3))
+        hitCap = hitCap - math.floor(30.7548 * pointsInNoCS)
+    end
+
     self:Debug("calculated melee hit cap = " .. hitCap)
 
     return hitCap
@@ -1026,6 +1032,12 @@ function Reforgenator:CalculateDWMeleeHitCap(playerModel)
     if playerModel.className == "ROGUE" then
         local pointsInPrecision = select(5, GetTalentInfo(2,3))
         hitCap = hitCap - math.floor(30.7548 * 2 * pointsInPrecision)
+    end
+
+    -- Frost DKs get varying amounts if they're DW and have Nerves of Cold Steel
+    if playerModel.className == "DEATHKNIGHT" and playerModel.mainHandWeaponType:sub(1,10) ~= "Two-handed" then
+        local pointsInNoCS = select(5, GetTalentInfo(2, 3))
+        hitCap = hitCap - math.floor(30.7548 * pointsInNoCS)
     end
 
     self:Debug("calculated DW melee hit cap = " .. hitCap)
