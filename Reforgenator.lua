@@ -244,8 +244,9 @@ function Reforgenator:OnInitialize()
     AC:RegisterOptionsTable('Reforgenator built-in models', builtInModelOptions)
     ACD:AddToBlizOptions('Reforgenator built-in models', 'Built-in models', 'Reforgenator')
 
-    local broker = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject("Reforgenator", {
-        launcher = true,
+    local broker = LibStub:GetLibrary("LibDataBroker-1.1", true)
+    local ldbButton = broker:NewDataObject("Reforgenator", {
+        type = "launcher",
         icon = "Interface\\Icons\\INV_Misc_EngGizmos_06",
         text = "Reforgenator",
         OnClick = function(frame, button)
@@ -262,7 +263,7 @@ function Reforgenator:OnInitialize()
         end
     })
     Reforgenator.minimapIcon = LibStub("LibDBIcon-1.0")
-    Reforgenator.minimapIcon:Register("Reforgenator", broker, Reforgenator.db.profile.minimap)
+    Reforgenator.minimapIcon:Register("Reforgenator", ldbButton, Reforgenator.db.profile.minimap)
 
     self:Debug("### minimap.hide="..(to_string(Reforgenator.db.profile.minimap.hide or "nil")))
     if Reforgenator.db.profile.minimap.hide then
