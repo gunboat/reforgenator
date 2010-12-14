@@ -2020,6 +2020,17 @@ function Reforgenator:ShowState()
     self:Debug("playerStats="..to_string(playerStats))
 
 
+    local REFORGE_ID_MAP = {
+	[1] = "ITEM_MOD_SPIRIT_SHORT",
+	[2] = "ITEM_MOD_DODGE_RATING_SHORT",
+	[3] = "ITEM_MOD_PARRY_RATING_SHORT",
+	[4] = "ITEM_MOD_HIT_RATING_SHORT",
+	[5] = "ITEM_MOD_CRIT_RATING_SHORT",
+	[6] = "ITEM_MOD_HASTE_RATING_SHORT",
+	[7] = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+	[8] = "ITEM_MOD_MASTERY_RATING_SHORT",
+    }
+
     -- Get the current state of the equipment
     soln = SolutionContext:new()
     for k,v in ipairs(Reforgenator.constants.INVENTORY_SLOTS) do
@@ -2033,10 +2044,19 @@ function Reforgenator:ShowState()
             entry.slotInfo = slotInfo
             entry.itemLevel = select(4, GetItemInfo(itemLink))
 
+	    -- examine items previously reforged to see if they're still optimal
+	    entry.reforged = nil
             if RI:IsItemReforged(itemLink) then
-                entry.reforged = true
-            else
-                entry.reforged = nil
+		-- mark this item sandboxed
+		entry.sandboxed = true
+		local minus, plus = RI:GetReforgedStatIDs(RI:GetReforgeID(itemLink))
+		entry.previousReforgedFrom = REFORGE_ID_MAP[minus]
+		entry.previousReforgedTo = REFORGE_ID_MAP[plus]
+
+		-- and undo the effects of the previous reforge
+		local delta = stats[REFORGE_ID_MAP[plus]]
+		stats[REFORGE_ID_MAP[plus]] = nil
+		stats[REFORGE_ID_MAP[minus]] = stats[REFORGE_ID_MAP[minus]] + delta
             end
 
             for k,v in pairs(stats) do
@@ -2059,16 +2079,29 @@ function Reforgenator:ShowState()
         end
     end
 
+    -- Go through the list and copy the changes except those that were reforged in the sandbox and wound
+    -- up in the same place as they started
+    local effectiveChanges = {}
+    for k,v in ipairs(soln.changes) do
+	if v.sandboxed then
+	    if v.reforgedFrom ~= v.previouslyReforgedFrom or v.reforgedTo ~= v.previouslyReforgedTo then
+		effectiveChanges[#effectiveChanges] = v
+	    end
+	else
+	    effectiveChanges[#effectiveChanges] = v
+	end
+    end
+
     -- Populate the window with the things to change
-    if #soln.changes == 0 then
+    if #effectiveChanges == 0 then
         self:MessageBox("Reforgenator has no suggestions for your gear")
     else
-        for k,v in ipairs(soln.changes) do
+        for k,v in ipairs(effectiveChanges) do
             self:Debug("changed: " .. to_string(v))
         end
     end
 
-    self.changes = soln.changes
+    self.changes = effectiveChanges
     self:UpdateWindow()
 
     self:Debug("all done")
