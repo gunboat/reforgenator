@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "1.1.0"
+local version = "1.1.1"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -2050,13 +2050,14 @@ function Reforgenator:ShowState()
 		-- mark this item sandboxed
 		entry.sandboxed = true
 		local minus, plus = RI:GetReforgedStatIDs(RI:GetReforgeID(itemLink))
-		entry.previousReforgedFrom = REFORGE_ID_MAP[minus]
-		entry.previousReforgedTo = REFORGE_ID_MAP[plus]
+		entry.oldReforgedFrom = REFORGE_ID_MAP[minus]
+		entry.oldReforgedTo = REFORGE_ID_MAP[plus]
 
 		-- and undo the effects of the previous reforge
 		local delta = stats[REFORGE_ID_MAP[plus]]
 		stats[REFORGE_ID_MAP[plus]] = nil
 		stats[REFORGE_ID_MAP[minus]] = stats[REFORGE_ID_MAP[minus]] + delta
+		self:Debug("pretending stats are "..to_string(stats))
             end
 
             for k,v in pairs(stats) do
@@ -2083,12 +2084,15 @@ function Reforgenator:ShowState()
     -- up in the same place as they started
     local effectiveChanges = {}
     for k,v in ipairs(soln.changes) do
+	self:Debug("sandboxed="..to_string(v.sandboxed))
 	if v.sandboxed then
-	    if v.reforgedFrom ~= v.previouslyReforgedFrom or v.reforgedTo ~= v.previouslyReforgedTo then
-		effectiveChanges[#effectiveChanges] = v
+	    self:Debug("oldReforgedFrom="..v.oldReforgedFrom..", reforgedFrom="..v.reforgedFrom)
+	    self:Debug("oldReforgedTo="..v.oldReforgedTo..", reforgedTo="..v.reforgedTo)
+	    if v.reforgedFrom ~= v.oldReforgedFrom or v.reforgedTo ~= v.oldReforgedTo then
+		effectiveChanges[#effectiveChanges + 1] = v
 	    end
 	else
-	    effectiveChanges[#effectiveChanges] = v
+	    effectiveChanges[#effectiveChanges + 1] = v
 	end
     end
 
