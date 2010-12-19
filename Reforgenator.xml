@@ -88,7 +88,7 @@
          hidden="true"
          parent="UIParent">
     <Size>
-      <AbsDimension x="301" y="235"/>
+      <AbsDimension x="301" y="265"/>
     </Size>
     <Anchors>
       <Anchor point="CENTER"/>
@@ -158,14 +158,24 @@
           </Anchor>
         </Anchors>
       </Frame>
+      <Frame name="$parent_SandboxSelection"
+             inherits="UIDropDownMenuTemplate">
+        <Anchors>
+          <Anchor point="TOP">
+            <Offset>
+              <AbsDimension x="0" y="-50"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+      </Frame>
       <ScrollFrame name="ReforgeListScrollFrame" inherits="FauxScrollFrameTemplate">
         <Size>
-          <AbsDimension x="31" y="163"/>
+          <AbsDimension x="31" y="168"/>
         </Size>
         <Anchors>
           <Anchor point="TOPRIGHT">
             <Offset>
-              <AbsDimension x="-36" y="-60"/>
+              <AbsDimension x="-36" y="-85"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -181,12 +191,12 @@
           <Layer level="BACKGROUND">
             <Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
               <Size>
-                <AbsDimension x="31" y="163"/>
+                <AbsDimension x="31" y="85"/>
               </Size>
               <Anchors>
                 <Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
                   <Offset>
-                    <AbsDimension x="-2" y="5"/>
+                    <AbsDimension x="-2" y="4"/>
                   </Offset>
                 </Anchor>
               </Anchors>
@@ -194,12 +204,12 @@
             </Texture>
             <Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
               <Size>
-                <AbsDimension x="31" y="108"/>
+                <AbsDimension x="31" y="85"/>
               </Size>
               <Anchors>
                 <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
                   <Offset>
-                    <AbsDimension x="-2" y="-4"/>
+                    <AbsDimension x="-2" y="-2"/>
                   </Offset>
                 </Anchor>
               </Anchors>
@@ -214,7 +224,7 @@
         <Anchors>
           <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="30" y="-53"/>
+              <AbsDimension x="30" y="-83"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -329,11 +339,12 @@
     </Frames>
     <Scripts>
       <OnLoad>
-        UIDropDownMenu_Initialize(ReforgenatorPanel_ModelSelection, function(...)
-        Reforgenator:ModelSelection_OnLoad(...) end)
+        UIDropDownMenu_Initialize(ReforgenatorPanel_ModelSelection, function(...) Reforgenator:ModelSelection_OnLoad(...) end)
+        UIDropDownMenu_Initialize(ReforgenatorPanel_SandboxSelection, function(...) Reforgenator:SandboxSelection_OnLoad(...) end)
       </OnLoad>
       <OnShow>
         Reforgenator:ModelSelection_OnShow()
+        Reforgenator:SandboxSelection_OnShow()
       </OnShow>
     </Scripts>
   </Frame>

@@ -91,7 +91,7 @@ local options = {
     name = "Reforgenator",
     handler = Reforgenator,
     desc = "Calculate what to reforge",
-    args = { 
+    args = {
         useMinimap = {
             name = "Use minimap button",
             desc = "Show a button on the minimap",
@@ -809,7 +809,7 @@ function Reforgenator:OnCheckbox(widget)
 end
 
 function Reforgenator:UpdateWindow()
-    FauxScrollFrame_Update(ReforgeListScrollFrame, #self.changes, 4, 41) 
+    FauxScrollFrame_Update(ReforgeListScrollFrame, #self.changes, 4, 41)
 
     for i = 1,4 do
         local linePlusOffset = i + FauxScrollFrame_GetOffset(ReforgeListScrollFrame)
@@ -941,6 +941,50 @@ function Reforgenator:ModelSelection_OnShow()
         if v.PerCharacterOptions[key] then
             UIDropDownMenu_SetSelectedName(ReforgenatorPanel_ModelSelection, k)
         end
+    end
+end
+
+function Reforgenator:SandboxSelection_OnLoad()
+    self:Debug("### SandboxSelection_OnLoad")
+end
+
+function Reforgenator:SandboxSelection_OnInitialize()
+    self:Debug("### SandboxSelection_OnInitialize")
+
+    local info = UIDropDownMenu_CreateInfo()
+    info.text = "Leave reforged items alone"
+    info.func = function(self)
+	Reforgenator.db.char.useSandbox = nil
+	UIDropDownMenu_SetSelectedName(ReforgenatorPanel_SandboxSelection, self.value)
+	Reforgenator:ShowState()
+    end
+    info.id = 1
+    info.checked = nil
+    UIDropDownMenu_AddButton(info)
+
+    info.text = "Consider reforging anything"
+    info.func = function(self)
+	Reforgenator.db.char.useSandbox = true
+	UIDropDownMenu_SetSelectedName(ReforgenatorPanel_SandboxSelection, self.value)
+	Reforgenator:ShowState()
+    end
+    info.id = 2
+    info.checked = nil
+    UIDropDownMenu_AddButton(info)
+end
+
+function Reforgenator:SandboxSelection_OnShow()
+    self:Debug("### SandboxSelection_OnShow")
+
+    local db = Reforgenator.db
+    local func = function() Reforgenator:SandboxSelection_OnInitialize() end
+    UIDropDownMenu_Initialize(ReforgenatorPanel_SandboxSelection, func)
+    UIDropDownMenu_SetWidth(ReforgenatorPanel_SandboxSelection, 230)
+
+    if db.char.useSandbox then
+	UIDropDownMenu_SetSelectedID(ReforgenatorPanel_SandboxSelection, 2)
+    else
+	UIDropDownMenu_SetSelectedID(ReforgenatorPanel_SandboxSelection, 1)
     end
 end
 
@@ -1988,6 +2032,7 @@ end
 
 function Reforgenator:ShowState()
     local c = Reforgenator.constants
+    local db = Reforgenator.db
     self:Debug("in ShowState")
 
     local playerModel = self:GetPlayerModel()
@@ -2044,20 +2089,23 @@ function Reforgenator:ShowState()
             entry.slotInfo = slotInfo
             entry.itemLevel = select(4, GetItemInfo(itemLink))
 
-	    -- examine items previously reforged to see if they're still optimal
-	    entry.reforged = nil
+            -- examine items previously reforged to see if they're still optimal
+            entry.reforged = nil
             if RI:IsItemReforged(itemLink) then
-		-- mark this item sandboxed
-		entry.sandboxed = true
-		local minus, plus = RI:GetReforgedStatIDs(RI:GetReforgeID(itemLink))
-		entry.oldReforgedFrom = REFORGE_ID_MAP[minus]
-		entry.oldReforgedTo = REFORGE_ID_MAP[plus]
+		if db.char.useSandbox then
+		    -- mark this item sandboxed
+		    entry.sandboxed = true
+		    local minus, plus = RI:GetReforgedStatIDs(RI:GetReforgeID(itemLink))
+		    entry.oldReforgedFrom = REFORGE_ID_MAP[minus]
+		    entry.oldReforgedTo = REFORGE_ID_MAP[plus]
 
-		-- and undo the effects of the previous reforge
-		local delta = stats[REFORGE_ID_MAP[plus]]
-		stats[REFORGE_ID_MAP[plus]] = nil
-		stats[REFORGE_ID_MAP[minus]] = stats[REFORGE_ID_MAP[minus]] + delta
-		self:Debug("pretending stats are "..to_string(stats))
+		    -- and undo the effects of the previous reforge
+		    local delta = math.floor(0.40 * stats[REFORGE_ID_MAP[minus]])
+		    playerStats[REFORGE_ID_MAP[plus]] = playerStats[REFORGE_ID_MAP[plus]] - delta
+		    playerStats[REFORGE_ID_MAP[minus]] = playerStats[REFORGE_ID_MAP[minus]] + delta
+		else
+		    entry.reforged = true
+		end
             end
 
             for k,v in pairs(stats) do
