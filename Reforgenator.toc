@@ -3,7 +3,7 @@
 ## Notes: Figure out what to reforge
 ## Author: gunboat, gnerfed
 ## URL: 
-## Version: 1.1.2
+## Version: 1.1.3
 ## SavedVariables: ReforgenatorDB
 ## OptionalDeps: Ace3, tekDebug
 
