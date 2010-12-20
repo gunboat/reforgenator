@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "1.1.1"
+local version = "1.1.2"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -1084,7 +1084,7 @@ function Reforgenator:CalculateMeleeHitCap(playerModel)
     end
 
     -- Fury warriors get 3% bonus from Precision
-    if playerModel.class == "WARRIOR" and playerModel.primaryTab == 2 then
+    if playerModel.className == "WARRIOR" and playerModel.primaryTab == 2 then
         hitCap = hitCap - math.floor(3 * K)
     end
 
@@ -1117,7 +1117,7 @@ function Reforgenator:CalculateDWMeleeHitCap(playerModel)
     end
 
     -- Fury warriors get 3% bonus from Precision
-    if playerModel.class == "WARRIOR" and playerModel.primaryTab == 2 then
+    if playerModel.className == "WARRIOR" and playerModel.primaryTab == 2 then
         hitCap = hitCap - math.floor(3 * K)
     end
 
