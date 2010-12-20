@@ -1,15 +1,14 @@
 -- Many of the IDs were verified on live & beta, but some are interpolated.
 
-local MAJOR, MINOR = "LibReforgingInfo-1.0", 2
+local MAJOR, MINOR = "LibReforgingInfo-1.0", 3
 
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
-local cata = GetGuildLevelEnabled()
 
 -- offset is the id of the spirit -> dodge reforge
--- this is different on 4.0.1 and 4.0.3 apparently.
-local offset = cata and 113 or 57
+-- this is the value used in 4.0.3a.
+local offset = 113
 
 local SPI = 1
 local DODGE = 2
