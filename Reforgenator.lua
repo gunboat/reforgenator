@@ -2094,15 +2094,22 @@ function Reforgenator:ShowState()
             if RI:IsItemReforged(itemLink) then
 		if db.char.useSandbox then
 		    -- mark this item sandboxed
-		    entry.sandboxed = true
 		    local minus, plus = RI:GetReforgedStatIDs(RI:GetReforgeID(itemLink))
-		    entry.oldReforgedFrom = REFORGE_ID_MAP[minus]
-		    entry.oldReforgedTo = REFORGE_ID_MAP[plus]
+		    if minus and plus then
+			entry.sandboxed = true
+			entry.oldReforgedFrom = REFORGE_ID_MAP[minus]
+			entry.oldReforgedTo = REFORGE_ID_MAP[plus]
 
-		    -- and undo the effects of the previous reforge
-		    local delta = math.floor(0.40 * stats[REFORGE_ID_MAP[minus]])
-		    playerStats[REFORGE_ID_MAP[plus]] = playerStats[REFORGE_ID_MAP[plus]] - delta
-		    playerStats[REFORGE_ID_MAP[minus]] = playerStats[REFORGE_ID_MAP[minus]] + delta
+			-- and undo the effects of the previous reforge
+			local delta = math.floor(0.40 * stats[REFORGE_ID_MAP[minus]])
+			playerStats[REFORGE_ID_MAP[plus]] = playerStats[REFORGE_ID_MAP[plus]] - delta
+			playerStats[REFORGE_ID_MAP[minus]] = playerStats[REFORGE_ID_MAP[minus]] + delta
+		    else
+			-- this shouldn't happen, but apparently it does
+			-- and I haven't been able to repro yet
+			entry.reforged = true
+		    end
+
 		else
 		    entry.reforged = true
 		end
