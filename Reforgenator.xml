@@ -88,7 +88,7 @@
          hidden="true"
          parent="UIParent">
     <Size>
-      <AbsDimension x="301" y="265"/>
+      <AbsDimension x="301" y="290"/>
     </Size>
     <Anchors>
       <Anchor point="CENTER"/>
@@ -168,6 +168,16 @@
           </Anchor>
         </Anchors>
       </Frame>
+      <Frame name="$parent_TargetLevelSelection"
+             inherits="UIDropDownMenuTemplate">
+        <Anchors>
+          <Anchor point="TOP">
+            <Offset>
+              <AbsDimension x="0" y="-75"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+      </Frame>
       <ScrollFrame name="ReforgeListScrollFrame" inherits="FauxScrollFrameTemplate">
         <Size>
           <AbsDimension x="31" y="168"/>
@@ -175,7 +185,7 @@
         <Anchors>
           <Anchor point="TOPRIGHT">
             <Offset>
-              <AbsDimension x="-36" y="-85"/>
+              <AbsDimension x="-36" y="-110"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -224,7 +234,7 @@
         <Anchors>
           <Anchor point="TOPLEFT">
             <Offset>
-              <AbsDimension x="30" y="-83"/>
+              <AbsDimension x="30" y="-108"/>
             </Offset>
           </Anchor>
         </Anchors>
@@ -341,10 +351,12 @@
       <OnLoad>
         UIDropDownMenu_Initialize(ReforgenatorPanel_ModelSelection, function(...) Reforgenator:ModelSelection_OnLoad(...) end)
         UIDropDownMenu_Initialize(ReforgenatorPanel_SandboxSelection, function(...) Reforgenator:SandboxSelection_OnLoad(...) end)
+        UIDropDownMenu_Initialize(ReforgenatorPanel_TargetLevelSelection, function(...) Reforgenator:TargetLevelSelection_OnLoad(...) end)
       </OnLoad>
       <OnShow>
         Reforgenator:ModelSelection_OnShow()
         Reforgenator:SandboxSelection_OnShow()
+        Reforgenator:TargetLevelSelection_OnShow()
       </OnShow>
     </Scripts>
   </Frame>

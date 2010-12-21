@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "1.1.4"
+local version = "1.2.0"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -381,6 +381,36 @@ function Reforgenator:InitializeConstants()
         expertise = EXP_RATING_CONVERSIONS[gameVersion],
         haste = HASTE_RATING_CONVERSIONS[gameVersion],
         mastery = MASTERY_RATING_CONVERSIONS[gameVersion],
+    }
+
+    c.REFORGING_TARGET_LEVELS = {
+	[1] = "Reforge for heroics",
+	[2] = "Reforge for raiding",
+    }
+
+    c.MELEE_HIT_CAP_BY_TARGET_LEVEL = {
+	[1] = 6,
+	[2] = 8
+    }
+
+    c.DW_HIT_CAP_BY_TARGET_LEVEL = {
+	[1] = 25,
+	[2] = 27
+    }
+
+    c.EXP_SOFT_CAP_BY_TARGET_LEVEL = {
+	[1] = 24,
+	[2] = 26,
+    }
+
+    c.EXP_HARD_CAP_BY_TARGET_LEVEL = {
+	[1] = 24,
+	[2] = 55,
+    }
+
+    c.SPELL_HIT_CAP_BY_TARGET_LEVEL = {
+	[1] = 6,
+	[2] = 17,
     }
 
 end
@@ -988,6 +1018,41 @@ function Reforgenator:SandboxSelection_OnShow()
     end
 end
 
+function Reforgenator:TargetLevelSelection_OnLoad()
+    self:Debug("### TargetLevelSelection_OnLoad")
+end
+
+function Reforgenator:TargetLevelSelection_OnInitialize()
+    self:Debug("### TargetLevelSelection_OnInitialize")
+
+    local info = UIDropDownMenu_CreateInfo()
+
+    local c = Reforgenator.constants
+
+    for k,v in ipairs(c.REFORGING_TARGET_LEVELS) do
+	info.text = v
+	info.func = function(self)
+	    Reforgenator.db.char.targetLevelSelection = k
+	    UIDropDownMenu_SetSelectedName(ReforgenatorPanel_TargetLevelSelection, self.value)
+	    Reforgenator:ShowState()
+	end
+	info.id = k
+	info.checked = nil
+	UIDropDownMenu_AddButton(info)
+    end
+end
+
+function Reforgenator:TargetLevelSelection_OnShow()
+    self:Debug("### TargetLevelSelection_OnShow")
+
+    local db = Reforgenator.db
+    local func = function() Reforgenator:TargetLevelSelection_OnInitialize() end
+    UIDropDownMenu_Initialize(ReforgenatorPanel_TargetLevelSelection, func)
+    UIDropDownMenu_SetWidth(ReforgenatorPanel_TargetLevelSelection, 230)
+
+    UIDropDownMenu_SetSelectedID(ReforgenatorPanel_TargetLevelSelection, Reforgenator.db.char.targetLevelSelection or 2)
+end
+
 local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
 
 function Reforgenator:Debug(...)
@@ -1075,8 +1140,10 @@ end
 function Reforgenator:CalculateMeleeHitCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.meleeHit
+    local db = Reforgenator.db
+    local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local hitCap = math.ceil(8 * K)
+    local hitCap = math.ceil(cap * K)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
@@ -1108,8 +1175,10 @@ end
 function Reforgenator:CalculateDWMeleeHitCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.meleeHit
+    local db = Reforgenator.db
+    local cap = c.DW_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local hitCap = math.ceil(27 * K)
+    local hitCap = math.ceil(cap * K)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
@@ -1141,8 +1210,10 @@ end
 function Reforgenator:CalculateRangedHitCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.meleeHit
+    local db = Reforgenator.db
+    local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local hitCap = math.ceil(8 * K)
+    local hitCap = math.ceil(cap * K)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
@@ -1157,8 +1228,10 @@ end
 function Reforgenator:CalculateSpellHitCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.spellHit
+    local db = Reforgenator.db
+    local cap = c.SPELL_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local hitCap = math.ceil(17 * K)
+    local hitCap = math.ceil(cap * K)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
@@ -1250,8 +1323,10 @@ end
 function Reforgenator:CalculateExpertiseSoftCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.expertise
+    local db = Reforgenator.db
+    local cap = c.EXP_SOFT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local expertiseCap = math.ceil(26 * K)
+    local expertiseCap = math.ceil(cap * K)
 
     expertiseCap = expertiseCap - self:ExpertiseMods(playerModel)
     self:Debug("calculated expertise cap = " .. expertiseCap)
@@ -1261,8 +1336,10 @@ end
 function Reforgenator:CalculateExpertiseHardCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.expertise
+    local db = Reforgenator.db
+    local cap = c.EXP_HARD_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local expertiseCap = math.ceil(55 * K)
+    local expertiseCap = math.ceil(cap * K)
 
     expertiseCap = expertiseCap - self:ExpertiseMods(playerModel)
     self:Debug("calculated expertise cap = " .. expertiseCap)
