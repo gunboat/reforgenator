@@ -2218,6 +2218,14 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
     end
 
     if item[desiredRating] then
+	-- if we can't reforge for hit, do we want to try to reforge for
+	-- spirit?
+	if desiredRating == "ITEM_MOD_HIT_RATING_SHORT"
+		and spiritHitConversionRate then
+	    self:Debug(item.itemLink.." already has hit, so let's try spirit instead")
+	    return self:GetBestReforge(item, "ITEM_MOD_SPIRIT_SHORT", excessRating, statRank, spiritHitConversionRate)
+	end
+
         self:Debug(item.itemLink.." already has desired rating")
         return nil
     end
@@ -2407,8 +2415,14 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     newList = {}
     for k,v in ipairs(unforged) do
         self:Debug("### val="..val..", delta="..v.delta..", desiredValue="..desiredValue)
-        if val + v.delta <= desiredValue then
-            val = val + v.delta
+	local delta = v.delta
+	if rating == "ITEM_MOD_HIT_RATING_SHORT"
+		and v.suggestedRating == "ITEM_MOD_SPIRIT_SHORT"
+		and spiritHitConversionRate then
+	    delta = math.floor(delta * spiritHitConversionRate)
+	end
+        if val + delta <= desiredValue then
+            val = val + delta
             v.item = self:ReforgeItem(v, rating, soln.excessRating, spiritHitConversionRating)
             soln.changes[#soln.changes + 1] = v.item
             soln.items[#soln.items + 1] = v.item
@@ -2421,7 +2435,13 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     if #unforged > 0 then
         local v = unforged[#unforged]
         local under = math.abs(desiredValue - val)
-        local over = math.abs(desiredValue - val + v.delta)
+	local delta = v.delta
+	if rating == "ITEM_MOD_HIT_RATING_SHORT"
+		and v.suggestedRating == "ITEM_MOD_SPIRIT_SHORT"
+		and spiritHitConversionRate then
+	    delta = math.floor(delta * spiritHitConversionRate)
+	end
+        local over = math.abs(desiredValue - val + delta)
         self:Debug("### under="..under)
         self:Debug("### over="..over)
         if over < under then
