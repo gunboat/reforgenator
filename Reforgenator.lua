@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "1.1.3"
+local version = "1.2.0"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -1069,6 +1069,47 @@ function Reforgenator:GetPlayerModel()
     playerModel.race = select(2, UnitRace("player"))
     playerModel.mainHandWeaponType = getMainHandWeaponType()
 
+    -- Calculate spirit/hit conversion
+    -- Priest get 50/100 from Twisted Faith
+    -- Shaman get 33/66/100 from Elemental Precision
+    -- Pallies get 50/100 from Enlightened Judgement
+    -- Druids get 50/100 from Balance of Power
+    playerModel.spiritHitConversionRate = nil
+
+    local function pointsOutOf2(points)
+	if points == 1 then
+	    playerModel.spiritHitConversionRate = 0.5
+	elseif points == 2 then
+	    playerModel.spiritHitConversionRate = 1
+	end
+    end
+
+    local function pointsOutOf3(points)
+	if points == 1 then
+	    playerModel.spiritHitConversionRate = 0.3333
+	elseif points == 2 then
+	    playerModel.spiritHitConversionRate = 0.6666
+	elseif points == 3 then
+	    playerModel.spiritHitConversionRate = 1
+	end
+    end
+
+    if playerModel.className == "PRIEST" then
+	pointsOutOf2(select(5, GetTalentInfo(3, 7)))
+    end
+
+    if playerModel.className == "SHAMAN" then
+	pointsOutOf3(select(5, GetTalentInfo(1, 7)))
+    end
+
+    if playerModel.className == "PALADIN" then
+	pointsOutOf2(select(5, GetTalentInfo(1, 11)))
+    end
+
+    if playerModel.className == "DRUID" then
+	pointsOutOf2(select(5, GetTalentInfo(1, 6)))
+    end
+
     return playerModel
 end
 
@@ -2124,7 +2165,7 @@ function Reforgenator:ShowState()
         self:Debug("### entry.cap="..entry.cap)
         local f = c.STAT_CAPS[entry.cap]
         if f then
-          soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel, entry.userdata), model.statRank, soln)
+          soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel, entry.userdata), model.statRank, playerModel.spiritHitConversionRate, soln)
         end
     end
 
@@ -2165,7 +2206,7 @@ function Reforgenator:PotentialLossFromRating(item, rating)
     return potentialLoss
 end
 
-function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank)
+function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank, spiritHitConversionRate)
     if item.itemLevel < 200 then
         self:Debug(item.itemLink.." is too low a level to reforge")
         return nil
@@ -2190,12 +2231,17 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
 
     local desiredRank = statRank[desiredRating] or 0
     for k,v in pairs(item) do
-        if statRank[k] and statRank[k] > desiredRank then
-            local loss = self:PotentialLossFromRating(item, k)
-            self:Debug("loss from "..k.."="..loss)
-            candidates[#candidates + 1] = {k, loss}
-        end
-
+	if desiredRating == "ITEM_MOD_HIT_RATING_SHORT"
+	    and k == "ITEM_MOD_SPIRIT_SHORT"
+	    and spiritHitConversionRating then
+	    -- don't reforge spirit to hit if there's a conversion
+	else
+	    if statRank[k] and statRank[k] > desiredRank then
+		local loss = self:PotentialLossFromRating(item, k)
+		self:Debug("loss from "..k.."="..loss)
+		candidates[#candidates + 1] = {k, loss}
+	    end
+	end
     end
     for k,v in pairs(excessRating) do
         if item[k] then
@@ -2220,7 +2266,7 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
     return { item=item, suggestedRating=candidates[1][1], delta=candidates[1][2] }
 end
 
-function Reforgenator:ReforgeItem(suggestion, desiredStat, excessRating)
+function Reforgenator:ReforgeItem(suggestion, desiredStat, excessRating, spiritHitConversionRating)
     self:Debug("### ReforgeItem")
     self:Debug("### suggestion="..to_string(suggestion))
     self:Debug("### desiredStat="..desiredStat)
@@ -2249,11 +2295,12 @@ function Reforgenator:ReforgeItem(suggestion, desiredStat, excessRating)
     return result
 end
 
-function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statRank, ancestor)
+function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statRank, spiritHitConversionRate, ancestor)
     self:Debug("### Optimize Solution")
     self:Debug("### rating="..rating)
     self:Debug("### currentValue="..currentValue)
     self:Debug("### desiredValue="..to_string(desiredValue))
+    self:Debug("### spiritHitConversionRate="..to_string(spiritHitConversionRate))
 
     soln = SolutionContext:new()
 
@@ -2304,7 +2351,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
 
     unforged = {}
     for k,v in ipairs(ancestor.items) do
-        local suggestion = self:GetBestReforge(v, rating, soln.excessRating, statRank)
+        local suggestion = self:GetBestReforge(v, rating, soln.excessRating, statRank, spiritHitConversionRating)
         if suggestion then
             unforged[#unforged + 1] = suggestion
         else
@@ -2362,7 +2409,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
         self:Debug("### val="..val..", delta="..v.delta..", desiredValue="..desiredValue)
         if val + v.delta <= desiredValue then
             val = val + v.delta
-            v.item = self:ReforgeItem(v, rating, soln.excessRating)
+            v.item = self:ReforgeItem(v, rating, soln.excessRating, spiritHitConversionRating)
             soln.changes[#soln.changes + 1] = v.item
             soln.items[#soln.items + 1] = v.item
         else
@@ -2378,7 +2425,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
         self:Debug("### under="..under)
         self:Debug("### over="..over)
         if over < under then
-            v.item = self:ReforgeItem(v, rating, soln.excessRating)
+            v.item = self:ReforgeItem(v, rating, soln.excessRating, spiritHitConversionRating)
             soln.items[#soln.items + 1] = v.item
             soln.changes[#soln.changes + 1] = v.item
             unforged[#unforged] = nil
