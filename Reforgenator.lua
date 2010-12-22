@@ -1845,7 +1845,7 @@ function Reforgenator:ShadowPriestModel()
     model.reforgeOrder = {
         { rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
         { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="1SecGCD" },
-        { rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
+        { rating="ITEM_MOD_CRIT_RATING_SHORT", cap="MaximumPossible" },
     }
 
     model.useSpellHit = true
