@@ -1591,7 +1591,9 @@ function Reforgenator:AffWarlockModel()
     model.reforgeOrder = {
         { rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
         { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed",
-            userdata={ 157, 781, 1406, 2030 } },
+            userdata={ 1281, 3842,
+		1068, 3202, 5336,
+	    	534, 1601, 2668, 3735, 4803, 5870 }},
         { rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
@@ -1641,7 +1643,9 @@ function Reforgenator:DemoWarlockModel()
     model.reforgeOrder = {
         { rating="ITEM_MOD_HIT_RATING_SHORT", cap="SpellHitCap" },
         { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed",
-            userdata={ 157, 781, 1406, 2030 } },
+            userdata={ 1281, 3842,
+		1068, 3202, 5336,
+	    	534, 1601, 2668, 3735, 4803, 5870 }},
         { rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
@@ -1817,7 +1821,7 @@ function Reforgenator:RetPallyModel()
     model.reforgeOrder = {
         { rating="ITEM_MOD_HIT_RATING_SHORT", cap="MeleeHitCap" },
         { rating="ITEM_MOD_EXPERTISE_RATING_SHORT", cap="ExpertiseSoftCap" },
-        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed", userdata=751 },
+        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed", userdata=3978 },
         { rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
@@ -1913,11 +1917,12 @@ function Reforgenator:TreeModel()
     }
 
     model.reforgeOrder = {
-        { rating="ITEM_MOD_HASTE_RATING_SHORT",
-            cap="Fixed", userdata={ 411, 1231, 2050, 2870,
-                547, 1641, 2733,
-                165, 493, 821, 1149, 1477, 1804,
-                235, 704, 1172, 1641, 2109, 2577 }},
+        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed",
+	    userdata={ 915, 3964,
+		1220, 2440, 3659, 4879,
+		1423, 5489,
+		2004, 3746,
+		5489 }},
         { rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
@@ -1941,7 +1946,7 @@ function Reforgenator:DiscModel()
     }
 
     model.reforgeOrder = {
-        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed", userdata=831 },
+        { rating="ITEM_MOD_HASTE_RATING_SHORT", cap="Fixed", userdata=3241 },
         { rating="ITEM_MOD_MASTERY_RATING_SHORT", cap="MaximumPossible" },
     }
 
