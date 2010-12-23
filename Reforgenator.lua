@@ -2327,18 +2327,19 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
 
     local candidates = {}
 
+    -- spirit grants hit in this case, so set their statRank values equal
+    if spiritHitConversionRating then
+	if statRank["ITEM_MOD_SPIRIT_SHORT"] and statRank["ITEM_MOD_HIT_RATING_SHORT"] then
+	    statRank["ITEM_MOD_SPIRIT_SHORT"] = statRank["ITEM_MOD_HIT_RATING_SHORT"]
+	end
+    end
+
     local desiredRank = statRank[desiredRating] or 0
     for k,v in pairs(item) do
-	if desiredRating == "ITEM_MOD_HIT_RATING_SHORT"
-	    and k == "ITEM_MOD_SPIRIT_SHORT"
-	    and spiritHitConversionRating then
-	    -- don't reforge spirit to hit if there's a conversion
-	else
-	    if statRank[k] and statRank[k] > desiredRank then
-		local loss = self:PotentialLossFromRating(item, k)
-		self:Debug("loss from "..k.."="..loss)
-		candidates[#candidates + 1] = {k, loss}
-	    end
+	if statRank[k] and statRank[k] > desiredRank then
+	    local loss = self:PotentialLossFromRating(item, k)
+	    self:Debug("loss from "..k.."="..loss)
+	    candidates[#candidates + 1] = {k, loss}
 	end
     end
     for k,v in pairs(excessRating) do
