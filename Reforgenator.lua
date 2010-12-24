@@ -111,6 +111,17 @@ local options = {
                 return not Reforgenator.db.profile.minimap.hide
             end,
         },
+	verbose = {
+	    name = "Verbose reforging",
+	    desc = "Emit detail information during reforging to chat window",
+	    type = "toggle",
+	    set = function(info, val)
+		Reforgenator.db.profile.verbose.emit = val
+	    end,
+	    get = function(info)
+		return Reforgenator.db.profile.verbose.emit
+	    end,
+	}
     },
 }
 
@@ -141,6 +152,9 @@ local defaults = {
         minimap = {
             hide = false,
         },
+	verbose = {
+	    emit = false,
+	},
     },
     global = {
         nextModelID = 1,
@@ -1053,6 +1067,25 @@ function Reforgenator:TargetLevelSelection_OnShow()
     UIDropDownMenu_SetSelectedID(ReforgenatorPanel_TargetLevelSelection, Reforgenator.db.char.targetLevelSelection or 2)
 end
 
+function Reforgenator:ClearExplanation()
+    Reforgenator.explanation = ''
+end
+
+function Reforgenator:Explain(...)
+    local msg = string.join(", ", ...)
+    self:Debug(msg)
+
+    Reforgenator.explanation = (Reforgenator.explanation or '') .. "\n" .. msg
+end
+
+function Reforgenator:ShowExplanation()
+    if Reforgenator.db.profile.verbose.emit and Reforgenator.explanation then
+	for line in Reforgenator.explanation:gmatch("[^\r\n]+") do
+	    self:Print(line)
+	end
+    end
+end
+
 local debugFrame = tekDebug and tekDebug:GetFrame("Reforgenator")
 
 function Reforgenator:Debug(...)
@@ -1134,6 +1167,11 @@ function Reforgenator:GetPlayerModel()
     playerModel.race = select(2, UnitRace("player"))
     playerModel.mainHandWeaponType = getMainHandWeaponType()
 
+    self:Explain("className="..playerModel.className)
+    self:Explain("primaryTab="..playerModel.primaryTab)
+    self:Explain("race="..playerModel.race)
+    self:Explain("mainHandWeaponType="..playerModel.mainHandWeaponType)
+
     -- Calculate spirit/hit conversion
     -- Priest get 50/100 from Twisted Faith
     -- Shaman get 33/66/100 from Elemental Precision
@@ -1175,7 +1213,46 @@ function Reforgenator:GetPlayerModel()
 	pointsOutOf2(select(5, GetTalentInfo(1, 6)))
     end
 
+    self:Explain("spiritHitConversionRate="..playerModel.spiritHitConversionRate)
+
     return playerModel
+end
+
+function Reforgenator:CalculateHitMods(playerModel)
+    local c = Reforgenator.constants
+    local K = c.RATING_CONVERSIONS.meleeHit
+
+    local reduction = 0
+
+    -- Mods to hit: Draenei get 1% bonus
+    if playerModel.race == "Draenei" then
+	self:Explain("Draenei get 1% to hit")
+        reduction = reduction + math.floor(K)
+    end
+
+    -- Fury warriors get 3% bonus from Precision
+    if playerModel.className == "WARRIOR" and playerModel.primaryTab == 2 then
+	self:Explain("Fury warriors get 3% from Precision passive ability")
+        reduction = reduction + math.floor(3 * K)
+    end
+
+    -- Rogues get varying amounts based on Precision talent
+    if playerModel.className == "ROGUE" then
+        local pointsInPrecision = select(5, GetTalentInfo(2,3))
+	self:Explain("Rogues get "..(2*pointsInPrecision).."% from Precision talent")
+        reduction = reduction + math.floor(K * 2 * pointsInPrecision)
+    end
+
+    -- Frost DKs get varying amounts if they're DW and have Nerves of Cold Steel
+    if playerModel.className == "DEATHKNIGHT" and playerModel.mainHandWeaponType:sub(1,10) ~= "Two-handed" then
+        local pointsInNoCS = select(5, GetTalentInfo(2, 3))
+	self:Explain("DW DKs get "..(pointsInNoCS).."% from nerves of cold steel talent")
+        reduction = reduction + math.floor(K * pointsInNoCS)
+    end
+
+    self:Explain("hit rating modification = "..reduction)
+    return reduction
+
 end
 
 function Reforgenator:CalculateMeleeHitCap(playerModel)
@@ -1185,32 +1262,12 @@ function Reforgenator:CalculateMeleeHitCap(playerModel)
     local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
     local hitCap = math.ceil(cap * K)
+    self:Explain("hit cap = "..hitCap)
 
-    -- Mods to hit: Draenei get 1% bonus
-    if playerModel.race == "Draenei" then
-        hitCap = hitCap - math.floor(K)
-    end
+    local targetHitRating = hitCap - self:CalculateHitMods(playerModel)
+    self:Explain("calculated target hit rating = " .. targetHitRating)
 
-    -- Fury warriors get 3% bonus from Precision
-    if playerModel.className == "WARRIOR" and playerModel.primaryTab == 2 then
-        hitCap = hitCap - math.floor(3 * K)
-    end
-
-    -- Rogues get varying amounts based on Precision talent
-    if playerModel.className == "ROGUE" then
-        local pointsInPrecision = select(5, GetTalentInfo(2,3))
-        hitCap = hitCap - math.floor(K * 2 * pointsInPrecision)
-    end
-
-    -- Frost DKs get varying amounts if they're DW and have Nerves of Cold Steel
-    if playerModel.className == "DEATHKNIGHT" and playerModel.mainHandWeaponType:sub(1,10) ~= "Two-handed" then
-        local pointsInNoCS = select(5, GetTalentInfo(2, 3))
-        hitCap = hitCap - math.floor(K * pointsInNoCS)
-    end
-
-    self:Debug("calculated melee hit cap = " .. hitCap)
-
-    return hitCap
+    return targetHitRating
 end
 
 function Reforgenator:CalculateDWMeleeHitCap(playerModel)
@@ -1220,32 +1277,12 @@ function Reforgenator:CalculateDWMeleeHitCap(playerModel)
     local cap = c.DW_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
     local hitCap = math.ceil(cap * K)
+    self:Explain("DW hit cap = "..hitCap)
 
-    -- Mods to hit: Draenei get 1% bonus
-    if playerModel.race == "Draenei" then
-        hitCap = hitCap - math.floor(K)
-    end
+    local targetHitRating = hitCap - self:CalculateHitMods(playerModel)
+    self:Explain("calculated target hit rating = " .. targetHitRating)
 
-    -- Fury warriors get 3% bonus from Precision
-    if playerModel.className == "WARRIOR" and playerModel.primaryTab == 2 then
-        hitCap = hitCap - math.floor(3 * K)
-    end
-
-    -- Rogues get varying amounts based on Precision talent
-    if playerModel.className == "ROGUE" then
-        local pointsInPrecision = select(5, GetTalentInfo(2,3))
-        hitCap = hitCap - math.floor(K * 2 * pointsInPrecision)
-    end
-
-    -- Frost DKs get varying amounts if they're DW and have Nerves of Cold Steel
-    if playerModel.className == "DEATHKNIGHT" and playerModel.mainHandWeaponType:sub(1,10) ~= "Two-handed" then
-        local pointsInNoCS = select(5, GetTalentInfo(2, 3))
-        hitCap = hitCap - math.floor(K * pointsInNoCS)
-    end
-
-    self:Debug("calculated DW melee hit cap = " .. hitCap)
-
-    return hitCap
+    return targetHitRating
 end
 
 function Reforgenator:CalculateRangedHitCap(playerModel)
@@ -1255,13 +1292,15 @@ function Reforgenator:CalculateRangedHitCap(playerModel)
     local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
     local hitCap = math.ceil(cap * K)
+    self:Explain("ranged hit cap = "..hitCap)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
+	self:Explain("Draenei get 1% to hit")
         hitCap = hitCap - math.floor(K)
     end
 
-    self:Debug("calculated ranged hit cap = " .. hitCap)
+    self:Explain("calculated target ranged hit rating = " .. hitCap)
 
     return hitCap
 end
@@ -1273,19 +1312,22 @@ function Reforgenator:CalculateSpellHitCap(playerModel)
     local cap = c.SPELL_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
     local hitCap = math.ceil(cap * K)
+    self:Explain("base spell hit rating = "..hitCap)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
+	self:explain("Draenei get 1% to hit")
         hitCap = hitCap - math.floor(K)
     end
 
     -- Rogues get varying amounts based on Precision talent
     if playerModel.className == "ROGUE" then
         local pointsInPrecision = select(5, GetTalentInfo(2,3))
+	self:Explain("Rogues get "..(2*pointsInPrecision).."% from Precision talent")
         hitCap = hitCap - math.floor(K * 2 * pointsInPrecision)
     end
 
-    self:Debug("calculated spell hit cap = " .. hitCap)
+    self:Explain("calculated target spell hit rating = " .. hitCap)
 
     return hitCap
 end
@@ -1304,7 +1346,7 @@ function Reforgenator:ExpertiseMods(playerModel)
     local reduction = 0;
 
     if playerModel.className == "DEATHKNIGHT" and playerModel.primaryTab == 1 then
-        self:Debug("reducing expertise for blood DK")
+        self:Explain("Blood DK gets +6 expertise")
         reduction = reduction + math.floor(6 * K)
     end
 
@@ -1319,7 +1361,7 @@ function Reforgenator:ExpertiseMods(playerModel)
         end
 
         if hasGlyph then
-            self:Debug("reducing expertise for Glyph of Seal of Truth")
+            self:Explain("Paladins with Glyph of Seal of Truth get +10 expertise")
             reduction = reduction + math.floor(10 * K)
         end
     end
@@ -1328,13 +1370,13 @@ function Reforgenator:ExpertiseMods(playerModel)
         if playerModel.mainHandWeaponType == "One-Handed Axes"
                 or playerModel.mainHandWeaponType == "Two-Handed Axes"
                 or playerModel.mainHandWeaponType == "Fist Weapons" then
-            self:Debug("reducing expertise for Orc with axe or fist")
+            self:Explain("Orcs with axe or fist get +3 expertise")
             reduction = reduction + math.floor(3 * K)
         end
     elseif playerModel.race == "Dwarf" then
         if playerModel.mainHandWeaponType == "One-Handed Maces"
                 or playerModel.mainHandWeaponType == "Two-Handed Maces" then
-            self:Debug("reducing expertise for Dwarf with mace")
+            self:Explain("Dwarves with mace get +3 expertise")
             reduction = reduction + math.floor(3 * K)
         end
     elseif playerModel.race == "Human" then
@@ -1342,22 +1384,24 @@ function Reforgenator:ExpertiseMods(playerModel)
                 or playerModel.mainHandWeaponType == "Two-Handed Swords"
                 or playerModel.mainHandWeaponType == "One-Handed Maces"
                 or playerModel.mainHandWeaponType == "Two-Handed Maces" then
-            self:Debug("reducing expertise for Human with sword or mace")
+            self:Explain("Humans with sword or mace get +3 expertise")
             reduction = reduction + math.floor(3 * K)
         end
     elseif playerModel.race == "Gnome" then
         if playerModel.mainHandWeaponType == "One-Handed Swords"
                 or playerModel.mainHandWeaponType == "Daggers" then
-            self:Debug("reducing expertise for Gnome with dagger or 1H sword")
+            self:Explain("Gnomes with dagger or 1H sword get +3 expertise")
             reduction = reduction + math.floor(3 * K)
         end
     end
 
     if playerModel.className == "SHAMAN" then
         local pointsInUnleashedRage = select(5, GetTalentInfo(2,16))
+	self:Explain("Shaman get "..(4*pointsInUnleashedRage).."% from Unleashed Rage talent")
         reduction = reduction + math.floor(4 * pointsInUnleashedRage * K)
     end
 
+    self:Explain("expertise rating modification = "..reduction)
     return reduction
 end
 
@@ -1368,9 +1412,10 @@ function Reforgenator:CalculateExpertiseSoftCap(playerModel)
     local cap = c.EXP_SOFT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
     local expertiseCap = math.ceil(cap * K)
+    self:Explain("base expertise rating required = " .. expertiseCap)
 
     expertiseCap = expertiseCap - self:ExpertiseMods(playerModel)
-    self:Debug("calculated expertise cap = " .. expertiseCap)
+    self:Explain("target expertise rating = " .. expertiseCap)
     return expertiseCap
 end
 
@@ -1381,9 +1426,10 @@ function Reforgenator:CalculateExpertiseHardCap(playerModel)
     local cap = c.EXP_HARD_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
     local expertiseCap = math.ceil(cap * K)
+    self:Explain("base expertise rating required = " .. expertiseCap)
 
     expertiseCap = expertiseCap - self:ExpertiseMods(playerModel)
-    self:Debug("calculated expertise cap = " .. expertiseCap)
+    self:Explain("target expertise rating = " .. expertiseCap)
     return expertiseCap
 end
 
@@ -1392,19 +1438,25 @@ function Reforgenator:HasteTo1SecGCD(playerModel)
     local K = c.RATING_CONVERSIONS.haste
 
     local hasteCap = math.ceil(50 * K)
+    self:Explain("base haste rating required = " .. hasteCap)
+
     local reduction = 0
 
     if playerModel.className == "PRIEST" then
         local pointsInDarkness = select(5, GetTalentInfo(3,1))
+	self:Explain("Priest get "..(pointsInDarkness).."% spell haste from Darkenss talent")
         reduction = reduction + math.floor(pointsInDarkness * K)
     end
 
     if playerModel.className == "DRUID" then
         local moonkinForm = select(5, GetTalentInfo(1,8))
+	self:Explain("Druids get "..(5*moonkinForm).."% spell haste from moonkin form")
         reduction = reduction + math.floor(moonkinForm * 5 * K)
     end
 
-    return hasteCap - reduction
+    local targetHasteRating = hasteCap - reduction
+    self:Explain("target haste rating = " .. targetHasteRating)
+    return targetHasteRating
 end
 
 function Reforgenator:CalculateMaximumValue(playerModel)
@@ -2159,8 +2211,9 @@ function Reforgenator:ShowState()
     local db = Reforgenator.db
     self:Debug("in ShowState")
 
+    self:ClearExplanation()
+
     local playerModel = self:GetPlayerModel()
-    self:Debug("playerModel="..to_string(playerModel))
 
     local model = self:GetPlayerReforgeModel(playerModel)
     if not model then
@@ -2186,9 +2239,6 @@ function Reforgenator:ShowState()
         playerStats.ITEM_MOD_HASTE_RATING_SHORT = GetCombatRating(c.COMBAT_RATINGS.CR_HASTE_SPELL)
     end
 
-    self:Debug("playerStats="..to_string(playerStats))
-
-
     local REFORGE_ID_MAP = {
 	[1] = "ITEM_MOD_SPIRIT_SHORT",
 	[2] = "ITEM_MOD_DODGE_RATING_SHORT",
@@ -2199,6 +2249,9 @@ function Reforgenator:ShowState()
 	[7] = "ITEM_MOD_EXPERTISE_RATING_SHORT",
 	[8] = "ITEM_MOD_MASTERY_RATING_SHORT",
     }
+
+    self:Explain("useSandbox = "..to_string(db.char.useSandbox))
+    self:Explain("targetLevelSelection = "..to_string(db.char.targetLevelSelection))
 
     -- Get the current state of the equipment
     soln = SolutionContext:new()
@@ -2228,13 +2281,17 @@ function Reforgenator:ShowState()
 			local delta = math.floor(0.40 * stats[REFORGE_ID_MAP[minus]])
 			playerStats[REFORGE_ID_MAP[plus]] = playerStats[REFORGE_ID_MAP[plus]] - delta
 			playerStats[REFORGE_ID_MAP[minus]] = playerStats[REFORGE_ID_MAP[minus]] + delta
+
+			self:Explain("undoing previous reforge on item "..itemLink.." to reduce ".._G[REFORGE_ID_MAP[plus]].." by "..delta.." and add it back to ".._G[REFORGE_ID_MAP[minus]])
 		    else
 			-- this shouldn't happen, but apparently it does
 			-- and I haven't been able to repro yet
 			entry.reforged = true
+			self:Explain("item "..itemLink.." has been reforged but unexpected data ("..to_string(minus)..", "..to_string(plus)..") returned from LibReforgingInfo")
 		    end
 
 		else
+		    self:Explain("item "..itemLink.." previously reforged")
 		    entry.reforged = true
 		end
             end
@@ -2248,7 +2305,6 @@ function Reforgenator:ShowState()
             soln.items[#soln.items + 1] = entry
         end
     end
-    self:Dump("current", soln)
 
 
     for _, entry in ipairs(model.reforgeOrder) do
@@ -2286,6 +2342,7 @@ function Reforgenator:ShowState()
 
     self.changes = effectiveChanges
     self:UpdateWindow()
+    self:ShowExplanation()
 
     self:Debug("all done")
 end
@@ -2298,12 +2355,12 @@ end
 
 function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank, spiritHitConversionRate)
     if item.itemLevel < 200 then
-        self:Debug(item.itemLink.." is too low a level to reforge")
+        self:Explain("can't reforge "..item.itemLink.." as it's too low level")
         return nil
     end
 
     if item.reforged then
-        self:Debug(item.itemLink.." already reforged")
+        self:Debug("can't reforge "..item.itemLink.." as it's already reforged")
         return nil
     end
 
@@ -2316,7 +2373,7 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
 	    return self:GetBestReforge(item, "ITEM_MOD_SPIRIT_SHORT", excessRating, statRank, spiritHitConversionRate)
 	end
 
-        self:Debug(item.itemLink.." already has desired rating")
+        self:Explain("can't reforge "..item.itemLink.." as it already has desired rating")
         return nil
     end
 
@@ -2335,25 +2392,34 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
     end
 
     local desiredRank = statRank[desiredRating] or 0
+    self:Debug("### desiredRank="..desiredRank)
+    self:Explain("inspecting item "..item.itemLink)
     for k,v in pairs(item) do
-	if statRank[k] and statRank[k] > desiredRank then
-	    local loss = self:PotentialLossFromRating(item, k)
-	    self:Debug("loss from "..k.."="..loss)
-	    candidates[#candidates + 1] = {k, loss}
+	if statRank[k] then
+	    if statRank[k] > desiredRank then
+		local loss = self:PotentialLossFromRating(item, k)
+		self:Debug("### delta="..loss)
+		self:Explain("considering reforging "..loss.." points of ".._G[k].." for ".._G[desiredRating])
+		candidates[#candidates + 1] = {k, loss}
+	    else
+		self:Explain("not reforging ".._G[k].." for ".._G[desiredRating].." because it's too valuable")
+	    end
 	end
     end
     for k,v in pairs(excessRating) do
         if item[k] then
             local loss = self:PotentialLossFromRating(item, k)
-            self:Debug("loss from "..k.."="..loss..",excess="..excessRating[k])
             if loss < excessRating[k] then
+		self:Explain("considering reforging "..loss.." points of ".._G[k].." for ".._G[desiredRating])
                 candidates[#candidates + 1] = {k, loss}
+	    else
+		self:Explain("not reforging ".._G[k].." for ".._G[desiredRating].." because it would drop us under the cap")
             end
         end
     end
 
     if #candidates == 0 then
-        self:Debug("no reforgable attributes on item")
+        self:Explain("can't reforge "..item.itemLink.." as it has no reforgable attributes")
         return nil
     end
 
@@ -2361,6 +2427,8 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
 
     self:Debug("suggestedRating="..candidates[1][1])
     self:Debug("delta="..candidates[1][2])
+
+    self:Explain("item "..item.itemLink.." has ".._G[candidates[1][1]].." as its best reforgable attribute")
 
     return { item=item, suggestedRating=candidates[1][1], delta=candidates[1][2] }
 end
@@ -2401,6 +2469,9 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     self:Debug("### desiredValue="..to_string(desiredValue))
     self:Debug("### spiritHitConversionRate="..to_string(spiritHitConversionRate))
 
+    self:Explain("+++++")
+    self:Explain("reforging for ".._G[rating]..", currently at "..currentValue)
+
     soln = SolutionContext:new()
 
     for k,v in pairs(ancestor.excessRating) do
@@ -2412,6 +2483,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
 
     -- nil desiredValue means maintain the current level
     if not desiredValue then
+	self:Explain("retaining rating at current value")
         soln.excessRating[rating] = 0
         for k,v in ipairs(ancestor.items) do
             soln.items[#soln.items + 1] = v
@@ -2424,16 +2496,19 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     if type(desiredValue) == "table" then
         local vec = self:deepCopy(desiredValue)
         table.sort(vec, function(a,b) return a > b end)
+	self:Explain("maximum plateau rating is "..vec[1])
         if currentValue > vec[1] then
             overCap = true
         end
     else
+	self:Explain("desired value is "..desiredValue)
         if currentValue > desiredValue then
             overCap = true
         end
     end
     if overCap then
         soln.excessRating[rating] = currentValue - desiredValue
+	self:Explain("currently over cap for this rating by "..soln.excessRating[rating])
         for k,v in ipairs(ancestor.items) do
             soln.items[#soln.items + 1] = v
         end
@@ -2444,7 +2519,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
     -- previously said we had an excess of our now-desired rating, so
     -- clear it out
     if soln.excessRating[rating] then
-        self:Debug("zeroing out previous excess for "..rating)
+        self:Explain("zeroing out previous excess for rating")
         soln.excessRating[rating] = nil
     end
 
@@ -2547,6 +2622,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statR
         soln.items[#soln.items + 1] = v.item
     end
 
+    self:Explain("-----")
     return soln
 end
 
