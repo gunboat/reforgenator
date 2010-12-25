@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "1.2.1"
+local version = "1.2.2"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -1316,7 +1316,7 @@ function Reforgenator:CalculateSpellHitCap(playerModel)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
-	self:explain("Draenei get 1% to hit")
+	self:Explain("Draenei get 1% to hit")
         hitCap = hitCap - math.floor(K)
     end
 
