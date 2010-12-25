@@ -1082,6 +1082,9 @@ function Reforgenator:ShowExplanation()
     if Reforgenator.db.profile.verbose.emit and Reforgenator.explanation then
 	for line in Reforgenator.explanation:gmatch("[^\r\n]+") do
 	    self:Print(line)
+	    if line:find("End Reforge Model") then
+		break
+	    end
 	end
     end
 end
@@ -1168,7 +1171,7 @@ function Reforgenator:GetPlayerModel()
     playerModel.mainHandWeaponType = getMainHandWeaponType()
 
     self:Explain("className="..playerModel.className)
-    self:Explain("primaryTab="..playerModel.primaryTab)
+    self:Explain("primaryTab="..to_string(playerModel.primaryTab))
     self:Explain("race="..playerModel.race)
     self:Explain("mainHandWeaponType="..playerModel.mainHandWeaponType)
 
@@ -1198,22 +1201,30 @@ function Reforgenator:GetPlayerModel()
     end
 
     if playerModel.className == "PRIEST" then
-	pointsOutOf2(select(5, GetTalentInfo(3, 7)))
+	local points = select(5, GetTalentInfo(3, 7))
+	self:Explain("talent points in Twisted Faith="..points)
+	pointsOutOf2(points)
     end
 
     if playerModel.className == "SHAMAN" then
-	pointsOutOf3(select(5, GetTalentInfo(1, 7)))
+	local points = select(5, GetTalentInfo(1, 7))
+	self:Explain("talent points in Elemental Precision="..points)
+	pointsOutOf3(points)
     end
 
     if playerModel.className == "PALADIN" then
-	pointsOutOf2(select(5, GetTalentInfo(1, 11)))
+	local points = select(5, GetTalentInfo(1, 11))
+	self:Explain("talent points in Enlightened Judgements="..points)
+	pointsOutOf2(points)
     end
 
     if playerModel.className == "DRUID" then
-	pointsOutOf2(select(5, GetTalentInfo(1, 6)))
+	local points = select(5, GetTalentInfo(1, 6))
+	self:Explain("talent points in Balance of Power="..points)
+	pointsOutOf2(points)
     end
 
-    self:Explain("spiritHitConversionRate="..playerModel.spiritHitConversionRate)
+    self:Explain("spiritHitConversionRate="..to_string(playerModel.spiritHitConversionRate))
 
     return playerModel
 end
@@ -2213,6 +2224,7 @@ function Reforgenator:ShowState()
 
     self:ClearExplanation()
 
+    self:Explain("===== Begin Player Model =====")
     local playerModel = self:GetPlayerModel()
 
     local model = self:GetPlayerReforgeModel(playerModel)
@@ -2252,6 +2264,34 @@ function Reforgenator:ShowState()
 
     self:Explain("useSandbox = "..to_string(db.char.useSandbox))
     self:Explain("targetLevelSelection = "..to_string(db.char.targetLevelSelection))
+
+    self:Explain("hit = "..playerStats.ITEM_MOD_HIT_RATING_SHORT)
+    self:Explain("expertise = "..playerStats.ITEM_MOD_EXPERTISE_RATING_SHORT)
+    self:Explain("dodge = "..playerStats.ITEM_MOD_DODGE_RATING_SHORT)
+    self:Explain("parry = "..playerStats.ITEM_MOD_PARRY_RATING_SHORT)
+    self:Explain("crit = "..playerStats.ITEM_MOD_CRIT_RATING_SHORT)
+    self:Explain("haste = "..playerStats.ITEM_MOD_HASTE_RATING_SHORT)
+
+    self:Explain("===== End Player Model =====")
+
+    if playerModel.spiritHitConversionRate then
+	if model.statRank["ITEM_MOD_SPIRIT_SHORT"] and model.statRank["ITEM_MOD_HIT_RATING_SHORT"] then
+	    model.statRank["ITEM_MOD_SPIRIT_SHORT"] = model.statRank["ITEM_MOD_HIT_RATING_SHORT"]
+	end
+    end
+
+    for k,v in pairs(model.statRank) do
+	self:Explain("statRank[".._G[k].."]="..v)
+    end
+
+    for k, v in pairs(model.reforgeOrder) do
+        local f = c.STAT_CAPS[v.cap]
+        if f then
+	    self:Explain("rule #"..k..": "..v.rating.." to "..v.cap)
+        end
+    end
+
+    self:Explain("===== End Reforge Model =====")
 
     -- Get the current state of the equipment
     soln = SolutionContext:new()
@@ -2367,9 +2407,10 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
     if item[desiredRating] then
 	-- if we can't reforge for hit, do we want to try to reforge for
 	-- spirit?
+	self:Debug("### desiredRating="..desiredRating..", spiritHitConversionRate="..to_string(spiritHitConversionRate))
 	if desiredRating == "ITEM_MOD_HIT_RATING_SHORT"
 		and spiritHitConversionRate then
-	    self:Debug(item.itemLink.." already has hit, so let's try spirit instead")
+	    self:Explain("item already has hit, so let's try for spirit instead")
 	    return self:GetBestReforge(item, "ITEM_MOD_SPIRIT_SHORT", excessRating, statRank, spiritHitConversionRate)
 	end
 
@@ -2377,19 +2418,7 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
         return nil
     end
 
-    self:Debug("### GetBestReforge")
-    self:Debug("### item="..item.itemLink)
-    self:Debug("### desiredRating="..desiredRating)
-    self:Debug("### excessRating="..to_string(excessRating))
-
     local candidates = {}
-
-    -- spirit grants hit in this case, so set their statRank values equal
-    if spiritHitConversionRating then
-	if statRank["ITEM_MOD_SPIRIT_SHORT"] and statRank["ITEM_MOD_HIT_RATING_SHORT"] then
-	    statRank["ITEM_MOD_SPIRIT_SHORT"] = statRank["ITEM_MOD_HIT_RATING_SHORT"]
-	end
-    end
 
     local desiredRank = statRank[desiredRating] or 0
     self:Debug("### desiredRank="..desiredRank)
@@ -2425,20 +2454,12 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statRank
 
     table.sort(candidates, function(a,b) return a[2] > b[2] end)
 
-    self:Debug("suggestedRating="..candidates[1][1])
-    self:Debug("delta="..candidates[1][2])
-
     self:Explain("item "..item.itemLink.." has ".._G[candidates[1][1]].." as its best reforgable attribute")
 
     return { item=item, suggestedRating=candidates[1][1], delta=candidates[1][2] }
 end
 
 function Reforgenator:ReforgeItem(suggestion, desiredStat, excessRating, spiritHitConversionRating)
-    self:Debug("### ReforgeItem")
-    self:Debug("### suggestion="..to_string(suggestion))
-    self:Debug("### desiredStat="..desiredStat)
-    self:Debug("### excessRating="..to_string(excessRating))
-
     local result = {}
     local sr = suggestion.suggestedRating
 
@@ -2463,12 +2484,6 @@ function Reforgenator:ReforgeItem(suggestion, desiredStat, excessRating, spiritH
 end
 
 function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statRank, spiritHitConversionRate, ancestor)
-    self:Debug("### Optimize Solution")
-    self:Debug("### rating="..rating)
-    self:Debug("### currentValue="..currentValue)
-    self:Debug("### desiredValue="..to_string(desiredValue))
-    self:Debug("### spiritHitConversionRate="..to_string(spiritHitConversionRate))
-
     self:Explain("+++++")
     self:Explain("reforging for ".._G[rating]..", currently at "..currentValue)
 
