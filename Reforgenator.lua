@@ -460,7 +460,8 @@ function Reforgenator:rebuildStatRank(model)
     local n = 1
     local statRank = {}
     for _, v in ipairs(model.reforgeOrder) do
-        if not statRank[v.rating] then
+	self:Debug("### rebuilding v="..to_string(v))
+        if v.rating ~= '' and not statRank[v.rating] then
             statRank[v.rating] = n
             n = n + 1
         end
@@ -551,8 +552,6 @@ function Reforgenator:ModelToModelOption(modelName, model)
             order = seq,
             values = {},
             get = function()
-                Reforgenator:Debug("### rating.get, modelName=["..modelName.."], i="..i)
-                Reforgenator:Debug("### model.reforgeOrder[i]="..to_string(model.reforgeOrder[i]))
                 return model.reforgeOrder[i] and model.reforgeOrder[i].rating or nil
             end,
             set = function(info,key)
@@ -582,8 +581,6 @@ function Reforgenator:ModelToModelOption(modelName, model)
             desc = "Desired value for the stat we're currently reforging",
             order = seq,
             get = function()
-                Reforgenator:Debug("### cap.get, modelName=["..modelName.."], i="..i)
-                Reforgenator:Debug("### model.reforgeOrder[i]="..to_string(model.reforgeOrder[i]))
                 return model.reforgeOrder[i] and model.reforgeOrder[i].cap or nil
             end,
             set = function(info,key)
@@ -2274,6 +2271,7 @@ function Reforgenator:ShowState()
 
     self:Explain("===== End Player Model =====")
 
+    self:rebuildStatRank(model)
     if playerModel.spiritHitConversionRate then
 	if model.statRank["ITEM_MOD_SPIRIT_SHORT"] and model.statRank["ITEM_MOD_HIT_RATING_SHORT"] then
 	    model.statRank["ITEM_MOD_SPIRIT_SHORT"] = model.statRank["ITEM_MOD_HIT_RATING_SHORT"]
@@ -2284,7 +2282,7 @@ function Reforgenator:ShowState()
 	self:Explain("statRank[".._G[k].."]="..v)
     end
 
-    for k, v in pairs(model.reforgeOrder) do
+    for k, v in ipairs(model.reforgeOrder) do
         local f = c.STAT_CAPS[v.cap]
         if f then
 	    self:Explain("rule #"..k..": "..v.rating.." to "..v.cap)
