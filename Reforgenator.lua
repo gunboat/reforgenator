@@ -2,7 +2,7 @@
 Reforgenator = LibStub("AceAddon-3.0"):NewAddon("Reforgenator", "AceConsole-3.0", "AceEvent-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
-local version = "1.2.2"
+local version = "1.2.3"
 
 local function table_print (tt, indent, done)
     done = done or {}
@@ -2346,7 +2346,7 @@ function Reforgenator:ShowState()
 
 
     for _, entry in ipairs(model.reforgeOrder) do
-        self:Debug("### entry.cap="..entry.cap)
+        self:Debug("### entry.cap="..to_string(entry.cap))
         local f = c.STAT_CAPS[entry.cap]
         if f then
           soln = self:OptimizeSolution(entry.rating, playerStats[entry.rating], f(playerModel, entry.userdata), model.statRank, playerModel.spiritHitConversionRate, soln)
