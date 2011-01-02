@@ -911,8 +911,13 @@ function Reforgenator:UpdateWindowItem(index, itemDescriptor)
     _G["ReforgenatorPanel_Item" .. index]:SetID(itemDescriptor.slotInfo)
     _G["ReforgenatorPanel_Item" .. index .. "Checked"]:SetChecked(nil)
 
-    local msg = "- " .. _G[itemDescriptor.reforgedFrom] .. "\n"
-            .. "+ " .. _G[itemDescriptor.reforgedTo]
+    local msg = ''
+    if itemDescriptor.reforgedFrom then
+        msg = "- " .. _G[itemDescriptor.reforgedFrom] .. "\n"
+                .. "+ " .. _G[itemDescriptor.reforgedTo]
+    else
+        msg = "reset"
+    end
     _G["ReforgenatorPanel_Item" .. index .. "Name"]:SetText(msg)
 
     _G["ReforgenatorPanel_Item" .. index]:Show()
@@ -2753,6 +2758,24 @@ function Reforgenator:ShowState()
             end
         else
             effectiveChanges[#effectiveChanges + 1] = v
+        end
+    end
+
+    -- see if there is anything that was previously reforged that should be reset
+    for k,v in pairs(soln.items) do
+        if v.sandboxed then
+            local reset = true
+            for ik, iv in pairs(soln.changes) do
+                if iv.itemLink == v.itemLink then
+                    reset = nil
+                    break
+                end
+            end
+
+            if reset then
+                self:Debug("### undo old reforge on "..v.itemLink)
+                effectiveChanges[#effectiveChanges + 1] = v
+            end
         end
     end
 
