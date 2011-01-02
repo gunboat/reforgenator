@@ -1570,7 +1570,7 @@ function Reforgenator:BearModel()
     model.reforgeOrder = {
         {
             rating = "ITEM_MOD_DODGE_RATING_SHORT",
-            cap = "MeleeHitCap"
+            cap = "MaximumPossible"
         },
         {
             rating = "ITEM_MOD_MASTERY_RATING_SHORT",
