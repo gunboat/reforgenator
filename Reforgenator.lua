@@ -1569,12 +1569,8 @@ function Reforgenator:BearModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = "ITEM_MOD_DODGE_RATING_SHORT",
             cap = "MeleeHitCap"
-        },
-        {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
-            cap = "ExpertiseSoftCap"
         },
         {
             rating = "ITEM_MOD_MASTERY_RATING_SHORT",
