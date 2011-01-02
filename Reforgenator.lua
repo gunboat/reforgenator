@@ -2699,6 +2699,16 @@ function Reforgenator:ShowState()
                         playerStats[REFORGE_ID_MAP[plus]] = playerStats[REFORGE_ID_MAP[plus]] - delta
                         playerStats[REFORGE_ID_MAP[minus]] = playerStats[REFORGE_ID_MAP[minus]] + delta
 
+                        if playerModel.spiritHitConversionRate and REFORGE_ID_MAP[minus] == "ITEM_MOD_SPIRIT_SHORT" then
+                            local d2 = math.floor(playerModel.spiritHitConversionRate * delta)
+                            playerStats["ITEM_MOD_HIT_RATING_SHORT"] = playerStats["ITEM_MOD_HIT_RATING_SHORT"] + d2
+                        end
+
+                        if playerModel.spiritHitConversionRate and REFORGE_ID_MAP[plus] == "ITEM_MOD_SPIRIT_SHORT" then
+                            local d2 = math.floor(playerModel.spiritHitConversionRate * delta)
+                            playerStats["ITEM_MOD_HIT_RATING_SHORT"] = playerStats["ITEM_MOD_HIT_RATING_SHORT"] - d2
+                        end
+
                         self:Explain("undoing previous reforge on item " .. itemLink .. " to reduce " .. _G[REFORGE_ID_MAP[plus]] .. " by " .. delta .. " and add it back to " .. _G[REFORGE_ID_MAP[minus]])
                     else
                     -- this shouldn't happen, but apparently it does
@@ -2842,7 +2852,10 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statWeig
             if spiritHitConversionRate and k == "ITEM_MOD_SPIRIT_SHORT" then
                 eff = "ITEM_MOD_HIT_RATING_SHORT"
             end
-            if excessRating[eff] then
+            if spiritHitConversionRate and desiredRating == "ITEM_MOD_HIT_RATING_SHORT" and k == "ITEM_MOD_SPIRIT_SHORT" then
+                -- don't do this even if the stat weights suggest it. People will talk
+                self:Debug("### not reforging spirit to hit, no matter what")
+            elseif excessRating[eff] then
                 if delta <= excessRating[eff] then
                     self:Explain("considering reforging " .. delta .. " points of " .. _G[k] .. " for " .. _G[desiredRating])
                     entry.cost = 0
@@ -2875,27 +2888,28 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statWeig
 
     return {
         item = item,
-        suggestedRating = candidates[1].rating,
+        reforgeFrom = candidates[1].rating,
+        reforgeTo = desiredRating,
         delta = candidates[1].delta
     }
 end
 
-function Reforgenator:ReforgeItem(suggestion, desiredStat, excessRating, spiritHitConversionRating)
+function Reforgenator:ReforgeItem(suggestion, desiredStat, excessRating, spiritHitConversionRate)
     local result = {}
-    local sr = suggestion.suggestedRating
+    local sr = suggestion.reforgeFrom
 
     for k,v in pairs(suggestion.item) do
         result[k] = v
     end
     result.reforged = true
-    result.reforgedFrom = sr
-    result.reforgedTo = desiredStat
+    result.reforgedFrom = suggestion.reforgeFrom
+    result.reforgedTo = suggestion.reforgeTo
 
-    result[desiredStat] = suggestion.delta
+    result[suggestion.reforgeTo] = suggestion.delta
     result[sr] = result[sr] - suggestion.delta
 
     local eff = sr
-    if spiritHitConversionRating and sr == "ITEM_MOD_SPIRIT_SHORT" then
+    if spiritHitConversionRate and sr == "ITEM_MOD_SPIRIT_SHORT" then
         eff = "ITEM_MOD_HIT_RATING_SHORT"
     end
     if excessRating[eff] then
@@ -2962,7 +2976,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statW
 
     unforged = {}
     for k,v in ipairs(ancestor.items) do
-        local suggestion = self:GetBestReforge(v, rating, soln.excessRating, statWeights, spiritHitConversionRating)
+        local suggestion = self:GetBestReforge(v, rating, soln.excessRating, statWeights, spiritHitConversionRate)
         if suggestion then
             unforged[#unforged + 1] = suggestion
         else
@@ -3026,7 +3040,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statW
         end
         if val + delta <= desiredValue then
             val = val + delta
-            v.item = self:ReforgeItem(v, rating, soln.excessRating, spiritHitConversionRating)
+            v.item = self:ReforgeItem(v, v.reforgeTo, soln.excessRating, spiritHitConversionRate)
             soln.changes[#soln.changes + 1] = v.item
             soln.items[#soln.items + 1] = v.item
         else
@@ -3049,7 +3063,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statW
         self:Debug("### under=" .. under)
         self:Debug("### over=" .. over)
         if over < under then
-            v.item = self:ReforgeItem(v, rating, soln.excessRating, spiritHitConversionRating)
+            v.item = self:ReforgeItem(v, rating, soln.excessRating, spiritHitConversionRate)
             soln.items[#soln.items + 1] = v.item
             soln.changes[#soln.changes + 1] = v.item
             unforged[#unforged] = nil
