@@ -2649,7 +2649,7 @@ function Reforgenator:ShowState()
     }
 
     self:Explain("useSandbox = " .. to_string(db.char.useSandbox))
-    self:Explain("targetLevelSelection = " .. to_string(db.char.targetLevelSelection))
+    self:Explain("targetLevelSelection = " .. c.REFORGING_TARGET_LEVELS[db.char.targetLevelSelection or 2])
 
     if playerModel.spiritHitConversionRate then
         if model.statWeights["ITEM_MOD_SPIRIT_SHORT"] and model.statWeights["ITEM_MOD_HIT_RATING_SHORT"] then
@@ -2680,6 +2680,7 @@ function Reforgenator:ShowState()
                 if db.char.useSandbox then
                 -- mark this item sandboxed
                     local minus, plus = RI:GetReforgedStatIDs(RI:GetReforgeID(itemLink))
+                    self:Debug("### undoing previous reforge, minus="..to_string(minus)..", plus="..to_string(plus))
                     if minus and plus then
                         entry.sandboxed = true
                         entry.oldReforgedFrom = REFORGE_ID_MAP[minus]
@@ -2700,7 +2701,6 @@ function Reforgenator:ShowState()
                             playerStats["ITEM_MOD_HIT_RATING_SHORT"] = playerStats["ITEM_MOD_HIT_RATING_SHORT"] - d2
                         end
 
-                        self:Explain("undoing previous reforge on item " .. itemLink .. " to reduce " .. _G[REFORGE_ID_MAP[plus]] .. " by " .. delta .. " and add it back to " .. _G[REFORGE_ID_MAP[minus]])
                     else
                     -- this shouldn't happen, but apparently it does
                     -- and I haven't been able to repro yet
@@ -2709,7 +2709,6 @@ function Reforgenator:ShowState()
                     end
 
                 else
-                    self:Explain("item " .. itemLink .. " previously reforged")
                     entry.reforged = true
                 end
             end
@@ -2730,18 +2729,6 @@ function Reforgenator:ShowState()
     self:Explain("parry = " .. playerStats.ITEM_MOD_PARRY_RATING_SHORT)
     self:Explain("crit = " .. playerStats.ITEM_MOD_CRIT_RATING_SHORT)
     self:Explain("haste = " .. playerStats.ITEM_MOD_HASTE_RATING_SHORT)
-
-    for k,v in ipairs(model.reforgeOrder) do
-        local f = c.STAT_CAPS[v.cap]
-        if f then
-            self:Explain("rule #" .. k .. ": " .. v.rating .. " to " .. v.cap)
-            self:Explain("current=" .. playerStats[v.rating])
-            local _ = f(playerModel, v.userData)
-        end
-    end
-
-    self:Explain("===== End Reforge Model =====")
-
 
     for _,entry in ipairs(model.reforgeOrder) do
         self:Debug("### entry.cap=" .. to_string(entry.cap))
@@ -2826,17 +2813,17 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statWeig
         self:Debug("### desiredRating=" .. desiredRating .. ", spiritHitConversionRate=" .. to_string(spiritHitConversionRate))
         if desiredRating == "ITEM_MOD_HIT_RATING_SHORT"
                 and spiritHitConversionRate then
-            self:Explain("item already has hit, so let's try for spirit instead")
+            self:Debug("### item already has hit, so let's try for spirit instead")
             return self:GetBestReforge(item, "ITEM_MOD_SPIRIT_SHORT", excessRating, statWeights, spiritHitConversionRate)
         end
 
-        self:Explain("can't reforge " .. item.itemLink .. " as it already has desired rating")
+        self:Debug("### item " .. item.itemLink .. " already has rating")
         return nil
     end
 
     local candidates = {}
 
-    self:Explain("inspecting item " .. item.itemLink)
+    self:Debug("### inspecting item " .. item.itemLink)
     for k,v in pairs(item) do
         if c.ITEM_STATS[k] then
             local delta = self:PotentialLossFromRating(item, k)
@@ -2857,12 +2844,10 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statWeig
                 self:Debug("### not reforging spirit to hit, no matter what")
             elseif excessRating[eff] then
                 if delta <= excessRating[eff] then
-                    self:Explain("considering reforging " .. delta .. " points of " .. _G[k] .. " for " .. _G[desiredRating])
                     entry.cost = 0
                     candidates[#candidates + 1] = entry
                 end
             else
-                self:Explain("considering reforging " .. delta .. " points of " .. _G[k] .. " for " .. _G[desiredRating])
                 candidates[#candidates + 1] = entry
             end
         end
@@ -2870,7 +2855,7 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statWeig
     self:Debug("### candidates="..to_string(candidates))
 
     if #candidates == 0 then
-        self:Explain("can't reforge " .. item.itemLink .. " as it has no reforgable attributes")
+        self:Debug("### can't reforge " .. item.itemLink .. " as it has no reforgable attributes")
         return nil
     end
 
@@ -2884,7 +2869,7 @@ function Reforgenator:GetBestReforge(item, desiredRating, excessRating, statWeig
         end
     end)
 
-    self:Explain("item " .. item.itemLink .. " has " .. _G[candidates[1].rating] .. " as its best reforgable attribute")
+    self:Debug("### ".. candidates[1].rating .. " is best reforgable attribute")
 
     return {
         item = item,
@@ -2921,7 +2906,7 @@ end
 
 function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statWeights, spiritHitConversionRate, ancestor)
     self:Explain("+++++")
-    self:Explain("reforging for " .. _G[rating] .. ", currently at " .. currentValue)
+    self:Explain("reforging for " .. _G[rating] .. ", starting at " .. currentValue)
 
     soln = SolutionContext:new()
 
@@ -2970,7 +2955,7 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statW
     -- previously said we had an excess of our now-desired rating, so
     -- clear it out
     if soln.excessRating[rating] then
-        self:Explain("zeroing out previous excess for rating")
+        self:Debug("### zeroing out previous excess for rating")
         soln.excessRating[rating] = nil
     end
 
@@ -3063,12 +3048,15 @@ function Reforgenator:OptimizeSolution(rating, currentValue, desiredValue, statW
         self:Debug("### under=" .. under)
         self:Debug("### over=" .. over)
         if over < under then
+            val = val + delta
             v.item = self:ReforgeItem(v, rating, soln.excessRating, spiritHitConversionRate)
             soln.items[#soln.items + 1] = v.item
             soln.changes[#soln.changes + 1] = v.item
             unforged[#unforged] = nil
         end
     end
+
+    self:Explain("ending up at ".. val)
 
     for k,v in ipairs(unforged) do
         soln.items[#soln.items + 1] = v.item
