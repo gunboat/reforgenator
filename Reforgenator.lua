@@ -2661,15 +2661,6 @@ function Reforgenator:ShowState()
         self:Explain("statWeights[" .. _G[k] .. "]=" .. v)
     end
 
-    for k,v in ipairs(model.reforgeOrder) do
-        local f = c.STAT_CAPS[v.cap]
-        if f then
-            self:Explain("rule #" .. k .. ": " .. v.rating .. " to " .. v.cap)
-        end
-    end
-
-    self:Explain("===== End Reforge Model =====")
-
     -- Get the current state of the equipment
     soln = SolutionContext:new()
     for k,v in ipairs(Reforgenator.constants.INVENTORY_SLOTS) do
@@ -2740,7 +2731,16 @@ function Reforgenator:ShowState()
     self:Explain("crit = " .. playerStats.ITEM_MOD_CRIT_RATING_SHORT)
     self:Explain("haste = " .. playerStats.ITEM_MOD_HASTE_RATING_SHORT)
 
-    self:Explain("===== End Player Model =====")
+    for k,v in ipairs(model.reforgeOrder) do
+        local f = c.STAT_CAPS[v.cap]
+        if f then
+            self:Explain("rule #" .. k .. ": " .. v.rating .. " to " .. v.cap)
+            self:Explain("current=" .. playerStats[v.rating])
+            local _ = f(playerModel, v.userData)
+        end
+    end
+
+    self:Explain("===== End Reforge Model =====")
 
 
     for _,entry in ipairs(model.reforgeOrder) do
