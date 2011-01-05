@@ -2046,6 +2046,10 @@ function Reforgenator:TwoHandFrostDKModel()
             rating = "ITEM_MOD_MASTERY_RATING_SHORT",
             cap = "MaximumPossible"
         },
+        {
+            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            cap = "MaximumPossible"
+        },
     }
 
     return model
@@ -2076,6 +2080,10 @@ function Reforgenator:DWFrostDKModel()
             cap = "MaximumPossible"
         },
         {
+            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            cap = "MaximumPossible"
+        },
+        {
             rating = "ITEM_MOD_HASTE_RATING_SHORT",
             cap = "MaximumPossible"
         },
@@ -2103,6 +2111,10 @@ function Reforgenator:UnholyDKModel()
         {
             rating = "ITEM_MOD_HASTE_RATING_SHORT",
             cap = "MaximumPossible"
+        },
+        {
+            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            cap = "ExpertiseSoftCap"
         },
         {
             rating = "ITEM_MOD_CRIT_RATING_SHORT",
