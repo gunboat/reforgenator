@@ -2980,11 +2980,13 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
         soln.excessRating[rating] = nil
     end
 
+    -- make a list of all the items that could be reforged t give a stat that affects the desired
+    -- combat rating
     unforged = {}
     for k,v in ipairs(ancestor.items) do
         local foundOne = nil
-        for attribute,resultingRatingList in pairs(playerModel.statEffectMap) do
-            for _,iv in ipairs(resultingRatingList) do
+        for attribute,affectedRatingList in pairs(playerModel.statEffectMap) do
+            for _,iv in ipairs(affectedRatingList) do
                 if iv == rating then
                     local suggestion = self:GetBestReforge(playerModel, v, attribute, soln.excessRating, statWeights)
                     if suggestion then
