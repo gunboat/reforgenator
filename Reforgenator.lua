@@ -1183,11 +1183,19 @@ end
 
 function PlayerModel:UpdateStats(minusStat, plusStat, delta)
     for _,v in ipairs(self.statEffectMap[minusStat]) do
-        self.playerStats[v] = self.playerStats[v] - delta
+        if minusStat == "ITEM_MOD_SPIRIT" and v == CR_SPELL_HIT and self.spiritHitConversionRate then
+            self.playerStats[v] = self.playerStats[v] - math.floor(delta * self.spiritHitConversionRate)
+        else
+            self.playerStats[v] = self.playerStats[v] - delta
+        end
     end
 
     for _,v in ipairs(self.statEffectMap[plusStat]) do
-        self.playerStats[v] = self.playerStats[v] + delta
+        if plusStat == "ITEM_MOD_SPIRIT" and v == CR_SPELL_HIT and self.spiritHitConversionRate then
+            self.playerStats[v] = self.playerStats[v] + math.floor(delta * self.spiritHitConversionRate)
+        else
+            self.playerStats[v] = self.playerStats[v] + delta
+        end
     end
 end
 
@@ -2842,27 +2850,33 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
     }
 end
 
-function Reforgenator:ReforgeItem(playerModel, suggestion, desiredStat, excessRating)
+function Reforgenator:ReforgeItem(playerModel, suggestion, excessRating)
     local result = {}
     local st = sugestion.reforgeTo
-    local ssfr = suggestion.reforgeFrom
+    local sf = suggestion.reforgeFrom
 
     for k,v in pairs(suggestion.item) do
         result[k] = v
     end
     result.reforged = true
-    result.reforgedFrom = suggestion.reforgeFrom
-    result.reforgedTo = suggestion.reforgeTo
+    result.reforgedFrom = sf
+    result.reforgedTo = st
 
     result[st] = suggestion.delta
-    result[sf] = sf[sr] - suggestion.delta
+    result[sf] = result[sf] - suggestion.delta
 
-    playerModel.UpdateStats(sf, st, suggestion.delta)
+    playerModel:UpdateStats(sf, st, suggestion.delta)
 
     if playerModel.statEffectMap[sf] then
         for _,v in ipairs(playerModel.statEffectMap[sf]) do
             if excessRating[v] then
-                excessRating[v] = excessRating[v] - suggestion.delta
+                local delta = suggestion.delta
+                if sf == "ITEM_MOD_SPIRIT_SHORT"
+                    and v == CR_HIT_SPELL
+                    and playerModel.spiritHitConversionRate then
+                    delta = math.floor(delta * playerModel.spiritHitConversionRate)
+                end
+                excessRating[v] = excessRating[v] - delta
             end
         end
     end
@@ -3002,7 +3016,7 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
             delta = math.floor(delta * playerModel.spiritHitConversionRate)
         end
         if playerModel.playerStats[rating] + delta <= desiredValue then
-            v.item = self:ReforgeItem(playerModel, v, v.reforgeTo, soln.excessRating)
+            v.item = self:ReforgeItem(playerModel, v, soln.excessRating)
             soln.changes[#soln.changes + 1] = v.item
             soln.items[#soln.items + 1] = v.item
         else
@@ -3025,7 +3039,7 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
         self:Debug("### under=" .. under)
         self:Debug("### over=" .. over)
         if over < under then
-            v.item = self:ReforgeItem(playerModel, v, v.reforgeTo, soln.excessRating)
+            v.item = self:ReforgeItem(playerModel, v, soln.excessRating)
             soln.items[#soln.items + 1] = v.item
             soln.changes[#soln.changes + 1] = v.item
             unforged[#unforged] = nil
