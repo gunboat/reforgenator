@@ -504,24 +504,6 @@ function Reforgenator:ModelToModelOption(modelName, model)
     }
     seq = seq + 1
 
-    option.args['useSpellHit'] = {
-        type = 'toggle',
-        name = 'Use spell hit',
-        desc = 'Use spell hit instead of melee/ranged hit',
-        order = seq,
-        get = function()
-            return model.useSpellHit
-        end,
-        set = function(info, key)
-            if model.readOnly then
-                return
-            end
-
-            model.useSpellHit = key
-        end
-    }
-    seq = seq + 1
-
     option.args["weightHeader"] = {
         type = 'header',
         name = 'Stat Weights',
@@ -590,8 +572,8 @@ function Reforgenator:ModelToModelOption(modelName, model)
 
         local arr = option.args['rating' .. i].values
         arr[""] = ""
-        for k2,v2 in pairs(c.ITEM_STATS) do
-            arr[k2] = _G[k2]
+        for k2,v2 in pairs(c.RATING_NAMES) do
+            arr[v2] = k2
         end
 
         option.args['cap' .. i] = {
@@ -1576,15 +1558,15 @@ function Reforgenator:BloodDKModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -1606,11 +1588,11 @@ function Reforgenator:BearModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_DODGE_RATING_SHORT",
+            rating = CR_DODGE,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -1630,15 +1612,15 @@ function Reforgenator:ProtPallyModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -1661,15 +1643,15 @@ function Reforgenator:ProtWarriorModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -1689,11 +1671,11 @@ function Reforgenator:BeastMasterHunterModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_RANGED,
             cap = "RangedHitCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -1713,11 +1695,11 @@ function Reforgenator:MarksmanshipHunterModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_RANGED,
             cap = "RangedHitCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -1737,11 +1719,11 @@ function Reforgenator:SurvivalHunterModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_RANGED,
             cap = "RangedHitCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -1762,20 +1744,18 @@ function Reforgenator:BoomkinModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "1SecGCD"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -1793,15 +1773,15 @@ function Reforgenator:FuryModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "DWHitCap"
         },
     }
@@ -1822,11 +1802,11 @@ function Reforgenator:ArmsModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
     }
@@ -1847,20 +1827,18 @@ function Reforgenator:CombatRogueModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -1878,20 +1856,18 @@ function Reforgenator:AssassinationRogueModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -1909,20 +1885,18 @@ function Reforgenator:SubtletyRogueModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -1940,15 +1914,15 @@ function Reforgenator:CatModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
     }
@@ -1969,11 +1943,11 @@ function Reforgenator:AffWarlockModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "Fixed",
             userdata = {
                 1281, 3842,
@@ -1982,12 +1956,10 @@ function Reforgenator:AffWarlockModel()
             }
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2005,16 +1977,14 @@ function Reforgenator:DestroWarlockModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2032,11 +2002,11 @@ function Reforgenator:DemoWarlockModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "Fixed",
             userdata = {
                 1281, 3842,
@@ -2045,12 +2015,10 @@ function Reforgenator:DemoWarlockModel()
             }
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2068,23 +2036,23 @@ function Reforgenator:TwoHandFrostDKModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
     }
@@ -2105,23 +2073,23 @@ function Reforgenator:DWFrostDKModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
     }
@@ -2142,23 +2110,23 @@ function Reforgenator:UnholyDKModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -2179,24 +2147,22 @@ function Reforgenator:ArcaneMageModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2213,24 +2179,22 @@ function Reforgenator:FrostMageModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2247,24 +2211,22 @@ function Reforgenator:FireMageModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2282,20 +2244,20 @@ function Reforgenator:RetPallyModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_MELEE,
             cap = "Fixed",
             userdata = 3978
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -2316,24 +2278,22 @@ function Reforgenator:ShadowPriestModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "1SecGCD"
         },
         {
-            rating = "ITEM_MOD_CRIT_RATING_SHORT",
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2350,16 +2310,14 @@ function Reforgenator:ElementalModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = 1
 
     return model
 end
@@ -2377,20 +2335,18 @@ function Reforgenator:EnhancementModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HIT_RATING_SHORT",
+            rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+            rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2407,7 +2363,7 @@ function Reforgenator:RestoDruidModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "Fixed",
             userdata = {
                 915, 3964,
@@ -2418,12 +2374,10 @@ function Reforgenator:RestoDruidModel()
             }
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2440,17 +2394,15 @@ function Reforgenator:DiscPriestModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "Fixed",
             userdata = 3241
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2467,12 +2419,10 @@ function Reforgenator:HolyPriestModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2489,12 +2439,10 @@ function Reforgenator:RestoShamanModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "1SecGCD"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
@@ -2510,16 +2458,14 @@ function Reforgenator:HolyPallyModel()
 
     model.reforgeOrder = {
         {
-            rating = "ITEM_MOD_HASTE_RATING_SHORT",
+            rating = CR_HASTE_SPELL,
             cap = "1SecGCD"
         },
         {
-            rating = "ITEM_MOD_MASTERY_RATING_SHORT",
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
-
-    model.useSpellHit = true
 
     return model
 end
