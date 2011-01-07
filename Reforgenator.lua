@@ -566,7 +566,7 @@ function Reforgenator:ModelToModelOption(modelName, model)
                 end
 
                 if key == 0 then
-                    model.reforgeOrder[i] = { }
+                    model.reforgeOrder[i] = {}
                 else
                     model.reforgeOrder[i].rating = key
                 end
@@ -1155,7 +1155,7 @@ function PlayerModel:new()
         race = "",
         statEffectMap = {
             ["ITEM_MOD_CRIT_RATING_SHORT"] = {
-                CR_CRIT_MELEE, CR_CIT_RANGED, CR_CRIT_SPELL,
+                CR_CRIT_MELEE, CR_CRIT_RANGED, CR_CRIT_SPELL,
             },
             ["ITEM_MOD_DODGE_RATING_SHORT"] = {
                 CR_DODGE,
@@ -1304,7 +1304,9 @@ function Reforgenator:GetPlayerModel()
 
     self:Explain("spiritHitConversionRate=" .. to_string(playerModel.spiritHitConversionRate))
     if playerModel.spiritHitConversionRate then
-        playerModel.statEffectMap["IEM_MOD_SPIRIT_SHORT"] = { CR_HIT_SPELL }
+        playerModel.statEffectMap["ITEM_MOD_SPIRIT_SHORT"] = {
+            CR_HIT_SPELL
+        }
     end
 
     return playerModel
@@ -2564,6 +2566,22 @@ function Reforgenator:LoadModel(model, modelName, ak, class)
     Reforgenator.db.global.models = m
 end
 
+function Reforgenator:ExplainPlayerModel(playerModel)
+    self:Explain("  melee hit = " .. playerModel.playerStats[CR_HIT_MELEE])
+    self:Explain("  melee crit = " .. playerModel.playerStats[CR_CRIT_MELEE])
+    self:Explain("  melee haste = " .. playerModel.playerStats[CR_HASTE_MELEE])
+    self:Explain("  expertise = " .. playerModel.playerStats[CR_EXPERTISE])
+    self:Explain("  ranged hit = " .. playerModel.playerStats[CR_HIT_RANGED])
+    self:Explain("  ranged crit = " .. playerModel.playerStats[CR_CRIT_RANGED])
+    self:Explain("  ranged haste = " .. playerModel.playerStats[CR_HASTE_RANGED])
+    self:Explain("  spell hit = " .. playerModel.playerStats[CR_HIT_SPELL])
+    self:Explain("  spell crit = " .. playerModel.playerStats[CR_CRIT_SPELL])
+    self:Explain("  spell haste = " .. playerModel.playerStats[CR_HASTE_SPELL])
+    self:Explain("  dodge = " .. playerModel.playerStats[CR_DODGE])
+    self:Explain("  parry = " .. playerModel.playerStats[CR_PARRY])
+    self:Explain("  mastery = ".. playerModel.playerStats[CR_MASTERY])
+end
+
 
 function Reforgenator:GetPlayerReforgeModel(playerModel)
     local db = Reforgenator.db
@@ -2670,7 +2688,7 @@ function Reforgenator:ShowState()
 
                         -- and undo the effects of the previous reforge
                         local delta = math.floor(0.40 * stats[REFORGE_ID_MAP[minus]])
-                        playerModel:UpdateStats(REFORGE_ID_MAP[minus], REFORGE_ID_MAP[plus], delta)
+                        playerModel:UpdateStats(REFORGE_ID_MAP[plus], REFORGE_ID_MAP[minus], delta)
                     else
                     -- this shouldn't happen, but apparently it does
                     -- and I haven't been able to repro yet
@@ -2693,18 +2711,9 @@ function Reforgenator:ShowState()
         end
     end
 
-    self:Explain("melee hit = " .. playerModel.playerStats[CR_HIT_MELEE])
-    self:Explain("ranged hit = " .. playerModel.playerStats[CR_HIT_RANGED])
-    self:Explain("spell hit = " .. playerModel.playerStats[CR_HIT_SPELL])
-    self:Explain("expertise = " .. playerModel.playerStats[CR_EXPERTISE])
-    self:Explain("dodge = " .. playerModel.playerStats[CR_DODGE])
-    self:Explain("parry = " .. playerModel.playerStats[CR_PARRY])
-    self:Explain("melee crit = " .. playerModel.playerStats[CR_CRIT_MELEE])
-    self:Explain("ranged crit = " .. playerModel.playerStats[CR_CRIT_RANGED])
-    self:Explain("spell crit = " .. playerModel.playerStats[CR_CRIT_SPELL])
-    self:Explain("melee haste = " .. playerModel.playerStats[CR_HASTE_MELEE])
-    self:Explain("ranged haste = " .. playerModel.playerStats[CR_HASTE_RANGED])
-    self:Explain("spell haste = " .. playerModel.playerStats[CR_HASTE_SPELL])
+    self:Explain("Player stats as calculated before reforging:")
+    self:ExplainPlayerModel(playerModel)
+    self:Explain("-----")
 
     for _,entry in ipairs(model.reforgeOrder) do
         self:Debug("### entry.cap=" .. to_string(entry.cap))
@@ -2757,6 +2766,10 @@ function Reforgenator:ShowState()
         end
     end
 
+    self:Explain("Player stats as calculated after reforging:")
+    self:ExplainPlayerModel(playerModel)
+    self:Explain("-----")
+
     self.changes = effectiveChanges
     self:UpdateWindow()
     self:ShowExplanation()
@@ -2774,12 +2787,12 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
     local c = Reforgenator.constants
 
     if item.itemLevel < 200 then
-        self:Explain("can't reforge " .. item.itemLink .. " as it's too low level")
+        self:Debug("### can't reforge " .. item.itemLink .. " as it's too low level")
         return nil
     end
 
     if item.reforged then
-        self:Debug("can't reforge " .. item.itemLink .. " as it's already reforged")
+        self:Debug("### can't reforge " .. item.itemLink .. " as it's already reforged")
         return nil
     end
 
@@ -2805,7 +2818,7 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
             local usingExcessRating = nil
             local canReforge = true
             if not playerModel.statEffectMap[k] then
-                self:Debug("### stat["..k.."] has no presence in playerModel.statEffectMap")
+                self:Debug("### stat[" .. k .. "] has no presence in playerModel.statEffectMap")
             end
             if playerModel.statEffectMap[k] then
                 for _,v in ipairs(playerModel.statEffectMap[k]) do
@@ -2823,7 +2836,13 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
                 if usingExcessRating then
                     entry.cost = 0
                 end
-                candidates[#candidates + 1] = entry
+
+                -- don't ever reforge spirit to spell hit if there's a spirit/hit conversion
+                if stat == "ITEM_MOD_HIT_RATING_SHORT" and k == "ITEM_MOD_SPIRIT_SHORT" and playerModel.spiritHitConversionRate then
+                    self:Debug("### not reforging spirit to hit")
+                else
+                    candidates[#candidates + 1] = entry
+                end
             end
         end
     end
@@ -2870,8 +2889,8 @@ function Reforgenator:ReforgeItem(playerModel, suggestion, excessRating)
             if excessRating[v] then
                 local delta = suggestion.delta
                 if sf == "ITEM_MOD_SPIRIT_SHORT"
-                    and v == CR_HIT_SPELL
-                    and playerModel.spiritHitConversionRate then
+                        and v == CR_HIT_SPELL
+                        and playerModel.spiritHitConversionRate then
                     delta = math.floor(delta * playerModel.spiritHitConversionRate)
                 end
                 excessRating[v] = excessRating[v] - delta
@@ -2884,7 +2903,6 @@ end
 
 function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWeights, ancestor)
     local c = Reforgenator.constants
-    self:Explain("+++++")
     self:Explain("reforging for " .. c.RATING_NAMES[rating] .. ", starting at " .. playerModel.playerStats[rating])
 
     soln = SolutionContext:new()
@@ -2938,25 +2956,45 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
         soln.excessRating[rating] = nil
     end
 
-    -- make a list of all the items that could be reforged t give a stat that affects the desired
+    -- make a list of all the items that could be reforged to give a stat that affects the desired
     -- combat rating
     unforged = {}
     for k,v in ipairs(ancestor.items) do
-        local foundOne = nil
+        local choices = {}
         for attribute,affectedRatingList in pairs(playerModel.statEffectMap) do
             for _,iv in ipairs(affectedRatingList) do
                 if iv == rating then
                     local suggestion = self:GetBestReforge(playerModel, v, attribute, soln.excessRating, statWeights)
                     if suggestion then
-                        unforged[#unforged + 1] = suggestion
-                        foundOne = true
+                        choices[#choices + 1] = suggestion
                     end
                 end
             end
         end
 
-        if not foundOne then
+        if #choices == 0 then
             soln.items[#soln.items + 1] = v
+        else
+            -- figure out which one of these is better based on the size of the expected gain
+            table.sort(choices, function(a,b)
+                local a_delta = a.delta
+                if rating == CR_HIT_SPELL
+                        and a.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
+                        and playerModel.spiritHitConversionRate then
+                    a_delta = math.floor(a_delta * playerModel.spiritHitConversionRate)
+                end
+
+                local b_delta = b.delta
+                if rating == CR_HIT_SPELL
+                        and b.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
+                        and playerModel.spiritHitConversionRate then
+                    b_delta = math.floor(b_delta * playerModel.spiritHitConversionRate)
+                end
+
+                return a_delta >= b_delta
+            end)
+
+            unforged[#unforged + 1] = choices[1]
         end
     end
 
