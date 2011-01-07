@@ -565,15 +565,19 @@ function Reforgenator:ModelToModelOption(modelName, model)
                     model.reforgeOrder[i] = {}
                 end
 
-                model.reforgeOrder[i].rating = key
+                if key == 0 then
+                    model.reforgeOrder[i] = { }
+                else
+                    model.reforgeOrder[i].rating = key
+                end
             end,
         }
         seq = seq + 1
 
         local arr = option.args['rating' .. i].values
-        arr[""] = ""
+        arr[0] = ""
         for k2,v2 in pairs(c.RATING_NAMES) do
-            arr[v2] = k2
+            arr[k2] = v2
         end
 
         option.args['cap' .. i] = {
@@ -2831,16 +2835,10 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
     end
 
     table.sort(candidates, function(a, b)
-        if a.cost < b.cost then
-            return true
-        elseif a.cost == b.cost then
-            return a.delta > b.delta
-        else
-            return nil
-        end
+        return a.cost < b.cost or (a.cost == b.cost and a.delta > b.delta)
     end)
 
-    self:Debug("### " .. candidates[1].rating .. " is best reforgable stat")
+    self:Debug("### " .. candidates[1].stat .. " is best reforgable stat")
 
     return {
         item = item,
@@ -2852,7 +2850,7 @@ end
 
 function Reforgenator:ReforgeItem(playerModel, suggestion, excessRating)
     local result = {}
-    local st = sugestion.reforgeTo
+    local st = suggestion.reforgeTo
     local sf = suggestion.reforgeFrom
 
     for k,v in pairs(suggestion.item) do
@@ -2914,17 +2912,17 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
         local vec = self:deepCopy(desiredValue)
         table.sort(vec, function(a, b) return a > b end)
         self:Explain("maximum plateau rating is " .. vec[1])
-        if currentValue > vec[1] then
+        if playerModel.playerStats[rating] > vec[1] then
             overCap = true
         end
     else
         self:Explain("desired value is " .. desiredValue)
-        if currentValue > desiredValue then
+        if playerModel.playerStats[rating] > desiredValue then
             overCap = true
         end
     end
     if overCap then
-        soln.excessRating[rating] = currentValue - desiredValue
+        soln.excessRating[rating] = playerModel.playerStats[rating] - desiredValue
         self:Explain("currently over cap for this rating by " .. soln.excessRating[rating])
         for k,v in ipairs(ancestor.items) do
             soln.items[#soln.items + 1] = v
