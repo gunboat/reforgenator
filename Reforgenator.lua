@@ -424,10 +424,8 @@ function Reforgenator:InitializeConstants()
 
 end
 
-function Reforgenator:InitializeModelOptions()
+function Reforgenator:MigrateOldModels()
     local models = Reforgenator.db.global.models
-    local key = nil
-    local n = 1
 
     -- build a plausible statWeights for models without them (user-defined)
     for k,v in pairs(models) do
@@ -440,6 +438,66 @@ function Reforgenator:InitializeModelOptions()
 
         v.statRank = nil
     end
+
+    -- Change old "ITEM_MOD_HIT_RATING_SHORT" models into shiny new CR_HIT_MELEE models
+    for k,v in pairs(models) do
+        -- guess model type
+        local modelType = 1
+        if v.useSpellHit then
+            modelType = 3
+            v.useSpellHit = nil
+        end
+
+        local map = {
+            ["ITEM_MOD_HIT_RATING_SHORT"] = CR_HIT_MELEE,
+            ["ITEM_MOD_CRIT_RATING_SHORT"] = CR_CRIT_MELEE,
+            ["ITEM_MOD_HASTE_RATING_SHORT"] = CR_HASTE_MELEE,
+            ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = CR_EXPERTISE,
+            ["ITEM_MOD_DODGE_RATING_SHORT"] = CR_DODGE,
+            ["ITEM_MOD_PARRY_RATING_SHORT"] = CR_PARRY,
+            ["ITEM_MOD_MASTERY_RATING_SHORT"] = CR_MASTERY,
+            ["ITEM_MOD_SPIRIT_SHORT"] = CR_HIT_SPELL,
+        }
+
+        for _, iv in ipairs(v.reforgeOrder) do
+            if iv.rating == "ITEM_MOD_HIT_RATING_SHORT" then
+                if iv.cap == "MeleeHitCap" then
+                    iv.rating = CR_HIT_MELEE
+                    modelType = 1
+                elseif iv.cap == "RangedHitCap" then
+                    iv.rating = CR_HIT_RANGED
+                    modelType = 2
+                elseif iv.cap == "SpellHitCap" then
+                    iv.rating = CR_HIT_SPELL
+                    modelType = 3
+                end
+            end
+        end
+
+        if modelType == 2 then
+            map["ITEM_MOD_HIT_RATING_SHORT"] = CR_HIT_RANGED
+            map["ITEM_MOD_CRIT_RATING_SHORT"] = CR_CRIT_RANGED
+            map["ITEM_MOD_HASTE_RATING_SHORT"] = CR_HASTE_RANGED
+        elseif modelType == 3 then
+            map["ITEM_MOD_HIT_RATING_SHORT"] = CR_HIT_SPELL
+            map["ITEM_MOD_CRIT_RATING_SHORT"] = CR_CRIT_SPELL
+            map["ITEM_MOD_HASTE_RATING_SHORT"] = CR_HASTE_SPELL
+        end
+
+        for _, iv in ipairs(v.reforgeOrder) do
+            if map[iv.rating] then
+                iv.rating = map[iv.rating]
+            end
+        end
+    end
+end
+
+function Reforgenator:InitializeModelOptions()
+    local models = Reforgenator.db.global.models
+    local key = nil
+    local n = 1
+
+    self:MigrateOldModels()
 
     -- User-defined models
     for k,v in pairs(models) do
