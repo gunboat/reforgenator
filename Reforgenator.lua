@@ -711,6 +711,28 @@ function Reforgenator:ModelToModelOption(modelName, model)
             end,
         }
         seq = seq + 1
+
+        option.args['hard' .. i] = {
+            type = 'toggle',
+            name = 'Force greater than?',
+            desc = 'Check this to force the addon to go over the cap rather than closest to the cap',
+            order = seq,
+            get = function()
+                if not model.reforgeOrder[i] then
+                    return nil
+                end
+
+                return model.reforgeOrder[i].mustBeOver
+            end,
+            set = function(info, key)
+                if model.readOnly then
+                    return
+                end
+
+                model.reforgeOrder[i].mustBeOver = key
+            end,
+        }
+        seq = seq + 1
     end
 
     if not model.readOnly then
@@ -1190,6 +1212,14 @@ function Reforgenator:deepCopy(o)
     return _copy(o)
 end
 
+function Reforgenator:removeIf(l, pred)
+local result = {}
+  for _,v in ipairs(l) do
+    if not pred(v) then table.insert(result, v) end
+  end
+  return result
+end
+
 local SolutionContext = {}
 
 function SolutionContext:new()
@@ -1296,6 +1326,7 @@ function Reforgenator:GetPlayerModel()
     playerModel.race = select(2, UnitRace("player"))
     playerModel.mainHandWeaponType = getMainHandWeaponType()
 
+    self:Explain("level=" .. UnitLevel("player"))
     self:Explain("className=" .. playerModel.className)
     self:Explain("primaryTab=" .. to_string(playerModel.primaryTab))
     self:Explain("race=" .. playerModel.race)
@@ -2777,7 +2808,8 @@ function Reforgenator:ShowState()
         self:Debug("### entry.cap=" .. to_string(entry.cap))
         local f = c.STAT_CAPS[entry.cap]
         if f then
-            soln = self:OptimizeSolution(playerModel, entry.rating, f(playerModel, entry.userdata), model.statWeights, soln)
+            soln = self:OptimizeSolution(playerModel, entry.rating, f(playerModel, entry.userdata),
+                                        model.statWeights, model.mustBeOver, soln)
         end
     end
 
@@ -2959,7 +2991,51 @@ function Reforgenator:ReforgeItem(playerModel, suggestion, excessRating)
     return result
 end
 
-function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWeights, ancestor)
+function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRating, statWeights)
+    local unforged = {}
+    for k,v in ipairs(itemList) do
+        local choices = {}
+        for attribute,affectedRatingList in pairs(playerModel.statEffectMap) do
+            for _,iv in ipairs(affectedRatingList) do
+                if iv == rating then
+                    local suggestion = self:GetBestReforge(playerModel, v, attribute, excessRating, statWeights)
+                    if suggestion then
+                        choices[#choices + 1] = suggestion
+                    end
+                end
+            end
+        end
+
+        if #choices > 0 then
+            -- figure out which one of these is better based on the size of the expected gain
+            table.sort(choices, function(a,b)
+                local a_delta = a.delta
+                if rating == CR_HIT_SPELL
+                        and a.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
+                        and playerModel.spiritHitConversionRate then
+                    a_delta = math.floor(a_delta * playerModel.spiritHitConversionRate)
+                end
+
+                local b_delta = b.delta
+                if rating == CR_HIT_SPELL
+                        and b.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
+                        and playerModel.spiritHitConversionRate then
+                    b_delta = math.floor(b_delta * playerModel.spiritHitConversionRate)
+                end
+
+                return a_delta >= b_delta
+            end)
+
+            unforged[#unforged + 1] = choices[1]
+        end
+    end
+
+    table.sort(unforged, function(a, b) return a.delta > b.delta end)
+
+    return unforged
+end
+
+function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWeights, mustBeOver, ancestor)
     local c = Reforgenator.constants
     self:Explain("reforging for " .. c.RATING_NAMES[rating] .. ", starting at " .. playerModel.playerStats[rating])
 
@@ -3014,54 +3090,6 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
         soln.excessRating[rating] = nil
     end
 
-    -- make a list of all the items that could be reforged to give a stat that affects the desired
-    -- combat rating
-    unforged = {}
-    for k,v in ipairs(ancestor.items) do
-        local choices = {}
-        for attribute,affectedRatingList in pairs(playerModel.statEffectMap) do
-            for _,iv in ipairs(affectedRatingList) do
-                if iv == rating then
-                    local suggestion = self:GetBestReforge(playerModel, v, attribute, soln.excessRating, statWeights)
-                    if suggestion then
-                        choices[#choices + 1] = suggestion
-                    end
-                end
-            end
-        end
-
-        if #choices == 0 then
-            soln.items[#soln.items + 1] = v
-        else
-            -- figure out which one of these is better based on the size of the expected gain
-            table.sort(choices, function(a,b)
-                local a_delta = a.delta
-                if rating == CR_HIT_SPELL
-                        and a.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
-                        and playerModel.spiritHitConversionRate then
-                    a_delta = math.floor(a_delta * playerModel.spiritHitConversionRate)
-                end
-
-                local b_delta = b.delta
-                if rating == CR_HIT_SPELL
-                        and b.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
-                        and playerModel.spiritHitConversionRate then
-                    b_delta = math.floor(b_delta * playerModel.spiritHitConversionRate)
-                end
-
-                return a_delta >= b_delta
-            end)
-
-            unforged[#unforged + 1] = choices[1]
-        end
-    end
-
-    table.sort(unforged, function(a, b) return a.delta > b.delta end)
-
-    -- unforged is now sorted by the amount of gain that could be had from
-    -- reforging the item, and soln.items contains all the items that
-    -- can't be reforged to the desired rating
-
     -- "desiredValue" might be a list of break points instead of a single
     -- value. Reforge to get as far up the list as possible, but any
     -- past a break point that we can avoid reforging is a win
@@ -3069,11 +3097,27 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
         vec = self:deepCopy(desiredValue)
         table.sort(vec, function(a, b) return a > b end)
         self:Debug("### vec=" .. to_string(vec))
-        val = currentValue
-        for k,v in ipairs(unforged) do
-            val = val + v.delta
+
+        -- figure out what the max we can reach is. As a simplifying assumption we'll assume we don't have
+        -- any excess rating anywhere
+        local excess = {}
+        for k,v in pairs(soln.excessRating) do
+            excess[k] = 0
         end
-        self:Debug("### max reforged =" .. val)
+        local itemList = self:deepCopy(ancestor.items)
+        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, excess, statWeights)
+        local val = playerModel.playerStats[rating]
+        for k,v in ipairs(unforged) do
+            local delta = v.delta
+            if rating == CR_HIT_SPELL
+                    and v.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
+                    and playerModel.spiritHitConversionRate then
+                delta = math.floor(delta * playerModel.spiritHitConversionRate)
+            end
+
+            val = val + delta
+        end
+        self:Debug("### assume max reforged =" .. val)
 
         while vec[1] and vec[1] > val do
             self:Debug("### is it bigger than " .. vec[1] .. "?")
@@ -3081,69 +3125,76 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
         end
 
         if not vec[1] then
-            self:Debug("### can't reach first breakpoint ... go for max")
+            self:Debug("### can't reach first breakpoint ... go for max we can reach")
             vec[1] = val
         end
-        self:Debug("### breakpoint =" .. vec[1])
 
-        for n=#unforged,1,-1 do
+        self:Debug("### pretend cap is now " .. vec[1])
+        desiredValue = vec[1]
+    end
+
+    -- pass 1: reforge from biggest to smallest that will fit under the cap
+    local itemList = self:deepCopy(ancestor.items)
+    while true do
+        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, soln.excessRating, statWeights)
+        if #unforged == 0 then
+            break
+        end
+
+        local v = unforged[1]
+
+        local delta = v.delta
+        if rating == CR_HIT_SPELL
+                and v.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
+                and playerModel.spiritHitConversionRate then
+            delta = math.floor(delta * playerModel.spiritHitConversionRate)
+        end
+
+        -- Reforge the largest items that will fit under the cap
+        if playerModel.playerStats[rating] + delta < desiredValue then
+            v.item = self:ReforgeItem(playerModel, v, soln.excessRating)
+            soln.changes[#soln.changes + 1] = v.item
+            soln.items[#soln.items + 1] = v.item
+
+            itemList = self:removeIf(itemList, function(a) return a.itemLink == v.item.itemLink end)
+        else
+            break
+        end
+    end
+    self:Debug("### after first pass unforged=" .. to_string(itemList))
+
+    -- pass 2: find the smallest remaining item that will just meet or exceed the cap and reforge it
+    if #itemList > 0 then
+        local under = math.abs(desiredValue - playerModel.playerStats[rating])
+        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, soln.excessRating, statWeights)
+        for n = #unforged, 1, -1 do
             local v = unforged[n]
-            self:Debug("### can we lose " .. v.delta .. "?")
-            if val - v.delta < vec[1] then
+
+            local delta = v.delta
+            if rating == CR_HIT_SPELL
+                    and v.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
+                    and playerModel.spiritHitConversionRate then
+                delta = math.floor(delta * playerModel.spiritHitConversionRate)
+            end
+
+            if playerModel.playerStats[rating] + delta >= desiredValue then
+                local over = math.abs(desiredValue - (playerModel.playerStats[rating] + delta))
+                if under > over or mustBeOver then
+                    v.item = self:ReforgeItem(playerModel, v, soln.excessRating)
+                    soln.changes[#soln.changes + 1] = v.item
+                    soln.items[#soln.items + 1] = v.item
+                    itemList = self:removeIf(itemList, function(a) return a.itemLink == v.item.itemLink end)
+                end
                 break
             end
-            self:Debug("### backing out another reforge")
-            val = val - v.delta
-        end
-
-        self:Debug("### pretend cap is now " .. val)
-        desiredValue = val
-    end
-
-    newList = {}
-    for k,v in ipairs(unforged) do
-        self:Debug("### val=" .. playerModel.playerStats[rating] .. ", delta=" .. v.delta .. ", desiredValue=" .. desiredValue)
-        local delta = v.delta
-        if rating == CR_HIT_SPELL
-                and v.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
-                and playerModel.spiritHitConversionRate then
-            delta = math.floor(delta * playerModel.spiritHitConversionRate)
-        end
-        if playerModel.playerStats[rating] + delta <= desiredValue then
-            v.item = self:ReforgeItem(playerModel, v, soln.excessRating)
-            soln.changes[#soln.changes + 1] = v.item
-            soln.items[#soln.items + 1] = v.item
-        else
-            newList[#newList + 1] = v
         end
     end
-    unforged = newList
-    self:Debug("### all we can do without going over")
-
-    if #unforged > 0 then
-        local v = unforged[#unforged]
-        local under = math.abs(desiredValue - playerModel.playerStats[rating])
-        local delta = v.delta
-        if rating == CR_HIT_SPELL
-                and v.reforgeTo == "ITEM_MOD_SPIRIT_SHORT"
-                and playerModel.spiritHitConversionRate then
-            delta = math.floor(delta * playerModel.spiritHitConversionRate)
-        end
-        local over = math.abs(desiredValue - playerModel.playerStats[rating] + delta)
-        self:Debug("### under=" .. under)
-        self:Debug("### over=" .. over)
-        if over < under then
-            v.item = self:ReforgeItem(playerModel, v, soln.excessRating)
-            soln.items[#soln.items + 1] = v.item
-            soln.changes[#soln.changes + 1] = v.item
-            unforged[#unforged] = nil
-        end
-    end
+    self:Debug("### after second pass unforged=" .. to_string(itemList))
 
     self:Explain("ending up at " .. playerModel.playerStats[rating])
 
-    for k,v in ipairs(unforged) do
-        soln.items[#soln.items + 1] = v.item
+    for k,v in ipairs(itemList) do
+        soln.items[#soln.items + 1] = v
     end
 
     -- And now we don't have any excess of this rating
