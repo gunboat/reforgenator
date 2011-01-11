@@ -3023,7 +3023,7 @@ function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRa
                     b_delta = math.floor(b_delta * playerModel.spiritHitConversionRate)
                 end
 
-                return a_delta >= b_delta
+                return (a_delta > b_delta) or (a_delta == b_delta and a.reforgeTo == "ITEM_MOD_SPIRIT_SHORT" and b.reforgeTo == "ITEM_MOD_HIT_RATING_SHORT")
             end)
 
             unforged[#unforged + 1] = choices[1]
