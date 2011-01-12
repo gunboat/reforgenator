@@ -1637,6 +1637,11 @@ function Reforgenator:HasteTo1SecGCD(playerModel)
         reduction = reduction + math.floor(moonkinForm * 5 * K)
     end
 
+    if playerModel.race == "Goblin" then
+        self:Explain("1% haste for being a Goblin")
+        reduction = reduction + math.floor(K)
+    end
+
     local targetHasteRating = hasteCap - reduction
     self:Explain("target haste rating = " .. targetHasteRating)
     return targetHasteRating
