@@ -1657,7 +1657,7 @@ function Reforgenator:BloodDKModel()
     model.statWeights = {
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
         ["ITEM_MOD_DODGE_RATING_SHORT"] = 50,
-        ["ITEM_MOD_PARRY_RATING_SHORT"] = 43,
+        ["ITEM_MOD_PARRY_RATING_SHORT"] = 50,
         ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 38,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 22,
         ["ITEM_MOD_HIT_RATING_SHORT"] = 16,
