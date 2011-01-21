@@ -1807,6 +1807,15 @@ function Reforgenator:MarksmanshipHunterModel()
             cap = "RangedHitCap"
         },
         {
+            rating = CR_CRIT_RANGED,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HASTE_RANGED,
+            cap = "Fixed",
+            userdata = { 692, 1652 }
+        },
+        {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
