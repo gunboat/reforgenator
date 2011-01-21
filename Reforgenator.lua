@@ -2044,15 +2044,7 @@ function Reforgenator:CatModel()
 
     model.reforgeOrder = {
         {
-            rating = CR_HIT_MELEE,
-            cap = "MeleeHitCap"
-        },
-        {
-            rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
-        },
-        {
-            rating = CR_CRIT_MELEE,
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
