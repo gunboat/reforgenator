@@ -1783,6 +1783,10 @@ function Reforgenator:BeastMasterHunterModel()
             cap = "RangedHitCap"
         },
         {
+            rating = CR_CRIT_RANGED,
+            cap = "MaximumPossible"
+        },
+        {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
