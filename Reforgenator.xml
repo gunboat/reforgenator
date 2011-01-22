@@ -228,6 +228,25 @@
           </Layer>
         </Layers>
       </ScrollFrame>
+      <Button name="$parent_Notes"
+                inherits="UIPanelButtonTemplate">
+        <Size><AbsDimension x="16" y="16"/></Size>
+        <Anchors>
+          <Anchor point="TOPLEFT"
+                  relativeTo="$parent_ModelSelection"
+                  relativePoint="TOPRIGHT">
+            <Offset>
+              <AbsDimension x="-15" y="-5" />
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <NormalTexture file="Interface/Icons/INV_Misc_Note_04" />
+        <PushedTexture file="Interface/Icons/INV_Misc_Note_04" />
+        <Scripts>
+            <OnEnter>Reforgenator:OnEnterNote(self)</OnEnter>
+            <OnLeave>Reforgenator:OnLeaveNote(self)</OnLeave>
+        </Scripts>
+      </Button>
       <Button name="$parent_Item1"
               inherits="ReforgeItemTemplate"
               id="1">

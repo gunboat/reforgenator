@@ -746,6 +746,32 @@ function Reforgenator:ModelToModelOption(modelName, model)
         seq = seq + 1
     end
 
+    option.args.notesHeader = {
+        type = 'header',
+        name = 'Notes',
+        order = seq,
+    }
+    seq = seq + 1
+
+    option.args.notes = {
+        type = 'input',
+        multiline = true,
+        name = 'Notes',
+        desc = 'Any notes to be displayed in a tooltip on the reforge window',
+        order = seq,
+        get = function()
+            return model.notes
+        end,
+        set = function(info, key)
+            if model.readOnly then
+                return
+            end
+
+            model.notes = key
+        end,
+    }
+    seq = seq + 1
+
     if not model.readOnly then
         option.args.maintHeader = {
             type = 'header',
