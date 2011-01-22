@@ -2524,6 +2524,8 @@ function Reforgenator:ShadowPriestModel()
         ["ITEM_MOD_SPIRIT_SHORT"] = 16,
     }
 
+    model.notes = 'http://elitistjerks.com/f77/t112651-shadow_priest_cataclysm/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_SPELL,
@@ -2646,6 +2648,8 @@ function Reforgenator:DiscPriestModel()
         ["ITEM_MOD_SPIRIT_SHORT"] = 22,
     }
 
+    model.notes = 'http://elitistjerks.com/f77/t110244-cataclysm_discipline_priest_compendium/'
+
     model.reforgeOrder = {
         {
             rating = CR_HASTE_SPELL,
@@ -2670,6 +2674,8 @@ function Reforgenator:HolyPriestModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 38,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 31,
     }
+
+    model.notes = 'http://elitistjerks.com/f77/t110245-cataclysm_holy_priest_compendium/'
 
     model.reforgeOrder = {
         {
