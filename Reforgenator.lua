@@ -1423,27 +1423,27 @@ function Reforgenator:CalculateHitMods(playerModel)
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
         self:Explain("1% to hit for being Draenei")
-        reduction = reduction + math.floor(K)
+        reduction = reduction + K
     end
 
     -- Fury warriors get 3% bonus from Precision
     if playerModel.className == "WARRIOR" and playerModel.primaryTab == 2 then
         self:Explain("3% to hit for being Fury warrior due to Precision")
-        reduction = reduction + math.floor(3 * K)
+        reduction = reduction + (3 * K)
     end
 
     -- Rogues get varying amounts based on Precision talent
     if playerModel.className == "ROGUE" then
         local pointsInPrecision = select(5, GetTalentInfo(2, 3))
         self:Explain((2 * pointsInPrecision) .. "% to hit for being Rogue with Precision talent")
-        reduction = reduction + math.floor(K * 2 * pointsInPrecision)
+        reduction = reduction + (K * 2 * pointsInPrecision)
     end
 
     -- Frost DKs get varying amounts if they're DW and have Nerves of Cold Steel
     if playerModel.className == "DEATHKNIGHT" and playerModel.mainHandWeaponType:sub(1, 10) ~= "Two-handed" then
         local pointsInNoCS = select(5, GetTalentInfo(2, 3))
         self:Explain((pointsInNoCS) .. "% to hit for being DW DK with Nerves of Cold Steel talent")
-        reduction = reduction + math.floor(K * pointsInNoCS)
+        reduction = reduction + (K * pointsInNoCS)
     end
 
     self:Explain("hit rating modification = " .. reduction)
@@ -1457,10 +1457,10 @@ function Reforgenator:CalculateMeleeHitCap(playerModel)
     local db = Reforgenator.db
     local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local hitCap = math.ceil(cap * K)
+    local hitCap = (cap * K)
     self:Explain("hit cap = " .. hitCap)
 
-    local targetHitRating = hitCap - self:CalculateHitMods(playerModel)
+    local targetHitRating = math.ceil(hitCap - self:CalculateHitMods(playerModel))
     self:Explain("calculated target hit rating = " .. targetHitRating)
 
     return targetHitRating
@@ -1472,10 +1472,10 @@ function Reforgenator:CalculateDWMeleeHitCap(playerModel)
     local db = Reforgenator.db
     local cap = c.DW_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local hitCap = math.ceil(cap * K)
+    local hitCap = (cap * K)
     self:Explain("DW hit cap = " .. hitCap)
 
-    local targetHitRating = hitCap - self:CalculateHitMods(playerModel)
+    local targetHitRating = math.ceil(hitCap - self:CalculateHitMods(playerModel))
     self:Explain("calculated target hit rating = " .. targetHitRating)
 
     return targetHitRating
@@ -1487,15 +1487,16 @@ function Reforgenator:CalculateRangedHitCap(playerModel)
     local db = Reforgenator.db
     local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local hitCap = math.ceil(cap * K)
+    local hitCap = (cap * K)
     self:Explain("ranged hit cap = " .. hitCap)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
         self:Explain("1% to hit for being Draenei")
-        hitCap = hitCap - math.floor(K)
+        hitCap = hitCap - K
     end
 
+    hitCap = math.ceil(hitCap)
     self:Explain("calculated target ranged hit rating = " .. hitCap)
 
     return hitCap
@@ -1507,22 +1508,23 @@ function Reforgenator:CalculateSpellHitCap(playerModel)
     local db = Reforgenator.db
     local cap = c.SPELL_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local hitCap = math.ceil(cap * K)
+    local hitCap = (cap * K)
     self:Explain("base spell hit rating = " .. hitCap)
 
     -- Mods to hit: Draenei get 1% bonus
     if playerModel.race == "Draenei" then
         self:Explain("1% to hit for being Draenei")
-        hitCap = hitCap - math.floor(K)
+        hitCap = hitCap - (K)
     end
 
     -- Rogues get varying amounts based on Precision talent
     if playerModel.className == "ROGUE" then
         local pointsInPrecision = select(5, GetTalentInfo(2, 3))
         self:Explain((2 * pointsInPrecision) .. "% to hit for being Rogue with Precision talent")
-        hitCap = hitCap - math.floor(K * 2 * pointsInPrecision)
+        hitCap = hitCap - (K * 2 * pointsInPrecision)
     end
 
+    hitCap = math.ceil(hitCap)
     self:Explain("calculated target spell hit rating = " .. hitCap)
 
     return hitCap
@@ -1543,7 +1545,7 @@ function Reforgenator:ExpertiseMods(playerModel)
 
     if playerModel.className == "DEATHKNIGHT" and playerModel.primaryTab == 1 then
         self:Explain("+6 expertise for being blood DK")
-        reduction = reduction + math.floor(6 * K)
+        reduction = reduction + (6 * K)
     end
 
     if playerModel.className == "PALADIN" then
@@ -1558,7 +1560,7 @@ function Reforgenator:ExpertiseMods(playerModel)
 
         if hasGlyph then
             self:Explain("+10 expertise for being Paladin with Glyph of Seal of Truth")
-            reduction = reduction + math.floor(10 * K)
+            reduction = reduction + (10 * K)
         end
     end
 
@@ -1567,13 +1569,13 @@ function Reforgenator:ExpertiseMods(playerModel)
                 or playerModel.mainHandWeaponType == "Two-Handed Axes"
                 or playerModel.mainHandWeaponType == "Fist Weapons" then
             self:Explain("+3 expertise for being Orc with axe or fist")
-            reduction = reduction + math.floor(3 * K)
+            reduction = reduction + (3 * K)
         end
     elseif playerModel.race == "Dwarf" then
         if playerModel.mainHandWeaponType == "One-Handed Maces"
                 or playerModel.mainHandWeaponType == "Two-Handed Maces" then
             self:Explain("+3 expertise for being Dwarf with mace")
-            reduction = reduction + math.floor(3 * K)
+            reduction = reduction + (3 * K)
         end
     elseif playerModel.race == "Human" then
         if playerModel.mainHandWeaponType == "One-Handed Swords"
@@ -1581,20 +1583,20 @@ function Reforgenator:ExpertiseMods(playerModel)
                 or playerModel.mainHandWeaponType == "One-Handed Maces"
                 or playerModel.mainHandWeaponType == "Two-Handed Maces" then
             self:Explain("+3 expertise for being Human with sword or mace")
-            reduction = reduction + math.floor(3 * K)
+            reduction = reduction + (3 * K)
         end
     elseif playerModel.race == "Gnome" then
         if playerModel.mainHandWeaponType == "One-Handed Swords"
                 or playerModel.mainHandWeaponType == "Daggers" then
             self:Explain("+3 expertise for being Gnome with dagger or 1H sword")
-            reduction = reduction + math.floor(3 * K)
+            reduction = reduction + (3 * K)
         end
     end
 
     if playerModel.className == "SHAMAN" then
         local pointsInUnleashedRage = select(5, GetTalentInfo(2, 16))
         self:Explain("+" .. (4 * pointsInUnleashedRage) .. "expertise for being Shaman with Unleashed Rage talent")
-        reduction = reduction + math.floor(4 * pointsInUnleashedRage * K)
+        reduction = reduction + (4 * pointsInUnleashedRage * K)
     end
 
     self:Explain("expertise rating modification = " .. reduction)
@@ -1607,10 +1609,10 @@ function Reforgenator:CalculateExpertiseSoftCap(playerModel)
     local db = Reforgenator.db
     local cap = c.EXP_SOFT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local expertiseCap = math.ceil(cap * K)
+    local expertiseCap = (cap * K)
     self:Explain("base expertise rating required = " .. expertiseCap)
 
-    expertiseCap = expertiseCap - self:ExpertiseMods(playerModel)
+    expertiseCap = math.ceil(expertiseCap - self:ExpertiseMods(playerModel))
     self:Explain("target expertise rating = " .. expertiseCap)
     return expertiseCap
 end
@@ -1621,10 +1623,10 @@ function Reforgenator:CalculateExpertiseHardCap(playerModel)
     local db = Reforgenator.db
     local cap = c.EXP_HARD_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
 
-    local expertiseCap = math.ceil(cap * K)
+    local expertiseCap = (cap * K)
     self:Explain("base expertise rating required = " .. expertiseCap)
 
-    expertiseCap = expertiseCap - self:ExpertiseMods(playerModel)
+    expertiseCap = math.ceil(expertiseCap - self:ExpertiseMods(playerModel))
     self:Explain("target expertise rating = " .. expertiseCap)
     return expertiseCap
 end
@@ -1633,7 +1635,7 @@ function Reforgenator:HasteTo1SecGCD(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.haste
 
-    local hasteCap = math.ceil(50 * K)
+    local hasteCap = (50 * K)
     self:Explain("base haste rating required = " .. hasteCap)
 
     local reduction = 0
@@ -1641,21 +1643,21 @@ function Reforgenator:HasteTo1SecGCD(playerModel)
     if playerModel.className == "PRIEST" then
         local pointsInDarkness = select(5, GetTalentInfo(3, 1))
         self:Explain((pointsInDarkness) .. "% spell haste for being Priest with Darkenss talent")
-        reduction = reduction + math.floor(pointsInDarkness * K)
+        reduction = reduction + (pointsInDarkness * K)
     end
 
     if playerModel.className == "DRUID" then
         local moonkinForm = select(5, GetTalentInfo(1, 8))
         self:Explain((5 * moonkinForm) .. "% spell haste for being Druid with moonkin form")
-        reduction = reduction + math.floor(moonkinForm * 5 * K)
+        reduction = reduction + (moonkinForm * 5 * K)
     end
 
     if playerModel.race == "Goblin" then
         self:Explain("1% haste for being a Goblin")
-        reduction = reduction + math.floor(K)
+        reduction = reduction + (K)
     end
 
-    local targetHasteRating = hasteCap - reduction
+    local targetHasteRating = math.ceil(hasteCap - reduction)
     self:Explain("target haste rating = " .. targetHasteRating)
     return targetHasteRating
 end
