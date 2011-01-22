@@ -1772,6 +1772,8 @@ function Reforgenator:BearModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 1,
     }
 
+    model.notes = 'http://manaflask.com/Aryu/blog/5267/'
+
     model.reforgeOrder = {
         {
             rating = CR_DODGE,
@@ -1958,6 +1960,8 @@ function Reforgenator:BoomkinModel()
         ["ITEM_MOD_SPIRIT_SHORT"] = 22,
     }
 
+    model.notes = 'http://elitistjerks.com/f47/t66856-druid_balance_pve_updated_cataclysm_release/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_SPELL,
@@ -2127,6 +2131,8 @@ function Reforgenator:CatModel()
         ["ITEM_MOD_HIT_RATING_SHORT"] = 28,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 28,
     }
+
+    model.notes = 'http://elitistjerks.com/f73/t110352-feral_cat_cataclysm_release/'
 
     model.reforgeOrder = {
         {
@@ -2586,6 +2592,8 @@ function Reforgenator:RestoDruidModel()
         ["ITEM_MOD_SPIRIT_SHORT"] = 32,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 11,
     }
+
+    model.notes = 'http://elitistjerks.com/f73/t110354-resto_cataclysm_release/'
 
     model.reforgeOrder = {
         {
