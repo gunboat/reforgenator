@@ -988,6 +988,25 @@ function Reforgenator:UpdateWindowItem(index, itemDescriptor)
     _G["ReforgenatorPanel_Item" .. index .. "Checked"]:Show()
 end
 
+function Reforgenator:OnEnterNote(widget)
+    GameTooltip:ClearLines()
+    GameTooltip:SetOwner(widget, "ANCHOR_BOTTOMRIGHT")
+
+    GameTooltip:AddLine("Notes", 1, 1, 1, 1)
+
+    local models = Reforgenator.db.global.models
+    local name = UIDropDownMenu_GetText(ReforgenatorPanel_ModelSelection)
+    if models[name] and models[name].notes then
+        GameTooltip:AddLine(models[name].notes, nil, nil, nil, 1)
+    end
+
+    GameTooltip:Show()
+end
+
+function Reforgenator:OnLeaveNote(widget)
+    GameTooltip:Hide()
+end
+
 function Reforgenator:ModelSelection_OnLoad()
     self:Debug("### ModelSelection_OnLoad")
 end
