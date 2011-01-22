@@ -405,13 +405,13 @@ function Reforgenator:InitializeConstants()
 
     c.MELEE_HIT_CAP_BY_TARGET_LEVEL = {
         [1] = 6,
-        [2] = 8
+        [2] = 8,
         [3] = 5,
     }
 
     c.DW_HIT_CAP_BY_TARGET_LEVEL = {
         [1] = 25,
-        [2] = 27
+        [2] = 27,
         [3] = 24,
     }
 
