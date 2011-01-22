@@ -1720,12 +1720,16 @@ function Reforgenator:ProtPallyModel()
 
     model.reforgeOrder = {
         {
-            rating = CR_HIT_MELEE,
-            cap = "MeleeHitCap"
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap"
         },
         {
             rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
+            cap = "Maintain"
+        },
+        {
+            rating = CR_HIT_MELEE,
+            cap = "MeleeHitCap"
         },
         {
             rating = CR_MASTERY,
@@ -1751,12 +1755,16 @@ function Reforgenator:ProtWarriorModel()
 
     model.reforgeOrder = {
         {
-            rating = CR_HIT_MELEE,
-            cap = "MeleeHitCap"
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap"
         },
         {
             rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
+            cap = "Maintain"
+        },
+        {
+            rating = CR_HIT_MELEE,
+            cap = "MeleeHitCap"
         },
         {
             rating = CR_MASTERY,
@@ -1882,7 +1890,7 @@ function Reforgenator:BoomkinModel()
             cap = "1SecGCD"
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
     }
@@ -1936,6 +1944,10 @@ function Reforgenator:ArmsModel()
             cap = "MeleeHitCap"
         },
         {
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap"
+        },
+        {
             rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
@@ -1957,8 +1969,8 @@ function Reforgenator:CombatRogueModel()
 
     model.reforgeOrder = {
         {
-            rating = CR_HIT_SPELL,
-            cap = "SpellHitCap"
+            rating = CR_HIT_MELEE,
+            cap = "MeleeHitCap"
         },
         {
             rating = CR_EXPERTISE,
@@ -1990,11 +2002,7 @@ function Reforgenator:AssassinationRogueModel()
             cap = "SpellHitCap"
         },
         {
-            rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
-        },
-        {
-            rating = CR_HASTE_MELEE,
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
@@ -2015,12 +2023,12 @@ function Reforgenator:SubtletyRogueModel()
 
     model.reforgeOrder = {
         {
-            rating = CR_HIT_SPELL,
-            cap = "SpellHitCap"
-        },
-        {
             rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
+        },
+        {
+            rating = CR_HIT_SPELL,
+            cap = "SpellHitCap"
         },
         {
             rating = CR_HASTE_MELEE,
@@ -2078,7 +2086,7 @@ function Reforgenator:AffWarlockModel()
             }
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
     }
@@ -2103,8 +2111,12 @@ function Reforgenator:DestroWarlockModel()
             cap = "SpellHitCap"
         },
         {
-            rating = CR_MASTERY,
-            cap = "MaximumPossible"
+            rating = CR_HASTE_SPELL,
+            cap = "1SecGCD"
+        },
+        {
+            rating = CR_CRIT_SPELL,
+            cap = "MaxmiumPossible"
         },
     }
 
@@ -2131,13 +2143,11 @@ function Reforgenator:DemoWarlockModel()
             rating = CR_HASTE_SPELL,
             cap = "Fixed",
             userdata = {
-                1281, 3842,
-                1068, 3202, 5336,
-                534, 1601, 2668, 3735, 4803, 5870
+                581, 2635
             }
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
     }
@@ -2377,6 +2387,10 @@ function Reforgenator:RetPallyModel()
             rating = CR_HASTE_MELEE,
             cap = "Fixed",
             userdata = 3978
+        },
+        {
+            rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
         },
         {
             rating = CR_MASTERY,
