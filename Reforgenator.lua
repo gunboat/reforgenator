@@ -2167,6 +2167,8 @@ function Reforgenator:AffWarlockModel()
         ["ITEM_MOD_SPIRIT_SHORT"] = 34,
     }
 
+    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_dots_you/#Stats__amp__Gearing'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_SPELL,
@@ -2201,6 +2203,8 @@ function Reforgenator:DestroWarlockModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 16,
     }
 
+    model.notes = 'http://elitistjerks.com/f80/t111390-destruction_cataclysm_demonic_mage/#Stats__amp__Gearing'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_SPELL,
@@ -2229,6 +2233,8 @@ function Reforgenator:DemoWarlockModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 31,
         ["ITEM_MOD_SPIRIT_SHORT"] = 29,
     }
+
+    model.notes = 'http://elitistjerks.com/f80/t110366-demonology_cataclysm_demon_within/#Stats__amp__Gearing'
 
     model.reforgeOrder = {
         {
