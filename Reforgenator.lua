@@ -1740,6 +1740,8 @@ function Reforgenator:BloodDKModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 16,
     }
 
+    model.notes = 'http://elitistjerks.com/f72/t110102-blood_dk_endgame_tanking_4_x/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_MELEE,
@@ -2242,6 +2244,8 @@ function Reforgenator:TwoHandFrostDKModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 26,
     }
 
+    model.notes = 'http://elitistjerks.com/f72/t110296-frost_dps_cataclysm_4_0_3_nothing_lose/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_MELEE,
@@ -2279,6 +2283,8 @@ function Reforgenator:DWFrostDKModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 26,
     }
 
+    model.notes = 'http://elitistjerks.com/f72/t110296-frost_dps_cataclysm_4_0_3_nothing_lose/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_MELEE,
@@ -2315,6 +2321,8 @@ function Reforgenator:UnholyDKModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 20,
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 8,
     }
+
+    model.notes = 'http://elitistjerks.com/f72/t110294-unholy_dps_cataclysm_4_0_3_stay_me/'
 
     model.reforgeOrder = {
         {
