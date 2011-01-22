@@ -2558,6 +2558,8 @@ function Reforgenator:ElementalModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
     }
 
+    model.notes = 'http://elitistjerks.com/f79/t110309-elemental_cataclysm_discussion_patch_4_0_3a/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_SPELL,
@@ -2586,6 +2588,8 @@ function Reforgenator:EnhancementModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 28,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 16,
     }
+
+    model.notes = 'http://elitistjerks.com/f79/t110295-enhancement_unleashing_elements_cataclysmic_discussion/#Gemming__Enchanting_and_Reforging'
 
     model.reforgeOrder = {
         {
@@ -2696,6 +2700,8 @@ function Reforgenator:RestoShamanModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 58,
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 42,
     }
+
+    model.notes = 'http://elitistjerks.com/f79/t110263-resto_cataclysm_raiding_discussion/'
 
     model.reforgeOrder = {
         {
