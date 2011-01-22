@@ -400,31 +400,37 @@ function Reforgenator:InitializeConstants()
     c.REFORGING_TARGET_LEVELS = {
         [1] = "Reforge for heroics",
         [2] = "Reforge for raiding",
+        [3] = "Reforge for PvP",
     }
 
     c.MELEE_HIT_CAP_BY_TARGET_LEVEL = {
         [1] = 6,
         [2] = 8
+        [3] = 5,
     }
 
     c.DW_HIT_CAP_BY_TARGET_LEVEL = {
         [1] = 25,
         [2] = 27
+        [3] = 24,
     }
 
     c.EXP_SOFT_CAP_BY_TARGET_LEVEL = {
         [1] = 24,
         [2] = 26,
+        [3] = 20,
     }
 
     c.EXP_HARD_CAP_BY_TARGET_LEVEL = {
         [1] = 24,
         [2] = 55,
+        [3] = 20,
     }
 
     c.SPELL_HIT_CAP_BY_TARGET_LEVEL = {
         [1] = 6,
         [2] = 17,
+        [3] = 4,
     }
 
 end
