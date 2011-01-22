@@ -2450,6 +2450,10 @@ function Reforgenator:ElementalModel()
             cap = "SpellHitCap"
         },
         {
+            rating = CR_HASTE_SPELL,
+            cap = "1SecGCD"
+        },
+        {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
