@@ -3,6 +3,10 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Reforgenator", false)
 local RI = LibStub("LibReforgingInfo-1.0")
 local version = "1.3.3"
 
+-- There isn't really a "spirit" combat rating, but it will simplify
+-- some things if we pretend there is one
+local CR_SPIRIT = 99
+
 local function table_print(tt, indent, done)
     done = done or {}
     indent = indent or 0
@@ -348,6 +352,7 @@ function Reforgenator:InitializeConstants()
         [CR_HIT_SPELL] = "Spell Hit Rating",
         [CR_MASTERY] = "Mastery Rating",
         [CR_PARRY] = "Parry Rating",
+        [CR_SPIRIT] = "Spirit",
     }
 
     --
@@ -1270,7 +1275,9 @@ function PlayerModel:new()
             ["ITEM_MOD_PARRY_RATING_SHORT"] = {
                 CR_PARRY,
             },
-            ["ITEM_MOD_SPIRIT_SHORT"] = {},
+            ["ITEM_MOD_SPIRIT_SHORT"] = {
+                CR_SPIRIT,
+            },
         },
         playerStats = {},
     }
@@ -1355,6 +1362,9 @@ function Reforgenator:GetPlayerModel()
         playerModel.playerStats[v] = GetCombatRating(v)
     end
 
+    -- there isn't a "spirit" combat rating, but it's still interesting
+    playerModel.playerStats[CR_SPIRIT] = UnitStat("player", 5)
+
     -- Calculate spirit/hit conversion
     -- Priest get 50/100 from Twisted Faith
     -- Shaman get 33/66/100 from Elemental Precision
@@ -1407,7 +1417,7 @@ function Reforgenator:GetPlayerModel()
     self:Explain("spiritHitConversionRate=" .. to_string(playerModel.spiritHitConversionRate))
     if playerModel.spiritHitConversionRate then
         playerModel.statEffectMap["ITEM_MOD_SPIRIT_SHORT"] = {
-            CR_HIT_SPELL
+            CR_SPIRIT, CR_HIT_SPELL
         }
     end
 
