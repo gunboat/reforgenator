@@ -1798,6 +1798,8 @@ function Reforgenator:ProtPallyModel()
         ["ITEM_MOD_PARRY_RATING_SHORT"] = 30,
     }
 
+    model.notes = 'http://elitistjerks.com/f76/t110338-cataclysm_tanking_protection_field_manual_updated_jan_13_2011_4_0_3a/#Reforging'
+
     model.reforgeOrder = {
         {
             rating = CR_EXPERTISE,
@@ -2466,6 +2468,8 @@ function Reforgenator:RetPallyModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 30,
     }
 
+    model.notes = 'http://elitistjerks.com/f76/t110342-retribution_concordance_4_0_3a/#Stats_and_Gearing'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_MELEE,
@@ -2689,6 +2693,8 @@ function Reforgenator:HolyPallyModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 46,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 35,
     }
+
+    model.notes = 'http://elitistjerks.com/f76/t110847-holy_cataclysm_holy_compendium/#Stats'
 
     model.reforgeOrder = {
         {
