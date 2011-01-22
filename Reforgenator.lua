@@ -2417,6 +2417,8 @@ function Reforgenator:FireMageModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 43,
     }
 
+    model.notes = 'http://elitistjerks.com/f75/t110326-cataclysm_fire_mage_compendium/#Gearing_a_Fire_Mage'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_SPELL,
