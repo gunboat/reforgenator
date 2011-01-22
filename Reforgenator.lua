@@ -1867,6 +1867,8 @@ function Reforgenator:BeastMasterHunterModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 21,
     }
 
+    model.notes = 'http://elitistjerks.com/f74/t110880-cataclysm_beast_mastery_4_0_3a/#Stats'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_RANGED,
@@ -1895,6 +1897,8 @@ function Reforgenator:MarksmanshipHunterModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 24,
     }
 
+    model.notes = 'http://elitistjerks.com/f74/t112408-cataclysm_marksmanship/#3_0_Stats'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_RANGED,
@@ -1905,13 +1909,13 @@ function Reforgenator:MarksmanshipHunterModel()
             cap = "MaximumPossible"
         },
         {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
             rating = CR_HASTE_RANGED,
             cap = "Fixed",
             userdata = { 692, 1652 }
-        },
-        {
-            rating = CR_MASTERY,
-            cap = "MaximumPossible"
         },
     }
 
@@ -1927,6 +1931,8 @@ function Reforgenator:SurvivalHunterModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 42,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 31,
     }
+
+    model.notes = 'http://elitistjerks.com/f74/t110723-cataclysm_survival_hunter/#Stats'
 
     model.reforgeOrder = {
         {
