@@ -1164,6 +1164,13 @@ function Reforgenator:Explain(...)
     Reforgenator.explanation = (Reforgenator.explanation or '') .. "\n" .. msg
 end
 
+function Reforgenator:Warning(...)
+    local msg = string.join(", ", ...)
+    self:Print(msg)
+
+    self:Explain(...)
+end
+
 function Reforgenator:ShowExplanation()
     if Reforgenator.db.profile.verbose.emit and Reforgenator.explanation then
         for line in Reforgenator.explanation:gmatch("[^\r\n]+") do
@@ -1315,10 +1322,16 @@ function Reforgenator:GetPlayerModel()
     end
 
     local function getMainHandWeaponType()
+        local mainHandWeaponType = ''
         local mainHandLink = GetInventoryItemLink("player", GetInventorySlotInfo("MainHandSlot"))
-        local _, _, _, _, _, itemType, itemSubType = GetItemInfo(mainHandLink)
-        self:Debug("itemType=" .. itemType .. ", itemSubType=" .. itemSubType)
-        return itemSubType
+        if mainHandLink then
+            local _, _, _, _, _, itemType, itemSubType = GetItemInfo(mainHandLink)
+            self:Debug("itemType=" .. itemType .. ", itemSubType=" .. itemSubType)
+            mainHandWeaponType = itemSubType
+        else
+            self:Warning("Warning: no main-hand weapon found")
+        end
+        return mainHandWeaponType
     end
 
     playerModel.className = select(2, UnitClass("player"))
