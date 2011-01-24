@@ -2593,6 +2593,10 @@ function Reforgenator:EnhancementModel()
 
     model.reforgeOrder = {
         {
+            rating = CR_HIT_MELEE,
+            cap = "MeleeHitCap"
+        },
+        {
             rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
