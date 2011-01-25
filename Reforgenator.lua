@@ -1070,8 +1070,7 @@ function Reforgenator:ModelEditorScrollbar_Update()
 end
 
 function Reforgenator:GetPlayerKey()
-    local key = GetUnitName("player") .. "-" .. GetRealmName()
-    return key
+    return GetUnitName("player") .. "-" .. GetRealmName() .. "/" .. GetActiveTalentGroup(false, false)
 end
 
 function Reforgenator:ModelSelection_OnInitialize()
