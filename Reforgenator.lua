@@ -1026,6 +1026,7 @@ end
 function Reforgenator:OnEnterNote(widget)
     GameTooltip:ClearLines()
     GameTooltip:SetOwner(widget, "ANCHOR_BOTTOMRIGHT")
+    GameTooltip:SetMinimumWidth(300)
 
     GameTooltip:AddLine("Notes", 1, 1, 1, 1)
 
