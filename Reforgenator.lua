@@ -504,9 +504,18 @@ function Reforgenator:MigrateOldModels()
 end
 
 function Reforgenator:InitializeModelOptions()
-    local models = Reforgenator.db.global.models
+    local db = Reforgenator.db
+    local models = db.global.models
     local key = nil
     local n = 1
+
+    if not db.char.useSandbox or type(db.char.useSandbox) ~= "table" then
+        db.char.useSandbox = {}
+    end
+
+    if not db.char.targetLevelSelection or type(db.char.targetLevelSelection) ~= "table" then
+        db.char.targetLevelSelection = {}
+    end
 
     self:MigrateOldModels()
 
@@ -1139,7 +1148,8 @@ function Reforgenator:SandboxSelection_OnInitialize()
     local info = UIDropDownMenu_CreateInfo()
     info.text = "Leave reforged items alone"
     info.func = function(self)
-        Reforgenator.db.char.useSandbox = nil
+        local talentGroup = GetActiveTalentGroup(false, false)
+        Reforgenator.db.char.useSandbox[talentGroup] = nil
         UIDropDownMenu_SetSelectedName(ReforgenatorPanel_SandboxSelection, self.value)
         Reforgenator:ShowState()
     end
@@ -1149,7 +1159,8 @@ function Reforgenator:SandboxSelection_OnInitialize()
 
     info.text = "Consider reforging anything"
     info.func = function(self)
-        Reforgenator.db.char.useSandbox = true
+        local talentGroup = GetActiveTalentGroup(false, false)
+        Reforgenator.db.char.useSandbox[talentGroup] = true
         UIDropDownMenu_SetSelectedName(ReforgenatorPanel_SandboxSelection, self.value)
         Reforgenator:ShowState()
     end
@@ -1166,7 +1177,8 @@ function Reforgenator:SandboxSelection_OnShow()
     UIDropDownMenu_Initialize(ReforgenatorPanel_SandboxSelection, func)
     UIDropDownMenu_SetWidth(ReforgenatorPanel_SandboxSelection, 230)
 
-    if db.char.useSandbox then
+    local talentGroup = GetActiveTalentGroup(false, false)
+    if db.char.useSandbox[talentGroup] then
         UIDropDownMenu_SetSelectedID(ReforgenatorPanel_SandboxSelection, 2)
     else
         UIDropDownMenu_SetSelectedID(ReforgenatorPanel_SandboxSelection, 1)
@@ -1187,7 +1199,8 @@ function Reforgenator:TargetLevelSelection_OnInitialize()
     for k,v in ipairs(c.REFORGING_TARGET_LEVELS) do
         info.text = v
         info.func = function(self)
-            Reforgenator.db.char.targetLevelSelection = k
+            local talentGroup = GetActiveTalentGroup(false, false)
+            Reforgenator.db.char.targetLevelSelection[talentGroup] = k
             UIDropDownMenu_SetSelectedName(ReforgenatorPanel_TargetLevelSelection, self.value)
             Reforgenator:ShowState()
         end
@@ -1205,7 +1218,9 @@ function Reforgenator:TargetLevelSelection_OnShow()
     UIDropDownMenu_Initialize(ReforgenatorPanel_TargetLevelSelection, func)
     UIDropDownMenu_SetWidth(ReforgenatorPanel_TargetLevelSelection, 230)
 
-    UIDropDownMenu_SetSelectedID(ReforgenatorPanel_TargetLevelSelection, Reforgenator.db.char.targetLevelSelection or 2)
+    local talentGroup = GetActiveTalentGroup(false, false)
+    local selected = Reforgenator.db.char.targetLevelSelection
+    UIDropDownMenu_SetSelectedID(ReforgenatorPanel_TargetLevelSelection, selected[talentGroup] or 2)
 end
 
 function Reforgenator:ClearExplanation()
@@ -1395,6 +1410,7 @@ function Reforgenator:GetPlayerModel()
     playerModel.primaryTab = getPrimaryTab()
     playerModel.race = select(2, UnitRace("player"))
     playerModel.mainHandWeaponType = getMainHandWeaponType()
+    playerModel.talentGroup = GetActiveTalentGroup(false, false)
 
     self:Explain("level=" .. UnitLevel("player"))
     self:Explain("className=" .. playerModel.className)
@@ -1515,7 +1531,7 @@ function Reforgenator:CalculateMeleeHitCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.meleeHit
     local db = Reforgenator.db
-    local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
+    local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection[playerModel.talentGroup] or 2]
 
     local hitCap = (cap * K)
     self:Explain("hit cap = " .. hitCap)
@@ -1530,7 +1546,7 @@ function Reforgenator:CalculateDWMeleeHitCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.meleeHit
     local db = Reforgenator.db
-    local cap = c.DW_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
+    local cap = c.DW_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection[playerModel.talentGroup] or 2]
 
     local hitCap = (cap * K)
     self:Explain("DW hit cap = " .. hitCap)
@@ -1545,7 +1561,7 @@ function Reforgenator:CalculateRangedHitCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.meleeHit
     local db = Reforgenator.db
-    local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
+    local cap = c.MELEE_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection[playerModel.talentGroup] or 2]
 
     local hitCap = (cap * K)
     self:Explain("ranged hit cap = " .. hitCap)
@@ -1566,7 +1582,7 @@ function Reforgenator:CalculateSpellHitCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.spellHit
     local db = Reforgenator.db
-    local cap = c.SPELL_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
+    local cap = c.SPELL_HIT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection[playerModel.talentGroup] or 2]
 
     local hitCap = (cap * K)
     self:Explain("base spell hit rating = " .. hitCap)
@@ -1667,7 +1683,7 @@ function Reforgenator:CalculateExpertiseSoftCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.expertise
     local db = Reforgenator.db
-    local cap = c.EXP_SOFT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
+    local cap = c.EXP_SOFT_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection[playerModel.talentGroup] or 2]
 
     local expertiseCap = (cap * K)
     self:Explain("base expertise rating required = " .. expertiseCap)
@@ -1681,7 +1697,7 @@ function Reforgenator:CalculateExpertiseHardCap(playerModel)
     local c = Reforgenator.constants
     local K = c.RATING_CONVERSIONS.expertise
     local db = Reforgenator.db
-    local cap = c.EXP_HARD_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection or 2]
+    local cap = c.EXP_HARD_CAP_BY_TARGET_LEVEL[db.char.targetLevelSelection[playerModel.talentGroup] or 2]
 
     local expertiseCap = (cap * K)
     self:Explain("base expertise rating required = " .. expertiseCap)
@@ -2912,7 +2928,7 @@ function Reforgenator:ShowState()
     }
 
     self:Explain("useSandbox = " .. to_string(db.char.useSandbox))
-    self:Explain("targetLevelSelection = " .. c.REFORGING_TARGET_LEVELS[db.char.targetLevelSelection or 2])
+    self:Explain("targetLevelSelection = " .. c.REFORGING_TARGET_LEVELS[db.char.targetLevelSelection[playerModel.talentGroup] or 2])
 
     for k,v in ipairs(model.statWeights) do
         self:Explain("statWeights[" .. _G[k] .. "]=" .. v)
@@ -2934,7 +2950,7 @@ function Reforgenator:ShowState()
             -- examine items previously reforged to see if they're still optimal
             entry.reforged = nil
             if RI:IsItemReforged(itemLink) then
-                if db.char.useSandbox then
+                if db.char.useSandbox[playerModel.talentGroup] then
                 -- mark this item sandboxed
                     local minus, plus = RI:GetReforgedStatIDs(RI:GetReforgeID(itemLink))
                     self:Debug("### undoing previous reforge, minus=" .. to_string(minus) .. ", plus=" .. to_string(plus))
