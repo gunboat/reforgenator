@@ -2774,6 +2774,10 @@ function Reforgenator:HolyPallyModel()
 
     model.reforgeOrder = {
         {
+            rating = CR_SPIRIT,
+            cap = "MaximumPossible"
+        },
+        {
             rating = CR_HASTE_SPELL,
             cap = "1SecGCD"
         },
