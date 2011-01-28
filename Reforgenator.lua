@@ -336,6 +336,7 @@ function Reforgenator:InitializeConstants()
         ["1SecGCD"] = function(m) return Reforgenator:HasteTo1SecGCD(m) end,
         ["Fixed"] = function(m, a) return a end,
         ["Maintain"] = function(m) return nil end,
+        ["23.34% Crit"] = function(m) return Reforgenator:CalculateFrostSoftCritCap(m) end,
     }
 
     c.RATING_NAMES = {
@@ -388,6 +389,13 @@ function Reforgenator:InitializeConstants()
         [3] = 179.28,
     }
 
+    local CRIT_RATING_CONVERSIONS = {
+        [0] = 14,
+        [1] = 22.0769,
+        [2] = 45.906,
+        [3] = 179.28,
+    }
+
     local gameVersion = GetAccountExpansionLevel()
     c.RATING_CONVERSIONS = {
         meleeHit = HIT_RATING_CONVERSIONS[gameVersion],
@@ -395,6 +403,7 @@ function Reforgenator:InitializeConstants()
         expertise = EXP_RATING_CONVERSIONS[gameVersion],
         haste = HASTE_RATING_CONVERSIONS[gameVersion],
         mastery = MASTERY_RATING_CONVERSIONS[gameVersion],
+        crit = CRIT_RATING_CONVERSIONS[gameVersion],
     }
 
     c.REFORGING_TARGET_LEVELS = {
@@ -1743,6 +1752,27 @@ function Reforgenator:CalculateMaximumValue(playerModel)
     return 9999
 end
 
+function Reforgenator:CalculateFrostSoftCritCap(playerModel)
+    local c = Reforgenator.constants
+    local K = c.RATING_CONVERSIONS.crit
+
+    local critCap = (23.34 * K)
+    self:Explain("base crit rating required = " .. critCap)
+
+    local reduction = 0
+
+    if playerModel.className == "MAGE" then
+        local pointsInPiercingIce = select(5, GetTalentInfo(3, 2))
+        self:Explain((pointsInPiercingIce) .. "% to crit for being Mage with Piercing Ice talent")
+        reduction = reduction + (K * pointsInPiercingIce)
+    end
+
+    critCap = math.ceil(critCap - reduction)
+
+    self:Explain("calculated target crit rating = " .. critCap)
+    return critCap
+end
+
 function Reforgenator:BloodDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2433,18 +2463,16 @@ function Reforgenator:FrostMageModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 19,
     }
 
+    model.notes = 'http://www.mmo-champion.com/threads/820907-Mage-The-Ultimate-Guide-to-Frost'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_SPELL,
             cap = "SpellHitCap"
         },
         {
-            rating = CR_HASTE_SPELL,
-            cap = "MaximumPossible"
-        },
-        {
             rating = CR_CRIT_SPELL,
-            cap = "MaximumPossible"
+            cap = "23.34% Crit"
         },
         {
             rating = CR_MASTERY,
