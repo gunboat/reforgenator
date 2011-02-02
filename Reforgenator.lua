@@ -2770,7 +2770,7 @@ function Reforgenator:HolyPallyModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 35,
     }
 
-    model.notes = 'http://elitistjerks.com/f76/t110847-holy_cataclysm_holy_compendium/#Stats'
+    model.notes = 'http://elitistjerks.com/f76/t110847-holy_cataclysm_holy_compendium/#Stats http://www.bandagespec.com/2011/02/on-haste-crit-and-other-secondary-stats.html'
 
     model.reforgeOrder = {
         {
@@ -2779,8 +2779,13 @@ function Reforgenator:HolyPallyModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "1SecGCD"
+            cap = "Fixed",
+	    userdata = { 774, 1860, 2946 },
         },
+	{
+	    rating = CR_CRIT_SPELL,
+            cap = "MaximumPossible"
+	},
         {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
