@@ -656,6 +656,7 @@ function Reforgenator:ModelToModelOption(modelName, model)
                     model.reforgeOrder[i] = {}
                 else
                     model.reforgeOrder[i].rating = key
+                    option.args['preferSpirit' .. i].hidden = key ~= CR_HIT_SPELL
                 end
             end,
         }
@@ -759,6 +760,29 @@ function Reforgenator:ModelToModelOption(modelName, model)
                 end
 
                 model.reforgeOrder[i].mustBeOver = key
+            end,
+        }
+        seq = seq + 1
+
+        option.args['preferSpirit' .. i] = {
+            type = 'toggle',
+            name = 'Prefer spirit?',
+            desc = 'Check this to specify you prefer spirit for spell hit if possible',
+            order = seq,
+            hidden = not (model.reforgeOrder[i] and model.reforgeOrder[i].rating == CR_HIT_SPELL),
+            get = function()
+                if not model.reforgeOrder[i] then
+                    return nil
+                end
+
+                return model.reforgeOrder[i].preferSpirit
+            end,
+            set = function(info, key)
+                if model.readOnly then
+                    return
+                end
+
+                model.reforgeOrder[i].preferSpirit = key
             end,
         }
         seq = seq + 1
@@ -1364,7 +1388,7 @@ end
 
 function PlayerModel:UpdateStats(minusStat, plusStat, delta)
     for _,v in ipairs(self.statEffectMap[minusStat]) do
-        if minusStat == "ITEM_MOD_SPIRIT" and v == CR_SPELL_HIT and self.spiritHitConversionRate then
+        if minusStat == "ITEM_MOD_SPIRIT" and v == CR_HIT_SPELL and self.spiritHitConversionRate then
             self.playerStats[v] = self.playerStats[v] - math.floor(delta * self.spiritHitConversionRate)
         else
             self.playerStats[v] = self.playerStats[v] - delta
@@ -1372,7 +1396,7 @@ function PlayerModel:UpdateStats(minusStat, plusStat, delta)
     end
 
     for _,v in ipairs(self.statEffectMap[plusStat]) do
-        if plusStat == "ITEM_MOD_SPIRIT" and v == CR_SPELL_HIT and self.spiritHitConversionRate then
+        if plusStat == "ITEM_MOD_SPIRIT" and v == CR_HIT_SPELL and self.spiritHitConversionRate then
             self.playerStats[v] = self.playerStats[v] + math.floor(delta * self.spiritHitConversionRate)
         else
             self.playerStats[v] = self.playerStats[v] + delta
@@ -3031,7 +3055,7 @@ function Reforgenator:ShowState()
         local f = c.STAT_CAPS[entry.cap]
         if f then
             soln = self:OptimizeSolution(playerModel, entry.rating, f(playerModel, entry.userdata),
-                                        model.statWeights, model.mustBeOver, soln)
+                                        model.statWeights, model.mustBeOver, model.preferSpirit, soln)
         end
     end
 
@@ -3213,7 +3237,7 @@ function Reforgenator:ReforgeItem(playerModel, suggestion, excessRating)
     return result
 end
 
-function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRating, statWeights)
+function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRating, statWeights, preferSpirit)
     local unforged = {}
     for k,v in ipairs(itemList) do
         local choices = {}
@@ -3245,7 +3269,7 @@ function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRa
                     b_delta = math.floor(b_delta * playerModel.spiritHitConversionRate)
                 end
 
-                return a_delta > b_delta
+                return a_delta > b_delta or (preferSpirit and rating == CR_HIT_SPELL and a_delta == b_delta and a.stat == "ITEM_MOD_SPIRIT_SHORT")
             end)
 
             unforged[#unforged + 1] = choices[1]
@@ -3257,7 +3281,7 @@ function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRa
     return unforged
 end
 
-function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWeights, mustBeOver, ancestor)
+function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWeights, mustBeOver, preferSpirit, ancestor)
     local c = Reforgenator.constants
     self:Explain("reforging for " .. c.RATING_NAMES[rating] .. ", starting at " .. playerModel.playerStats[rating])
 
@@ -3327,7 +3351,7 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
             excess[k] = 0
         end
         local itemList = self:deepCopy(ancestor.items)
-        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, excess, statWeights)
+        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, excess, statWeights, preferSpirit)
         local val = playerModel.playerStats[rating]
         for k,v in ipairs(unforged) do
             local delta = v.delta
@@ -3358,7 +3382,7 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
     -- pass 1: reforge from biggest to smallest that will fit under the cap
     local itemList = self:deepCopy(ancestor.items)
     while true do
-        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, soln.excessRating, statWeights)
+        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, soln.excessRating, statWeights, preferSpirit)
         if #unforged == 0 then
             break
         end
@@ -3388,7 +3412,7 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
     -- pass 2: find the smallest remaining item that will just meet or exceed the cap and reforge it
     if #itemList > 0 then
         local under = math.abs(desiredValue - playerModel.playerStats[rating])
-        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, soln.excessRating, statWeights)
+        local unforged = self:GetBestReforgeList(playerModel, itemList, rating, soln.excessRating, statWeights, preferSpirit)
         for n = #unforged, 1, -1 do
             local v = unforged[n]
 
