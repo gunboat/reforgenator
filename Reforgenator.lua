@@ -3055,7 +3055,7 @@ function Reforgenator:ShowState()
         local f = c.STAT_CAPS[entry.cap]
         if f then
             soln = self:OptimizeSolution(playerModel, entry.rating, f(playerModel, entry.userdata),
-                                        model.statWeights, model.mustBeOver, model.preferSpirit, soln)
+                                        model.statWeights, entry.mustBeOver, entry.preferSpirit, soln)
         end
     end
 
@@ -3269,8 +3269,18 @@ function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRa
                     b_delta = math.floor(b_delta * playerModel.spiritHitConversionRate)
                 end
 
-                return a_delta > b_delta or (preferSpirit and rating == CR_HIT_SPELL and a_delta == b_delta and a.stat == "ITEM_MOD_SPIRIT_SHORT")
+                if a_delta > b_delta then
+                    return true
+                end
+
+                if a_delta < b_delta then
+                    return nil
+                end
+
+                return (preferSpirit and a.reforgeTo == "ITEM_MOD_SPIRIT_SHORT") or (not preferSpirit and a.reforgeTo == "ITEM_MOD_HIT_RATING_SHORT")
             end)
+
+            self:Debug("### sorted choices are " .. to_string(choices))
 
             unforged[#unforged + 1] = choices[1]
         end
@@ -3284,6 +3294,9 @@ end
 function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWeights, mustBeOver, preferSpirit, ancestor)
     local c = Reforgenator.constants
     self:Explain("reforging for " .. c.RATING_NAMES[rating] .. ", starting at " .. playerModel.playerStats[rating])
+    if rating == CR_HIT_SPELL then
+        self:Explain("prefer spirit = " .. to_string(preferSpirit))
+    end
 
     soln = SolutionContext:new()
 
