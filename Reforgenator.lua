@@ -1868,21 +1868,9 @@ function Reforgenator:ProtPallyModel()
         ["ITEM_MOD_PARRY_RATING_SHORT"] = 30,
     }
 
-    model.notes = 'http://elitistjerks.com/f76/t110338-cataclysm_tanking_protection_field_manual_updated_jan_13_2011_4_0_3a/#Reforging'
+    model.notes = 'http://elitistjerks.com/f76/t110338-cataclysm_tanking_protection_field_manual_updated_feb_9_2011_4_0_6_a/#Reforging'
 
     model.reforgeOrder = {
-        {
-            rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
-        },
-        {
-            rating = CR_EXPERTISE,
-            cap = "Maintain"
-        },
-        {
-            rating = CR_HIT_MELEE,
-            cap = "MeleeHitCap"
-        },
         {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
@@ -1906,18 +1894,6 @@ function Reforgenator:ProtWarriorModel()
     }
 
     model.reforgeOrder = {
-        {
-            rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
-        },
-        {
-            rating = CR_EXPERTISE,
-            cap = "Maintain"
-        },
-        {
-            rating = CR_HIT_MELEE,
-            cap = "MeleeHitCap"
-        },
         {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
