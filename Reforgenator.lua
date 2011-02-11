@@ -626,6 +626,76 @@ function Reforgenator:ModelToModelOption(modelName, model)
         seq = seq + 1
     end
 
+    option.args['pawnImportHeader'] = {
+	type = 'header',
+	name = 'Import Pawn scale',
+	order = seq,
+    }
+    seq = seq + 1
+
+    option.args['pawnImport'] = {
+	type = 'input',
+	name = 'Pawn import',
+	desc = 'Paste a Pawn string here to set weights',
+	order = seq,
+	get = function() return '' end,
+	set = function(info, key)
+	    if model.readOnly then
+		return
+	    end
+
+	    self:Debug("### new pawnImport=" .. to_string(key))
+
+	    local function PawnParseScaleTag(ScaleTag)
+		local Pos, _, Version, Name, ValuesString = strfind(ScaleTag, "^%s*%(%s*Pawn%s*:%s*v(%d+)%s*:%s*\"([^\"]+)\"%s*:%s*(.+)%s*%)%s*$")
+		Version = tonumber(Version)
+		if (not Pos) or (not Version) or (not Name) or (Name == "") or (not ValuesString) or (ValuesString == "") then return end
+		if Version > 1 then return end
+	
+		local Values = {}
+		local function SplitStatValuePair(Pair)
+		    local Pos, _, Stat, Value = strfind(Pair, "^%s*([%a%d]+)%s*=%s*(%-?[%d%.]+)%s*,$")
+		    Value = tonumber(Value)
+		    if Pos and Stat and (Stat ~= "") and Value then 
+			Values[Stat] = Value
+		    end
+		end
+		gsub(ValuesString .. ",", "[^,]*,", SplitStatValuePair)
+	
+		return Name, Values
+	    end
+
+	    local name, values = PawnParseScaleTag(key)
+	    self:Debug("### pawn.name=" .. to_string(name) .. ", values=" .. to_string(values))
+	    if not name then
+		return
+	    end
+
+	    local pawnMap = {
+		["CritRating"] = "ITEM_MOD_CRIT_RATING_SHORT",
+		["DodgeRating"] = "ITEM_MOD_DODGE_RATING_SHORT",
+		["ExpertiseRating"] = "ITEM_MOD_EXPERTISE_RATING_SHORT",
+		["HitRating"] = "ITEM_MOD_HIT_RATING_SHORT",
+		["HasteRating"] = "ITEM_MOD_HASTE_RATING_SHORT",
+		["MasteryRating"] = "ITEM_MOD_MASTERY_RATING_SHORT",
+		["ParryRating"] = "ITEM_MOD_PARRY_RATING_SHORT",
+		["Spirit"] = "ITEM_MOD_SPIRIT_SHORT",
+	    }
+	    for k,v in pairs(values) do
+		self:Debug("### k="..to_string(k)..", v="..to_string(v))
+		local stat = pawnMap[k]
+		self:Debug("### stat="..to_string(stat))
+		if stat then
+		    local f = option.args['weight' .. stat]
+		    self:Debug("### f=" .. to_string(f))
+		    if f then
+			f.set(nil, v)
+		    end
+		end
+	    end
+	end,
+    }
+
     for i=1,6 do
         option.args["h" .. i] = {
             type = 'header',
