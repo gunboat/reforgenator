@@ -2602,7 +2602,7 @@ function Reforgenator:RetPallyModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 9,
     }
 
-    model.notes = 'http://elitistjerks.com/f76/t110342-retribution_concordance_4_0_3a/#Stats_and_Gearing'
+    model.notes = 'http://elitistjerks.com/f76/t110342-retribution_concordance_-_4_0_6_compliant/'
 
     model.reforgeOrder = {
         {
@@ -2614,16 +2614,11 @@ function Reforgenator:RetPallyModel()
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = CR_HASTE_MELEE,
-            cap = "Fixed",
-            userdata = 3978
-        },
-        {
-            rating = CR_CRIT_MELEE,
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
     }
