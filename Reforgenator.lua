@@ -2285,7 +2285,7 @@ function Reforgenator:AffWarlockModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 30,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_dots_you/#Stats__amp__Gearing'
+    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_%7C_dots_you_4_0_6_updated/#Reforging'
 
     model.reforgeOrder = {
         {
@@ -2296,9 +2296,9 @@ function Reforgenator:AffWarlockModel()
             rating = CR_HASTE_SPELL,
             cap = "Fixed",
             userdata = {
-                1281, 3842,
-                1068, 3202, 5336,
-                534, 1601, 2668, 3735, 4803, 5870
+                218, 2589, 4951, 7326,
+                21, 1993, 3970, 5945,
+                518, 1499, 2488, 3476, 4462, 5446
             }
         },
         {
