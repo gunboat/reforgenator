@@ -2579,11 +2579,11 @@ function Reforgenator:FireMageModel()
             cap = "MaximumPossible"
         },
         {
-            rating = CR_HASTE_SPELL,
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_HASTE_SPELL,
             cap = "MaximumPossible"
         },
     }
