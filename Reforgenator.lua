@@ -2084,7 +2084,7 @@ function Reforgenator:BoomkinModel()
         ["ITEM_MOD_SPIRIT_SHORT"] = 22,
     }
 
-    model.notes = 'http://elitistjerks.com/f47/t66856-druid_balance_pve_updated_cataclysm_release/'
+    model.notes = 'http://elitistjerks.com/f73/t110353-%5Bbalance%5D_cataclysm_release_updated_4_0_6_a/'
 
     model.reforgeOrder = {
         {
@@ -2093,7 +2093,10 @@ function Reforgenator:BoomkinModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "1SecGCD"
+            cap = "Fixed",
+            userdata = { 3102, 5489,
+                1423, 2778, 4134, 5489,
+                1924, 3102, 4281, 5459 },
         },
         {
             rating = CR_CRIT_SPELL,
