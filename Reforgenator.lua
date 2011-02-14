@@ -2467,7 +2467,7 @@ function Reforgenator:UnholyDKModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 8,
     }
 
-    model.notes = 'http://elitistjerks.com/f72/t110294-unholy_dps_cataclysm_4_0_3_stay_me/'
+    model.notes = 'http://elitistjerks.com/f72/t110294-unholy_dps_%7C_cataclysm_4_0_6_missing_frame/#Stat_Weights'
 
     model.reforgeOrder = {
         {
@@ -2479,15 +2479,15 @@ function Reforgenator:UnholyDKModel()
             cap = "MaximumPossible"
         },
         {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
             rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
             rating = CR_CRIT_MELEE,
-            cap = "MaximumPossible"
-        },
-        {
-            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
