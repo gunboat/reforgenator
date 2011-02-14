@@ -2819,7 +2819,12 @@ function Reforgenator:RestoShamanModel()
     model.reforgeOrder = {
         {
             rating = CR_HASTE_SPELL,
-            cap = "1SecGCD"
+            cap = "Fixed",
+            userdata = 5489,
+        },
+        {
+            rating = CR_SPIRIT,
+            cap = "MaximumPossible",
         },
     }
 
