@@ -2670,7 +2670,7 @@ function Reforgenator:ElementalModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 20,
     }
 
-    model.notes = 'http://elitistjerks.com/f79/t110309-elemental_cataclysm_discussion_patch_4_0_3a/'
+    model.notes = 'http://elitistjerks.com/f79/t110309-%5Belemental%5D_cataclysm_discussion_-_patch_4_0_6_a/'
 
     model.reforgeOrder = {
         {
