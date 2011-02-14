@@ -2365,11 +2365,12 @@ function Reforgenator:DemoWarlockModel()
             rating = CR_HASTE_SPELL,
             cap = "Fixed",
             userdata = {
-                581, 2635
+                1573, 3264, 4951,
+                21, 1993, 3970, 5945,
             }
         },
         {
-            rating = CR_CRIT_SPELL,
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
