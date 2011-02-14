@@ -2739,7 +2739,7 @@ function Reforgenator:RestoDruidModel()
 
     model.reforgeOrder = {
         {
-            rating = CR_MASTERY
+            rating = CR_MASTERY,
             cap = "Maintain",
         },
         {
