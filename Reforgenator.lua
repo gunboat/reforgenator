@@ -2735,19 +2735,16 @@ function Reforgenator:RestoDruidModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 11,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t110354-resto_cataclysm_release/'
+    model.notes = 'http://elitistjerks.com/f73/t110354-%5Bresto%5D_cataclysm_release_updated_4_0_6_a/'
 
     model.reforgeOrder = {
         {
-            rating = CR_HASTE_SPELL,
-            cap = "Fixed",
-            userdata = {
-                915, 3964,
-                1220, 2440, 3659, 4879,
-                1423, 5489,
-                2004, 3746,
-                5489
-            }
+            rating = CR_MASTERY
+            cap = "Maintain",
+        },
+        {
+            rating = CR_SPIRIT,
+            cap = "MaximumPossible",
         },
         {
             rating = CR_MASTERY,
