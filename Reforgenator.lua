@@ -1873,7 +1873,7 @@ function Reforgenator:BloodDKModel()
     model.statWeights = {
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
         ["ITEM_MOD_DODGE_RATING_SHORT"] = 50,
-        ["ITEM_MOD_PARRY_RATING_SHORT"] = 50,
+        ["ITEM_MOD_PARRY_RATING_SHORT"] = 43,
         ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 38,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 22,
         ["ITEM_MOD_HIT_RATING_SHORT"] = 16,
@@ -1977,10 +1977,10 @@ function Reforgenator:BeastMasterHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 21,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 80,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 60,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 40,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 20,
     }
 
     model.notes = 'http://elitistjerks.com/f74/t110880-cataclysm_beast_mastery_4_0_3a/#Stats'
@@ -2007,10 +2007,10 @@ function Reforgenator:MarksmanshipHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 57,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 24,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 80,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 60,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 40,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 20,
     }
 
     model.notes = 'http://elitistjerks.com/f74/t112408-cataclysm_marksmanship/#3_0_Stats'
@@ -2042,10 +2042,10 @@ function Reforgenator:SurvivalHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 42,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 31,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 80,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 60,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 40,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 20,
     }
 
     model.notes = 'http://elitistjerks.com/f74/t110723-cataclysm_survival_hunter/#Stats'
@@ -2276,11 +2276,10 @@ function Reforgenator:AffWarlockModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 61,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 38,
-        ["ITEM_MOD_SPIRIT_SHORT"] = 34,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 52,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 43,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 32,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 30,
     }
 
     model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_dots_you/#Stats__amp__Gearing'
@@ -2312,11 +2311,10 @@ function Reforgenator:DestroWarlockModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 46,
-        ["ITEM_MOD_SPIRIT_SHORT"] = 26,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 16,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 64,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 36,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 34,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 29,
     }
 
     model.notes = 'http://elitistjerks.com/f80/t111390-destruction_cataclysm_demonic_mage/#Stats__amp__Gearing'
@@ -2343,11 +2341,10 @@ function Reforgenator:DemoWarlockModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 50,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 31,
-        ["ITEM_MOD_SPIRIT_SHORT"] = 29,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 63,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 40,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 35,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 31,
     }
 
     model.notes = 'http://elitistjerks.com/f80/t110366-demonology_cataclysm_demon_within/#Stats__amp__Gearing'
@@ -2494,11 +2491,10 @@ function Reforgenator:ArcaneMageModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 54,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 37,
-        ["ITEM_MOD_SPIRIT_SHORT"] = 14,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 80,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 50,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 45,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 40,
     }
 
     model.reforgeOrder = {
@@ -2557,10 +2553,10 @@ function Reforgenator:FireMageModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 53,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 43,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 82,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 52,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 37,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 35,
     }
 
     model.notes = 'http://elitistjerks.com/f75/t110326-cataclysm_fire_mage_compendium/#Gearing_a_Fire_Mage'
@@ -2591,11 +2587,11 @@ function Reforgenator:RetPallyModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 66,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 30,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 35,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 22,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 18,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 16,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 9,
     }
 
     model.notes = 'http://elitistjerks.com/f76/t110342-retribution_concordance_4_0_3a/#Stats_and_Gearing'
@@ -2631,11 +2627,11 @@ function Reforgenator:ShadowPriestModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 54,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 50,
-        ["ITEM_MOD_SPIRIT_SHORT"] = 16,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 38,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 37,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 37,
     }
 
     model.notes = 'http://elitistjerks.com/f77/t112651-shadow_priest_cataclysm/'
@@ -2666,10 +2662,9 @@ function Reforgenator:ElementalModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 56,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 60,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 40,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 20,
     }
 
     model.notes = 'http://elitistjerks.com/f79/t110309-elemental_cataclysm_discussion_patch_4_0_3a/'
@@ -2731,8 +2726,8 @@ function Reforgenator:RestoDruidModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 57,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 45,
         ["ITEM_MOD_SPIRIT_SHORT"] = 32,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 11,
     }
@@ -2764,10 +2759,10 @@ function Reforgenator:DiscPriestModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 59,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 48,
-        ["ITEM_MOD_SPIRIT_SHORT"] = 22,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 80,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 11,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 10,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 6,
     }
 
     model.notes = 'http://elitistjerks.com/f77/t110244-cataclysm_discipline_priest_compendium/'
@@ -2835,9 +2830,10 @@ function Reforgenator:HolyPallyModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 46,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 35,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 80,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 50,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 50,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 25,
     }
 
     model.notes = 'http://elitistjerks.com/f76/t110847-holy_cataclysm_holy_compendium/#Stats http://www.bandagespec.com/2011/02/on-haste-crit-and-other-secondary-stats.html'
