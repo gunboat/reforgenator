@@ -2329,7 +2329,11 @@ function Reforgenator:DestroWarlockModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "1SecGCD"
+            cap = "Fixed",
+            userdata = {
+                218, 2589, 4951, 7326,
+                21, 1993, 3970, 5945,
+            },
         },
         {
             rating = CR_CRIT_SPELL,
