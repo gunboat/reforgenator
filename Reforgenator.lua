@@ -2841,7 +2841,7 @@ function Reforgenator:HolyPallyModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 25,
     }
 
-    model.notes = 'http://elitistjerks.com/f76/t110847-holy_cataclysm_holy_compendium/#Stats http://www.bandagespec.com/2011/02/on-haste-crit-and-other-secondary-stats.html'
+    model.notes = 'http://elitistjerks.com/f76/t110847-%5Bholy%5Dcataclysm_holy_compendium/ http://www.bandagespec.com/2011/02/on-haste-crit-and-other-secondary-stats.html'
 
     model.reforgeOrder = {
         {
