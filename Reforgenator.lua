@@ -1880,17 +1880,9 @@ function Reforgenator:BloodDKModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 16,
     }
 
-    model.notes = 'http://elitistjerks.com/f72/t110102-blood_dk_endgame_tanking_4_x/'
+    model.notes = 'http://elitistjerks.com/f72/t110102-blood_dk_endgame_tanking_4_x/ http://pwnwear.com/forum/collected-theorycraft-thread-t900.html http://pwnwear.com/forum/post15917.html#p15917'
 
     model.reforgeOrder = {
-        {
-            rating = CR_HIT_MELEE,
-            cap = "MeleeHitCap"
-        },
-        {
-            rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
-        },
         {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
