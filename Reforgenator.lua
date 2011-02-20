@@ -3285,7 +3285,11 @@ function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRa
                 if iv == rating then
                     local suggestion = self:GetBestReforge(playerModel, v, attribute, excessRating, statWeights)
                     if suggestion then
-                        choices[#choices + 1] = suggestion
+                        if suggestion.reforgeFrom == "ITEM_MOD_HIT_RATING_SHORT" and rating == CR_HIT_SPELL then
+                            self:Debug("### not reforging hit to hit via spirit")
+                        else
+                            choices[#choices + 1] = suggestion
+                        end
                     end
                 end
             end
