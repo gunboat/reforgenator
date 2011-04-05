@@ -1474,6 +1474,22 @@ function PlayerModel:UpdateStats(minusStat, plusStat, delta)
     end
 end
 
+function PlayerModel:isFuryWarrior()
+    return self.className == "WARRIOR" and self.primaryTab == 2
+end
+
+function PlayerModel:isBloodDK()
+    return self.className == "DEATHKNIGHT" and self.primaryTab == 1
+end
+
+function PlayerModel:isFrostDK()
+    return self.className == "DEATHKNIGHT" and self.primaryTab == 2
+end
+
+function PlayerModel:isEnhShaman()
+    return self.className == "SHAMAN" and self.primaryTab == 2
+end
+
 function Reforgenator:GetPlayerModel()
     local playerModel = PlayerModel:new()
 
@@ -1607,7 +1623,7 @@ function Reforgenator:CalculateHitMods(playerModel)
     end
 
     -- Fury warriors get 3% bonus from Precision
-    if playerModel.className == "WARRIOR" and playerModel.primaryTab == 2 then
+    if playerModel:isFuryWarrior() then
         self:Explain("3% to hit for being Fury warrior due to Precision")
         reduction = reduction + (3 * K)
     end
@@ -1723,7 +1739,7 @@ function Reforgenator:ExpertiseMods(playerModel)
     --   Enh shamans get +4 for each point in Unleashed Rage
     local reduction = 0;
 
-    if playerModel.className == "DEATHKNIGHT" and playerModel.primaryTab == 1 then
+    if playerModel:isBloodDK() then
         self:Explain("+6 expertise for being blood DK")
         reduction = reduction + (6 * K)
     end
@@ -2970,7 +2986,7 @@ function Reforgenator:GetPlayerReforgeModel(playerModel)
 
     local ak
     ak = playerModel.className .. "/" .. to_string(playerModel.primaryTab)
-    if playerModel.className == "DEATHKNIGHT" and playerModel.primaryTab == 2 then
+    if playerModel:isFrostDK() then
         if playerModel.mainHandWeaponType:sub(1, 10) == "Two-handed" then
             ak = '2HFrost'
         else
@@ -3277,6 +3293,7 @@ function Reforgenator:ReforgeItem(playerModel, suggestion, excessRating)
 end
 
 function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRating, statWeights, preferSpirit)
+    local c = Reforgenator.constants
     local unforged = {}
     for k,v in ipairs(itemList) do
         local choices = {}
@@ -3284,6 +3301,12 @@ function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRa
             for _,iv in ipairs(affectedRatingList) do
                 if iv == rating then
                     local suggestion = self:GetBestReforge(playerModel, v, attribute, excessRating, statWeights)
+
+                    if suggestion and playerModel:isEnhShaman() and rating == CR_HIT_SPELL and suggestion.reforgeTo == "ITEM_MOD_SPIRIT_SHORT" then
+                        suggestion = nil
+                    end
+
+
                     if suggestion then
                         if suggestion.reforgeFrom == "ITEM_MOD_HIT_RATING_SHORT" and rating == CR_HIT_SPELL then
                             self:Debug("### not reforging hit to hit via spirit")
