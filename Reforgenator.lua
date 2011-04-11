@@ -2136,6 +2136,14 @@ function Reforgenator:FuryModel()
             cap = "ExpertiseSoftCap"
         },
         {
+            rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
             rating = CR_HIT_MELEE,
             cap = "DWHitCap"
         },
