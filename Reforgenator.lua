@@ -2147,6 +2147,51 @@ function Reforgenator:FuryModel()
             rating = CR_HIT_MELEE,
             cap = "DWHitCap"
         },
+        {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
+        },
+    }
+
+    return model
+end
+
+function Reforgenator:SMFuryModel()
+    local model = ReforgeModel:new()
+    model.readOnly = true
+    model.statWeights = {
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 100,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 66,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 48,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 36,
+    }
+
+    model.reforgeOrder = {
+        {
+            rating = CR_HIT_MELEE,
+            cap = "MeleeHitCap"
+        },
+        {
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap"
+        },
+        {
+            rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HIT_MELEE,
+            cap = "DWHitCap"
+        },
+        {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
+        },
     }
 
     return model
@@ -2938,6 +2983,7 @@ function Reforgenator:LoadDefaultModels()
 
     self:LoadModel(self:ArmsModel(), 'Warrior, arms', 'WARRIOR/1', 'WARRIOR')
     self:LoadModel(self:FuryModel(), 'Warrior, fury', 'WARRIOR/2', 'WARRIOR')
+    self:LoadModel(self:SMFuryModel(), 'Warrior, single-minded fury', nil, 'WARRIOR')
     self:LoadModel(self:ProtWarriorModel(), 'Warrior, protection', 'WARRIOR/3', 'WARRIOR')
 end
 
