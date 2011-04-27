@@ -2085,14 +2085,14 @@ function Reforgenator:BoomkinModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 100,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 100,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 54,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 43,
-        ["ITEM_MOD_SPIRIT_SHORT"] = 22,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 90,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 90,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 90,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 80,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 70,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t110353-%5Bbalance%5D_cataclysm_release_updated_4_0_6_a/'
+    model.notes = 'http://elitistjerks.com/f73/t110353-balance_cataclysm_release_updated_4_1_a/'
 
     model.reforgeOrder = {
         {
@@ -2101,13 +2101,10 @@ function Reforgenator:BoomkinModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "Fixed",
-            userdata = { 3102, 5489,
-                1423, 2778, 4134, 5489,
-                1924, 3102, 4281, 5459 },
+            cap = "MaximumPossible",
         },
         {
-            rating = CR_CRIT_SPELL,
+            rating = CR_MASTERY
             cap = "MaximumPossible"
         },
     }
@@ -2796,7 +2793,7 @@ function Reforgenator:RestoDruidModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 11,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t110354-%5Bresto%5D_cataclysm_release_updated_4_0_6_a/'
+    model.notes = 'http://elitistjerks.com/f73/t110354-resto_cataclysm_release_updated_4_1_a/'
 
     model.reforgeOrder = {
         {
