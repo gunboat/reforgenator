@@ -2122,6 +2122,8 @@ function Reforgenator:FuryModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 36,
     }
 
+    model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_1_updates_progress/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_MELEE,
@@ -2177,15 +2179,15 @@ function Reforgenator:SMFuryModel()
             cap = "MaximumPossible"
         },
         {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
             rating = CR_HIT_MELEE,
             cap = "DWHitCap"
         },
         {
             rating = CR_MASTERY,
-            cap = "MaximumPossible"
-        },
-        {
-            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
     }
@@ -2204,18 +2206,24 @@ function Reforgenator:ArmsModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 50,
     }
 
+    model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_1_updates_progress/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
         },
         {
-            rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
-        },
-        {
             rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
+        },
+        {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap"
         },
     }
 
