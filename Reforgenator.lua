@@ -2342,7 +2342,7 @@ function Reforgenator:AffWarlockModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 30,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_%7C_dots_you_4_0_6_updated/#Reforging'
+    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_dots_you_4_1_updated/'
 
     model.reforgeOrder = {
         {
@@ -2351,12 +2351,7 @@ function Reforgenator:AffWarlockModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "Fixed",
-            userdata = {
-                218, 2589, 4951, 7326,
-                21, 1993, 3970, 5945,
-                518, 1499, 2488, 3476, 4462, 5446
-            }
+            cap = "MaximumPossible",
         },
         {
             rating = CR_CRIT_SPELL,
@@ -2377,7 +2372,7 @@ function Reforgenator:DestroWarlockModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 29,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t111390-destruction_cataclysm_demonic_mage/#Stats__amp__Gearing'
+    model.notes = 'http://elitistjerks.com/f80/t111390-destruction_cataclysm_demonic_mage_4_1_updated/'
 
     model.reforgeOrder = {
         {
@@ -2386,11 +2381,7 @@ function Reforgenator:DestroWarlockModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "Fixed",
-            userdata = {
-                218, 2589, 4951, 7326,
-                21, 1993, 3970, 5945,
-            },
+            cap = "MaxmiumPossible"
         },
         {
             rating = CR_CRIT_SPELL,
@@ -2411,7 +2402,7 @@ function Reforgenator:DemoWarlockModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 31,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t110366-demonology_cataclysm_demon_within/#Stats__amp__Gearing'
+    model.notes = 'http://elitistjerks.com/f80/t110366-demonology_cataclysm_demon_within_4_1_updated/'
 
     model.reforgeOrder = {
         {
@@ -2419,15 +2410,11 @@ function Reforgenator:DemoWarlockModel()
             cap = "SpellHitCap"
         },
         {
-            rating = CR_HASTE_SPELL,
-            cap = "Fixed",
-            userdata = {
-                1573, 3264, 4951,
-                21, 1993, 3970, 5945,
-            }
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_HASTE_SPELL,
             cap = "MaximumPossible"
         },
     }
