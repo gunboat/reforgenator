@@ -1,4 +1,4 @@
-## Interface: 40000
+## Interface: 40100
 ## Title: Reforgenator
 ## Notes: Figure out what to reforge
 ## Author: gunboat, gnerfed
