@@ -2103,8 +2103,8 @@ function Reforgenator:BoomkinModel()
             cap = "MaximumPossible",
         },
         {
-            rating = CR_MASTERY
-            cap = "MaximumPossible"
+            rating = CR_MASTERY,
+            cap = "MaximumPossible",
         },
     }
 
@@ -3243,10 +3243,12 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
     for k,v in pairs(item) do
         if c.ITEM_STATS[k] then
             local delta = self:PotentialLossFromStat(item, k)
-            local cost = statWeights[k] or 0
+            local cost = delta * (statWeights[k] or 0)
+            local gain = delta * statWeights[stat]
             entry = {
                 ["stat"] = k,
                 ["cost"] = cost,
+                ["gain"] = gain,
                 ["delta"] = delta,
             }
 
@@ -3290,7 +3292,9 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
     end
 
     table.sort(candidates, function(a, b)
-        return a.cost < b.cost or (a.cost == b.cost and a.delta > b.delta)
+        local delta_ep_a = a.gain - a.cost
+        local delta_ep_b = b.gain - b.cost
+        return delta_ep_a > delta_ep_b or (delta_ep_a == delta_ep_b and a.delta > b.delta)
     end)
 
     self:Debug("### " .. candidates[1].stat .. " is best reforgable stat")
