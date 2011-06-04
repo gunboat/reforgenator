@@ -396,6 +396,20 @@ function Reforgenator:InitializeConstants()
         [3] = 179.28,
     }
 
+    local PARRY_RATING_CONVERSIONS = {
+        [0] = 13.8,
+        [1] = 21.76154,
+        [2] = 45.25019,
+        [3] = 176.7189,
+    }
+
+    local DODGE_RATING_CONVERSIONS = {
+        [0] = 13.8,
+        [1] = 21.76154,
+        [2] = 45.25019,
+        [3] = 176.7189,
+    }
+
     local gameVersion = GetAccountExpansionLevel()
     c.RATING_CONVERSIONS = {
         meleeHit = HIT_RATING_CONVERSIONS[gameVersion],
@@ -404,6 +418,9 @@ function Reforgenator:InitializeConstants()
         haste = HASTE_RATING_CONVERSIONS[gameVersion],
         mastery = MASTERY_RATING_CONVERSIONS[gameVersion],
         crit = CRIT_RATING_CONVERSIONS[gameVersion],
+
+        ["ITEM_MOD_PARRY_RATING_SHORT"] = PARRY_RATING_CONVERSIONS[gameVersion],
+        ["ITEM_MOD_DODGE_RATING_SHORT"] = DODGE_RATING_CONVERSIONS[gameVersion],
     }
 
     c.REFORGING_TARGET_LEVELS = {
@@ -440,6 +457,28 @@ function Reforgenator:InitializeConstants()
         [1] = 6,
         [2] = 17,
         [3] = 4,
+    }
+
+    c.AVOIDANCE_K = {
+        ["WARRIOR"] = 0.9560,
+        ["PALADIN"] = 0.9560,
+        ["DEATHKNIGHT"] = 0.9560,
+        ["DRUID"] = 0.9720,
+    }
+
+    c.AVOIDANCE_C = {
+        ["ITEM_MOD_PARRY_RATING_SHORT"] = {
+            ["WARRIOR"] = 0.01523660,
+            ["PALADIN"] = 0.01523660,
+            ["DEATHKNIGHT"] = 0.01523660,
+        },
+
+        ["ITEM_MOD_DODGE_RATING_SHORT"] = {
+            ["WARRIOR"] = 0.01523660,
+            ["PALADIN"] = 0.01523660,
+            ["DEATHKNIGHT"] = 0.01523660,
+            ["DRUID"] = 0.008555,
+        },
     }
 
 end
@@ -3219,6 +3258,22 @@ function Reforgenator:PotentialLossFromStat(item, stat)
     return potentialLoss
 end
 
+function Reforgenator:CalculateScalingFromDR(playerModel, stat)
+    local c = Reforgenator.constants
+
+    if not c.AVOIDANCE_C[stat] or not c.AVOIDANCE_C[stat][playerModel.class] then
+        return 1
+    end
+
+    local one_over_c = c.AVOIDANCE_C[stat][playerModel.class]
+    local k = c.AVOIDANCE_K[playerModel.class]
+    local x = playerModel.stats[stat] / c.RATING_CONVERSIONS[stat]
+
+    local one_over_x_prime = one_over_c + (k / x)
+
+    return 1.0 / (x * one_over_x_prime)
+end
+
 function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, statWeights)
     local c = Reforgenator.constants
 
@@ -3243,8 +3298,11 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
     for k,v in pairs(item) do
         if c.ITEM_STATS[k] then
             local delta = self:PotentialLossFromStat(item, k)
-            local cost = delta * (statWeights[k] or 0)
-            local gain = delta * statWeights[stat]
+
+            local cost = delta * (statWeights[k] or 0) * self:CalculateScalingFromDR(playerModel, k)
+
+            local gain = delta * (statWeights[stat] or 0) * self:CalculateScalingFromDR(playerModel, stat)
+
             entry = {
                 ["stat"] = k,
                 ["cost"] = cost,
