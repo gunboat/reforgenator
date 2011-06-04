@@ -337,6 +337,7 @@ function Reforgenator:InitializeConstants()
         ["Fixed"] = function(m, a) return a end,
         ["Maintain"] = function(m) return nil end,
         ["23.34% Crit"] = function(m) return Reforgenator:CalculateFrostSoftCritCap(m) end,
+        ["15% Haste"] = function(m) return Reforgenator:CalculateFireSoftHasteCap(m) end,
     }
 
     c.RATING_NAMES = {
@@ -1922,6 +1923,16 @@ function Reforgenator:CalculateFrostSoftCritCap(playerModel)
     return critCap
 end
 
+function Reforgenator:CalculateFireSoftHasteCap(playerModel)
+    local c = Reforgenator.constants
+    local K = c.RATING_CONVERSIONS.haste
+
+    local hasteCap = (15 * K)
+    self:Explain("base haste rating required = " .. hasteCap)
+
+    return hasteCap
+end
+
 function Reforgenator:BloodDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2666,15 +2677,11 @@ function Reforgenator:FireMageModel()
             cap = "SpellHitCap"
         },
         {
-            rating = CR_CRIT_SPELL,
-            cap = "MaximumPossible"
-        },
-        {
-            rating = CR_MASTERY,
-            cap = "MaximumPossible"
-        },
-        {
             rating = CR_HASTE_SPELL,
+            cap = "15% Haste"
+        },
+        {
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
     }
