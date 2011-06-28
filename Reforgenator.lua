@@ -1969,6 +1969,7 @@ function Reforgenator:BloodDKModel()
     return model
 end
 
+-- TODO
 function Reforgenator:BearModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2007,7 +2008,7 @@ function Reforgenator:ProtPallyModel()
         ["ITEM_MOD_PARRY_RATING_SHORT"] = 30,
     }
 
-    model.notes = 'http://elitistjerks.com/f76/t110338-cataclysm_tanking_protection_field_manual_updated_feb_9_2011_4_0_6_a/#Reforging'
+    model.notes = 'http://elitistjerks.com/f76/t123600-prot_4_2_flames/'
 
     model.reforgeOrder = {
         {
