@@ -2045,6 +2045,7 @@ function Reforgenator:ProtWarriorModel()
     return model
 end
 
+-- TODO
 function Reforgenator:BeastMasterHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2075,6 +2076,7 @@ function Reforgenator:BeastMasterHunterModel()
     return model
 end
 
+-- TODO
 function Reforgenator:MarksmanshipHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2109,6 +2111,7 @@ function Reforgenator:MarksmanshipHunterModel()
     return model
 end
 
+-- TODO
 function Reforgenator:SurvivalHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2144,6 +2147,7 @@ function Reforgenator:SurvivalHunterModel()
     return model
 end
 
+-- TODO
 function Reforgenator:BoomkinModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2354,6 +2358,7 @@ function Reforgenator:AssassinationRogueModel()
     return model
 end
 
+-- TODO
 function Reforgenator:SubtletyRogueModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2621,6 +2626,7 @@ function Reforgenator:UnholyDKModel()
     return model
 end
 
+-- TODO
 function Reforgenator:ArcaneMageModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2653,6 +2659,7 @@ function Reforgenator:ArcaneMageModel()
     return model
 end
 
+-- TODO
 function Reforgenator:FrostMageModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2683,6 +2690,7 @@ function Reforgenator:FrostMageModel()
     return model
 end
 
+-- TODO
 function Reforgenator:FireMageModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2748,6 +2756,7 @@ function Reforgenator:RetPallyModel()
     return model
 end
 
+-- TODO
 function Reforgenator:ShadowPriestModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2882,6 +2891,7 @@ function Reforgenator:RestoDruidModel()
     return model
 end
 
+-- TODO
 function Reforgenator:DiscPriestModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2909,6 +2919,7 @@ function Reforgenator:DiscPriestModel()
     return model
 end
 
+-- TODO
 function Reforgenator:HolyPriestModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -2958,6 +2969,7 @@ function Reforgenator:RestoShamanModel()
     return model
 end
 
+-- TODO
 function Reforgenator:HolyPallyModel()
     local model = ReforgeModel:new()
     model.readOnly = true
