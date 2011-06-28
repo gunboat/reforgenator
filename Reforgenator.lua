@@ -2938,13 +2938,13 @@ function Reforgenator:RestoShamanModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 42,
     }
 
-    model.notes = 'http://elitistjerks.com/f79/t110263-resto_cataclysm_raiding_discussion/'
+    model.notes = 'http://elitistjerks.com/f79/t121202-resto_raiding_4_1_updating_4_2_a/'
 
     model.reforgeOrder = {
         {
             rating = CR_HASTE_SPELL,
             cap = "Fixed",
-            userdata = 5489,
+            userdata = { 610, 916 },
         },
         {
             rating = CR_SPIRIT,
