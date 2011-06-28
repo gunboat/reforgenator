@@ -2789,7 +2789,7 @@ function Reforgenator:ElementalModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
     }
 
-    model.notes = 'http://elitistjerks.com/f79/t110309-elemental_cataclysm_discussion_patch_4_1_a/'
+    model.notes = 'http://elitistjerks.com/f79/t110309-elemental_cataclysm_discussion_patch_4_2_a/'
 
     model.reforgeOrder = {
         {
@@ -2820,7 +2820,7 @@ function Reforgenator:EnhancementModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 16,
     }
 
-    model.notes = 'http://elitistjerks.com/f79/t110295-enhancement_unleashing_elements_cataclysmic_discussion/#Gemming__Enchanting_and_Reforging'
+    model.notes = 'http://elitistjerks.com/f79/t123790-enhancement_4_2_someone_spilled_spells_all_over_axe/'
 
     model.reforgeOrder = {
         {
