@@ -1928,7 +1928,18 @@ function Reforgenator:CalculateFireSoftHasteCap(playerModel)
     local K = c.RATING_CONVERSIONS.haste
 
     local hasteCap = (15 * K)
-    self:Explain("base haste rating required = " .. hasteCap)
+
+    local reduction = 0
+
+    if playerModel.className == "MAGE" then
+        local pointsInNP = select(5, GetTalentInfo(1, 3))
+        self:Explain((pointsInNP) .. "% to haste for being Mage with Netherwind Presence talent")
+        reduction = reduction + (K * pointsInNP)
+    end
+
+    hasteCap = math.ceil(hasteCap - reduction)
+
+    self:Explain("calculated target haste rating = " .. hasteCap)
 
     return hasteCap
 end
@@ -2188,12 +2199,12 @@ function Reforgenator:FuryModel()
             cap = "MaximumPossible"
         },
         {
-            rating = CR_MASTERY,
-            cap = "MaximumPossible"
-        },
-        {
             rating = CR_HIT_MELEE,
             cap = "DWHitCap"
+        },
+        {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
         },
         {
             rating = CR_HASTE_MELEE,
@@ -2229,12 +2240,12 @@ function Reforgenator:SMFuryModel()
             cap = "MaximumPossible"
         },
         {
-            rating = CR_HASTE_MELEE,
-            cap = "MaximumPossible"
-        },
-        {
             rating = CR_HIT_MELEE,
             cap = "DWHitCap"
+        },
+        {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
         },
         {
             rating = CR_MASTERY,
