@@ -2304,7 +2304,7 @@ function Reforgenator:CombatRogueModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 33,
     }
 
-    model.notes = 'http://elitistjerks.com/f78/t111329-combat_guide_cata_04_26_2011_a/'
+    model.notes = 'http://elitistjerks.com/f78/t111329-combat_guide_cata_06_28_2011_a/'
 
     model.reforgeOrder = {
         {
@@ -2335,7 +2335,7 @@ function Reforgenator:AssassinationRogueModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 35,
     }
 
-    model.notes = 'http://elitistjerks.com/f78/t110134-assassination_guide_cata_04_26_2011_a/'
+    model.notes = 'http://elitistjerks.com/f78/t110134-assassination_guide_cata_06_28_2011_a/'
 
     model.reforgeOrder = {
         {
