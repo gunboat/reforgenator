@@ -2183,7 +2183,7 @@ function Reforgenator:FuryModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 36,
     }
 
-    model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_1_updates_progress/'
+    model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_2_read_while_patching_before_posting/'
 
     model.reforgeOrder = {
         {
@@ -2226,6 +2226,8 @@ function Reforgenator:SMFuryModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 36,
     }
 
+    model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_2_read_while_patching_before_posting/'
+
     model.reforgeOrder = {
         {
             rating = CR_HIT_MELEE,
@@ -2256,7 +2258,7 @@ function Reforgenator:SMFuryModel()
     return model
 end
 
-function Reforgenator:ArmsModel()
+funcion Reforgenator:ArmsModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
@@ -2267,7 +2269,7 @@ function Reforgenator:ArmsModel()
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 50,
     }
 
-    model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_1_updates_progress/'
+    model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_2_read_while_patching_before_posting/'
 
     model.reforgeOrder = {
         {
