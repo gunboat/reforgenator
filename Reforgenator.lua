@@ -2721,7 +2721,7 @@ function Reforgenator:RetPallyModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 9,
     }
 
-    model.notes = 'http://elitistjerks.com/f76/t110342-retribution_concordance_-_4_0_6_compliant/'
+    model.notes = 'http://elitistjerks.com/f76/t110342-retribution_concordance_4_2_now_two_scoops_ragnar_ohs/'
 
     model.reforgeOrder = {
         {
