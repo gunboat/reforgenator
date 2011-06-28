@@ -2032,6 +2032,8 @@ function Reforgenator:ProtWarriorModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 7,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 1,
     }
+    
+    model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_2_read_while_patching_before_posting/'
 
     model.reforgeOrder = {
         {
