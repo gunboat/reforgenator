@@ -2512,7 +2512,7 @@ function Reforgenator:TwoHandFrostDKModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 26,
     }
 
-    model.notes = 'http://elitistjerks.com/f72/t121704-frost_dps_4_1_way_we_get/'
+    model.notes = 'http://elitistjerks.com/f72/t121704-frost_dps_4_2_against_all_odds/'
 
     model.reforgeOrder = {
         {
@@ -2551,7 +2551,7 @@ function Reforgenator:DWFrostDKModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 26,
     }
 
-    model.notes = 'http://elitistjerks.com/f72/t121704-frost_dps_4_1_way_we_get/'
+    model.notes = 'http://elitistjerks.com/f72/t121704-frost_dps_4_2_against_all_odds/'
 
     model.reforgeOrder = {
         {
@@ -2590,7 +2590,7 @@ function Reforgenator:UnholyDKModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 8,
     }
 
-    model.notes = 'http://elitistjerks.com/f72/t120315-unholy_dps_just_act_natural_4_1_0_a/'
+    model.notes = 'http://elitistjerks.com/f72/t120315-unholy_dps_back_black_4_2_0_a/'
 
     model.reforgeOrder = {
         {
