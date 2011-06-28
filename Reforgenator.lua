@@ -2391,9 +2391,17 @@ function Reforgenator:CatModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 28,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t110352-feral_cat_cataclysm_release/'
+    model.notes = 'http://elitistjerks.com/f73/t123596-feral_cat_4_2_fire_cat_funtimes/'
 
     model.reforgeOrder = {
+        {
+            rating = CR_HIT_MELEE,
+            cap = "MeleeHitCap"
+        },
+        {
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap"
+        },
         {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
