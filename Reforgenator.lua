@@ -2854,12 +2854,17 @@ function Reforgenator:RestoDruidModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 11,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t110354-resto_cataclysm_release_updated_4_1_a/'
+    model.notes = 'http://elitistjerks.com/f73/t110354-resto_cataclysm_4_2_a/'
 
     model.reforgeOrder = {
         {
             rating = CR_MASTERY,
             cap = "Maintain",
+        },
+        {
+            rating = CR_HASTE_SPELL,
+            cap = "Fixed",
+            userdata = { 916, 2005 },
         },
         {
             rating = CR_SPIRIT,
