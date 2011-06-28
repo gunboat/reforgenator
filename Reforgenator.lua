@@ -2421,7 +2421,7 @@ function Reforgenator:AffWarlockModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 30,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_dots_you_4_1_updated/'
+    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_4_2_release/'
 
     model.reforgeOrder = {
         {
@@ -2451,7 +2451,7 @@ function Reforgenator:DestroWarlockModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 29,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t111390-destruction_cataclysm_demonic_mage_4_1_updated/'
+    model.notes = 'http://elitistjerks.com/f80/t111390-destruction_cataclysm_4_2_release/'
 
     model.reforgeOrder = {
         {
@@ -2481,7 +2481,7 @@ function Reforgenator:DemoWarlockModel()
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 31,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t110366-demonology_cataclysm_demon_within_4_1_updated/'
+    model.notes = 'http://elitistjerks.com/f80/t110366-demonology_cataclysm_4_2_release/'
 
     model.reforgeOrder = {
         {
