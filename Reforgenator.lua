@@ -2265,7 +2265,7 @@ function Reforgenator:SMFuryModel()
     return model
 end
 
-funcion Reforgenator:ArmsModel()
+function Reforgenator:ArmsModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
@@ -2281,19 +2281,19 @@ funcion Reforgenator:ArmsModel()
     model.reforgeOrder = {
         {
             rating = CR_HIT_MELEE,
-            cap = "MeleeHitCap"
+            cap = "MeleeHitCap",
         },
         {
             rating = CR_CRIT_MELEE,
-            cap = "MaximumPossible"
+            cap = "MaximumPossible",
         },
         {
             rating = CR_MASTERY,
-            cap = "MaximumPossible"
+            cap = "MaximumPossible",
         },
         {
             rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap"
+            cap = "ExpertiseSoftCap",
         },
     }
 
