@@ -3534,21 +3534,24 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
 
     -- already over cap?
     local overCap = nil
+    local amountOverCap = nil
     if type(desiredValue) == "table" then
         local vec = self:deepCopy(desiredValue)
         table.sort(vec, function(a, b) return a > b end)
         self:Explain("maximum plateau rating is " .. vec[1])
         if playerModel.playerStats[rating] > vec[1] then
             overCap = true
+            amountOverCap = playerModel.playerStats[rating] - vec[1]
         end
     else
         self:Explain("desired value is " .. desiredValue)
         if playerModel.playerStats[rating] > desiredValue then
             overCap = true
+            amountOverCap = playerModel.playerStats[rating] - desiredValue
         end
     end
     if overCap then
-        soln.excessRating[rating] = playerModel.playerStats[rating] - desiredValue
+        soln.excessRating[rating] = amountOverCap
         self:Explain("currently over cap for this rating by " .. soln.excessRating[rating])
         for k,v in ipairs(ancestor.items) do
             soln.items[#soln.items + 1] = v
