@@ -1760,6 +1760,12 @@ function Reforgenator:CalculateSpellHitCap(playerModel)
         hitCap = hitCap - (K * 2 * pointsInPrecision)
     end
 
+    -- Death Knights get 9% spell hit from Runic Focus
+    if playerModel.className == "DEATHKNIGHT" then
+        self:Explain("9% to hit for being Death Knight")
+        hitCap = hitCap - K * 9
+    end
+
     hitCap = math.ceil(hitCap)
     self:Explain("calculated target spell hit rating = " .. hitCap)
 
@@ -2555,8 +2561,8 @@ function Reforgenator:DWFrostDKModel()
 
     model.reforgeOrder = {
         {
-            rating = CR_HIT_MELEE,
-            cap = "MeleeHitCap"
+            rating = CR_HIT_SPELL,
+            cap = "SpellHitCap"
         },
         {
             rating = CR_EXPERTISE,
