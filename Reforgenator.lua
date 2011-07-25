@@ -2084,10 +2084,10 @@ function Reforgenator:MarksmanshipHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.53,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.78,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.72,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.3,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.49,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.66,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.61,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.38,
     }
 
     model.notes = 'http://elitistjerks.com/f74/t112408-cataclysm_marksmanship_updated_4_1_a/'
@@ -2120,7 +2120,7 @@ function Reforgenator:SurvivalHunterModel()
     model.readOnly = true
     model.statWeights = {
         ["ITEM_MOD_HIT_RATING_SHORT"] = 2.66,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 2.2,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.5,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.02,
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.95,
     }
@@ -2224,11 +2224,11 @@ function Reforgenator:SMFuryModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.4,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.37,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 2.05,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.44,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.34,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.2,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.29,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 2.02,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.33,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.24,
     }
 
     model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_2_read_while_patching_before_posting/'
@@ -2267,11 +2267,11 @@ function Reforgenator:ArmsModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.6,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.75,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.09,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.84,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.82,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.46,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.34,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.9,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.8,
     }
 
     model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_2_read_while_patching_before_posting/'
@@ -2390,11 +2390,11 @@ function Reforgenator:CatModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.19,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.13,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.13,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.11,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.11,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.291,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.291,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.291,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.24,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.24,
     }
 
     model.notes = 'http://elitistjerks.com/f73/t123596-feral_cat_4_2_fire_cat_funtimes/'
@@ -2511,11 +2511,11 @@ function Reforgenator:TwoHandFrostDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.9,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.54,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.38,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.24,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.17,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.26,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.75,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.4,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.37,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.34,
     }
 
     model.notes = 'http://elitistjerks.com/f72/t121704-frost_dps_4_2_against_all_odds/'
@@ -2550,11 +2550,11 @@ function Reforgenator:DWFrostDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.34,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.82,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.3,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.2,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.14,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.14,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.58,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.51,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.33,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.09,
     }
 
     model.notes = 'http://elitistjerks.com/f72/t121704-frost_dps_4_2_against_all_odds/'
@@ -2589,11 +2589,11 @@ function Reforgenator:UnholyDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.1,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.01,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.9,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.82,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.76,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.67,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.64,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.33,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.26,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.98,
     }
 
     model.notes = 'http://elitistjerks.com/f72/t120315-unholy_dps_back_black_4_2_0_a/'
@@ -2794,11 +2794,11 @@ function Reforgenator:ElementalModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_SPIRIT_SHORT"] = 60,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 60,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 55,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 46,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 35,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 1.74,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.74,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.6,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.33,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.02,
     }
 
     model.notes = 'http://elitistjerks.com/f79/t110309-elemental_cataclysm_discussion_patch_4_2_a/'
@@ -2897,9 +2897,9 @@ function Reforgenator:DiscPriestModel()
     model.readOnly = true
     model.statWeights = {
         ["ITEM_MOD_SPIRIT_SHORT"] = 80,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 50,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 50,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 60,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 50,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
     }
 
     model.notes = 'http://elitistjerks.com/f77/t110244-cataclysm_discipline_priest_compendium/'
