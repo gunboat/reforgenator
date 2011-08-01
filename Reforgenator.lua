@@ -7,6 +7,9 @@ local version = "1.3.9"
 -- some things if we pretend there is one
 local CR_SPIRIT = 99
 
+-- and likewise there isn't an EP combat rating
+local CR_EP = 100
+
 local function table_print(tt, indent, done)
     done = done or {}
     indent = indent or 0
@@ -355,6 +358,7 @@ function Reforgenator:InitializeConstants()
         [CR_MASTERY] = "Mastery Rating",
         [CR_PARRY] = "Parry Rating",
         [CR_SPIRIT] = "Spirit",
+        [CR_EP] = "Equivalency Points",
     }
 
     --
@@ -1488,7 +1492,7 @@ function PlayerModel:new()
                 CR_SPIRIT,
             },
         },
-        playerStats = {},
+        playerStats = { },
     }
 
     setmetatable(result, self)
@@ -1590,6 +1594,9 @@ function Reforgenator:GetPlayerModel()
 
     -- there isn't a "spirit" combat rating, but it's still interesting
     playerModel.playerStats[CR_SPIRIT] = UnitStat("player", 5)
+
+    -- aaaaaand we just made this one up for funsies
+    playerModel.playerStats[CR_EP] = 0
 
     -- Calculate spirit/hit conversion
     -- Priest get 50/100 from Twisted Faith
@@ -2466,11 +2473,11 @@ function Reforgenator:DestroWarlockModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "MaxmiumPossible"
+            cap = "MaximumPossible"
         },
         {
             rating = CR_CRIT_SPELL,
-            cap = "MaxmiumPossible"
+            cap = "MaximumPossible"
         },
     }
 
@@ -3335,6 +3342,33 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
         return nil
     end
 
+    -- EP is a pseudo-stat that means whatever is the highest weighted stat
+    -- not already on the item
+    if stat == CR_EP then
+        self:Debug("### reforging for EP")
+        local allStats = self:deepCopy(c.ITEM_STATS)
+        for k,v in pairs(item) do
+            allStats[k] = nil
+        end
+
+        local bestWeight, bestStat = 0, nil
+        for k,v in pairs(allStats) do
+            local w = (statWeights[k] or 0) * self:CalculateScalingFromDR(playerModel, k)
+            if w > bestWeight then
+                bestWeight = w
+                bestStat = k
+            end
+        end
+
+        if not bestStat then
+            self:Debug("### no stats suitable for EP")
+            return nil
+        end
+
+        self:Debug("### best EP stat = " .. bestStat)
+        stat = bestStat
+    end
+
     if item[stat] then
         self:Debug("### item " .. item.itemLink .. " already has stat")
         return nil
@@ -3452,6 +3486,24 @@ function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRa
     local unforged = {}
     for k,v in ipairs(itemList) do
         local choices = {}
+
+        if rating == CR_EP then
+            local suggestion = self:GetBestReforge(playerModel, v, attribute, excessRating, statWeights)
+
+            if suggestion and playerModel:isEnhShaman() and rating == CR_HIT_SPELL and suggestion.reforgeTo == "ITEM_MOD_SPIRIT_SHORT" then
+                suggestion = nil
+            end
+
+
+            if suggestion then
+                if suggestion.reforgeFrom == "ITEM_MOD_HIT_RATING_SHORT" and rating == CR_HIT_SPELL then
+                    self:Debug("### not reforging hit to hit via spirit")
+                else
+                    choices[#choices + 1] = suggestion
+                end
+            end
+        end
+
         for attribute,affectedRatingList in pairs(playerModel.statEffectMap) do
             for _,iv in ipairs(affectedRatingList) do
                 if iv == rating then
