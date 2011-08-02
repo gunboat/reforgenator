@@ -358,7 +358,7 @@ function Reforgenator:InitializeConstants()
         [CR_MASTERY] = "Mastery Rating",
         [CR_PARRY] = "Parry Rating",
         [CR_SPIRIT] = "Spirit",
-        [CR_EP] = "Equivalency Points",
+        -- [CR_EP] = "Equivalency Points",
     }
 
     --
@@ -3344,6 +3344,7 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
 
     -- EP is a pseudo-stat that means whatever is the highest weighted stat
     -- not already on the item
+    self:Debug("### stat="..to_string(stat))
     if stat == CR_EP then
         self:Debug("### reforging for EP")
         local allStats = self:deepCopy(c.ITEM_STATS)
@@ -3354,6 +3355,10 @@ function Reforgenator:GetBestReforge(playerModel, item, stat, excessRating, stat
         local bestWeight, bestStat = 0, nil
         for k,v in pairs(allStats) do
             local w = (statWeights[k] or 0) * self:CalculateScalingFromDR(playerModel, k)
+            if excessRating[k] then
+                w = 0
+            end
+
             if w > bestWeight then
                 bestWeight = w
                 bestStat = k
@@ -3488,7 +3493,7 @@ function Reforgenator:GetBestReforgeList(playerModel, itemList, rating, excessRa
         local choices = {}
 
         if rating == CR_EP then
-            local suggestion = self:GetBestReforge(playerModel, v, attribute, excessRating, statWeights)
+            local suggestion = self:GetBestReforge(playerModel, v, rating, excessRating, statWeights)
 
             if suggestion and playerModel:isEnhShaman() and rating == CR_HIT_SPELL and suggestion.reforgeTo == "ITEM_MOD_SPIRIT_SHORT" then
                 suggestion = nil
@@ -3669,6 +3674,7 @@ function Reforgenator:OptimizeSolution(playerModel, rating, desiredValue, statWe
     end
 
     -- pass 1: reforge from biggest to smallest that will fit under the cap
+    self:Debug("### rating="..to_string(rating))
     local itemList = self:deepCopy(ancestor.items)
     while true do
         local unforged = self:GetBestReforgeList(playerModel, itemList, rating, soln.excessRating, statWeights, preferSpirit)
