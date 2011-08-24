@@ -2168,7 +2168,7 @@ function Reforgenator:BoomkinModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.87,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t110353-balance_cataclysm_release_updated_4_1_a/'
+    model.notes = 'http://elitistjerks.com/f73/t110353-balance_cataclysm_4_2_a/'
 
     model.reforgeOrder = {
         {
@@ -2176,7 +2176,7 @@ function Reforgenator:BoomkinModel()
             cap = "SpellHitCap"
         },
         {
-            rating = CR_CRIT_SPELL,
+            rating = CR_HASTE_SPELL,
             cap = "MaximumPossible",
         },
     }
@@ -2996,8 +2996,7 @@ function Reforgenator:HolyPallyModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "Fixed",
-	    userdata = { 774, 1860, 2946 },
+            cap = "MaximumPossible"
         },
 	{
 	    rating = CR_CRIT_SPELL,
