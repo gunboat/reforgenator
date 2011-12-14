@@ -2518,14 +2518,14 @@ function Reforgenator:TwoHandFrostDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.26,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.75,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.4,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.37,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.34,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.12,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.53,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.74,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.86,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.69,
     }
 
-    model.notes = 'http://elitistjerks.com/f72/t121704-frost_dps_4_2_against_all_odds/'
+    model.notes = 'http://elitistjerks.com/f72/t125291-frost_dps_winter_discontent_4_3_a/'
 
     model.reforgeOrder = {
         {
@@ -2537,11 +2537,11 @@ function Reforgenator:TwoHandFrostDKModel()
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = CR_HASTE_MELEE,
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
         {
@@ -2557,14 +2557,14 @@ function Reforgenator:DWFrostDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.14,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.58,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.51,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.33,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.09,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.14,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.92,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.48,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.90,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.68,
     }
 
-    model.notes = 'http://elitistjerks.com/f72/t121704-frost_dps_4_2_against_all_odds/'
+    model.notes = 'http://elitistjerks.com/f72/t125291-frost_dps_winter_discontent_4_3_a/'
 
     model.reforgeOrder = {
         {
@@ -2592,18 +2592,57 @@ function Reforgenator:DWFrostDKModel()
     return model
 end
 
+function Reforgenator:MasterfrostDKModel()
+    local model = ReforgeModel:new()
+    model.readOnly = true
+    model.statWeights = {
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.22,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 2.06,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.32,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 2.15,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.73,
+    }
+
+    model.notes = 'http://elitistjerks.com/f72/t125291-frost_dps_winter_discontent_4_3_a/'
+
+    model.reforgeOrder = {
+        {
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap"
+        },
+        {
+            rating = CR_HIT_SPELL,
+            cap = "SpellHitCap"
+        },
+        {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
+        },
+    }
+
+    return model
+end
+
 function Reforgenator:UnholyDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.67,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.64,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.33,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.26,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.98,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.0,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.89,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.55,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.85,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.99,
     }
 
-    model.notes = 'http://elitistjerks.com/f72/t120315-unholy_dps_back_black_4_2_0_a/'
+    model.notes = 'http://elitistjerks.com/f72/t125292-unholy_dps_my_friend_misery_4_3_0_a/'
 
     model.reforgeOrder = {
         {
@@ -2615,16 +2654,16 @@ function Reforgenator:UnholyDKModel()
             cap = "MaximumPossible"
         },
         {
+            rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
         {
             rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
-        },
-        {
-            rating = CR_CRIT_MELEE,
-            cap = "MaximumPossible"
         },
     }
 
@@ -3030,6 +3069,7 @@ function Reforgenator:LoadDefaultModels()
     self:LoadModel(self:BloodDKModel(), 'DK, blood', 'DEATHKNIGHT/1', 'DEATHKNIGHT')
     self:LoadModel(self:TwoHandFrostDKModel(), 'DK, 2H frost', '2HFrost', 'DEATHKNIGHT')
     self:LoadModel(self:DWFrostDKModel(), 'DK, DW frost', 'DWFrost', 'DEATHKNIGHT')
+    self:LoadModel(self:MasterfrostDKModel(), 'DK, Masterfrost', 'Masterfrost', 'DEATHKNIGHT')
     self:LoadModel(self:UnholyDKModel(), 'DK, unholy', 'DEATHKNIGHT/3', 'DEATHKNIGHT')
 
     self:LoadModel(self:BoomkinModel(), 'Druid, boomkin', 'DRUID/1', 'DRUID')
