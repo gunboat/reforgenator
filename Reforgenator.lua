@@ -2130,10 +2130,10 @@ function Reforgenator:SurvivalHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.66,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.5,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.02,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.95,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.19,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.37,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.33,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.27,
     }
 
     model.notes = 'http://elitistjerks.com/f74/t110723-cataclysm_survival_hunter/#Stats'
@@ -2149,8 +2149,7 @@ function Reforgenator:SurvivalHunterModel()
         },
         {
             rating = CR_HASTE_RANGED,
-            cap = "Fixed",
-            userdata = 757
+            cap = "MaximumPossible"
         },
         {
             rating = CR_MASTERY,
