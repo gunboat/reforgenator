@@ -2300,6 +2300,10 @@ function Reforgenator:ArmsModel()
             cap = "MeleeHitCap",
         },
         {
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap",
+        },
+        {
             rating = CR_CRIT_MELEE,
             cap = "MaximumPossible",
         },
@@ -2308,8 +2312,8 @@ function Reforgenator:ArmsModel()
             cap = "MaximumPossible",
         },
         {
-            rating = CR_EXPERTISE,
-            cap = "ExpertiseSoftCap",
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible",
         },
     }
 
