@@ -2171,7 +2171,7 @@ function Reforgenator:BoomkinModel()
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.87,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t110353-balance_cataclysm_4_2_a/'
+    model.notes = 'http://elitistjerks.com/f73/t110353-balance_cataclysm_4_3_dragon_soul/'
 
     model.reforgeOrder = {
         {
@@ -2180,6 +2180,14 @@ function Reforgenator:BoomkinModel()
         },
         {
             rating = CR_HASTE_SPELL,
+            cap = "MaximumPossible",
+        },
+        {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible",
         },
     }
