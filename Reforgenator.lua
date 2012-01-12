@@ -2036,11 +2036,11 @@ function Reforgenator:ProtWarriorModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_PARRY_RATING_SHORT"] = 1.54,
-        ["ITEM_MOD_DODGE_RATING_SHORT"] = 1.496,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.1,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 0.05,
+        ["ITEM_MOD_PARRY_RATING_SHORT"] = 1.03,
+        ["ITEM_MOD_DODGE_RATING_SHORT"] = 1.00,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.00,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.04,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 0.02,
     }
     
     model.notes = 'http://elitistjerks.com/f81/t110350-cataclysm_warrior_faq_4_2_read_while_patching_before_posting/'
