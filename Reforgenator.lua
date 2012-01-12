@@ -2903,13 +2903,13 @@ function Reforgenator:ShadowPriestModel()
     model.readOnly = true
     model.statWeights = {
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 2,
-        ["ITEM_MOD_SPIRIT_SHORT"] = 1.92,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.92,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.84,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.67,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 1.95,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.95,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.70,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.60,
     }
 
-    model.notes = 'http://elitistjerks.com/f77/t112651-shadow_priest_cataclysm/'
+    model.notes = 'http://elitistjerks.com/f77/t124358-shadow_priest_pve_guide_4_3_updated/'
 
     model.reforgeOrder = {
         {
@@ -2921,11 +2921,11 @@ function Reforgenator:ShadowPriestModel()
             cap = "1SecGCD"
         },
         {
-            rating = CR_CRIT_SPELL,
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
     }
