@@ -2793,10 +2793,10 @@ function Reforgenator:FrostMageModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 0.94,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.44,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.42,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.41,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.08,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.97,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.61,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.43,
     }
 
     model.notes = 'http://www.mmo-champion.com/threads/820907-Mage-The-Ultimate-Guide-to-Frost'
@@ -2809,6 +2809,10 @@ function Reforgenator:FrostMageModel()
         {
             rating = CR_CRIT_SPELL,
             cap = "23.34% Crit"
+        },
+        {
+            rating = CR_HASTE_SPELL,
+            cap = "MaximumPossible"
         },
         {
             rating = CR_MASTERY,
