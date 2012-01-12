@@ -2535,13 +2535,13 @@ function Reforgenator:DestroWarlockModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 76,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 42,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 39,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 36,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.83,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 2.08,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.40,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.40,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t111390-destruction_cataclysm_4_2_release/'
+    model.notes = 'http://elitistjerks.com/f80/t111390-destruction_cataclysm_4_3_release/'
 
     model.reforgeOrder = {
         {
@@ -2554,6 +2554,10 @@ function Reforgenator:DestroWarlockModel()
         },
         {
             rating = CR_CRIT_SPELL,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
