@@ -2060,13 +2060,13 @@ function Reforgenator:BeastMasterHunterModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.58,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 2.31,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.37,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.73,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.65,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.60,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.42,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.20,
     }
 
-    model.notes = 'http://elitistjerks.com/f74/t110880-cataclysm_beast_mastery_4_1_a/'
+    model.notes = 'http://elitistjerks.com/f74/t110880-cataclysm_beast_mastery_4_3_a/'
 
     model.reforgeOrder = {
         {
@@ -2075,6 +2075,10 @@ function Reforgenator:BeastMasterHunterModel()
         },
         {
             rating = CR_CRIT_RANGED,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HASTE_RANGED,
             cap = "MaximumPossible"
         },
         {
