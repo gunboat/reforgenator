@@ -2603,11 +2603,11 @@ function Reforgenator:TwoHandFrostDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.12,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.53,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.74,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.86,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.69,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.26,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.75,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.40,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.37,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.34,
     }
 
     model.notes = 'http://elitistjerks.com/f72/t125291-frost_dps_winter_discontent_4_3_a/'
@@ -2622,11 +2622,11 @@ function Reforgenator:TwoHandFrostDKModel()
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = CR_MASTERY,
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
         {
-            rating = CR_HASTE_MELEE,
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
         {
