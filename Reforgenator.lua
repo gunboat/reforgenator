@@ -2862,14 +2862,14 @@ function Reforgenator:RetPallyModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.55,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.3,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.77,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.30,
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.13,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.98,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.79,
     }
 
-    model.notes = 'http://elitistjerks.com/f76/t110342-retribution_concordance_4_2_now_two_scoops_ragnar_ohs/'
+    model.notes = 'http://elitistjerks.com/f76/t110342-retribution_concordance_4_3_voice_dps/'
 
     model.reforgeOrder = {
         {
@@ -2886,6 +2886,10 @@ function Reforgenator:RetPallyModel()
         },
         {
             rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HASTE_MELEE,
             cap = "MaximumPossible"
         },
     }
