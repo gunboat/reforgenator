@@ -2722,8 +2722,8 @@ function Reforgenator:UnholyDKModel()
     model.statWeights = {
         ["ITEM_MOD_HIT_RATING_SHORT"] = 3.0,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.89,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.55,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.85,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.55,
         ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.99,
     }
 
