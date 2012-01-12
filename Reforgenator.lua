@@ -2569,13 +2569,13 @@ function Reforgenator:DemoWarlockModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.39,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.5,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.38,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.16,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.74,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 2.57,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 2.37,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.95,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t110366-demonology_cataclysm_4_2_release/'
+    model.notes = 'http://elitistjerks.com/f80/t110366-demonology_cataclysm_4_3_release/'
 
     model.reforgeOrder = {
         {
@@ -2584,6 +2584,10 @@ function Reforgenator:DemoWarlockModel()
         },
         {
             rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_CRIT_SPELL,
             cap = "MaximumPossible"
         },
         {
