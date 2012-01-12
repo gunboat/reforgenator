@@ -1985,15 +1985,15 @@ function Reforgenator:BearModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_DODGE_RATING_SHORT"] = 0.88,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.48,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.3,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.28,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 0.15,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.04,
+        ["ITEM_MOD_DODGE_RATING_SHORT"] = 0.98,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.42,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.25,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.22,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 0.13,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.02,
     }
 
-    model.notes = 'http://manaflask.com/Aryu/blog/5267/'
+    model.notes = 'http://elitistjerks.com/f73/t127444-feral_bear_cataclysm_4_3_dragon_soul/'
 
     model.reforgeOrder = {
         {
@@ -2309,14 +2309,14 @@ function Reforgenator:CombatRogueModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.65,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.65,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.52,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.19,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.92,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.85,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.7,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.5,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.5,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.25,
     }
 
-    model.notes = 'http://elitistjerks.com/f78/t111329-combat_guide_cata_06_28_2011_a/'
+    model.notes = 'http://elitistjerks.com/f78/t111329-combat_guide_cata_12_01_2011_a/'
 
     model.reforgeOrder = {
         {
@@ -2370,12 +2370,24 @@ function Reforgenator:SubtletyRogueModel()
     model.statWeights = {
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.35,
         ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.15,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.15,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.05,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.1,
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.9,
     }
 
     model.reforgeOrder = {
+        {
+            rating = CR_HIT_MELEE,
+            cap = "MeleeHitCap"
+        },
+        {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
+        },
         {
             rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
@@ -2385,7 +2397,11 @@ function Reforgenator:SubtletyRogueModel()
             cap = "SpellHitCap"
         },
         {
-            rating = CR_HASTE_MELEE,
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HIT_MELEE,
             cap = "MaximumPossible"
         },
     }
