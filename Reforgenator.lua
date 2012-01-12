@@ -2013,14 +2013,14 @@ function Reforgenator:ProtPallyModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_DODGE_RATING_SHORT"] = 1.23,
-        ["ITEM_MOD_PARRY_RATING_SHORT"] = 1.23,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1,
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.1,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 0.05,
+        ["ITEM_MOD_DODGE_RATING_SHORT"] = 1.0,
+        ["ITEM_MOD_PARRY_RATING_SHORT"] = 1.0,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.0,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 0.04,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 0.02,
     }
 
-    model.notes = 'http://elitistjerks.com/f76/t123600-prot_4_2_flames/'
+    model.notes = 'http://elitistjerks.com/f76/t126438-prot_4_3_send_me_my_way/'
 
     model.reforgeOrder = {
         {
