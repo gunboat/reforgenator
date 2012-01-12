@@ -2324,11 +2324,11 @@ function Reforgenator:CombatRogueModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.85,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.7,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.5,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.5,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.25,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.46,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.13,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.87,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.51,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.18,
     }
 
     model.notes = 'http://elitistjerks.com/f78/t111329-combat_guide_cata_12_01_2011_a/'
@@ -2339,11 +2339,27 @@ function Reforgenator:CombatRogueModel()
             cap = "MeleeHitCap"
         },
         {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
             rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
         },
         {
-            rating = CR_HASTE_MELEE,
+            rating = CR_HIT_SPELL,
+            cap = "SpellHitCap"
+        },
+        {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible",
+        },
+        {
+            rating = CR_HIT_MELEE,
+            cap = "DWHitCap"
+        },
+        {
+            rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
     }
@@ -2355,14 +2371,14 @@ function Reforgenator:AssassinationRogueModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.3,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.2,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.75,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.30,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.20,
         ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.1,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.1,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.9,
     }
 
-    model.notes = 'http://elitistjerks.com/f78/t110134-assassination_guide_cata_06_28_2011_a/'
+    model.notes = 'http://elitistjerks.com/f78/t110134-assassination_guide_cata_12_01_2011_a/'
 
     model.reforgeOrder = {
         {
@@ -2371,6 +2387,22 @@ function Reforgenator:AssassinationRogueModel()
         },
         {
             rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_EXPERTISE,
+            cap = "ExpertiseSoftCap"
+        },
+        {
+            rating = CR_HIT_MELEE,
+            cap = "DWHitCap"
+        },
+        {
+            rating = CR_CRIT_MELEE,
             cap = "MaximumPossible"
         },
     }
@@ -2383,12 +2415,14 @@ function Reforgenator:SubtletyRogueModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.40,
         ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.35,
         ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 1.15,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.05,
         ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.1,
         ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.9,
     }
+
+    model.notes = 'http://elitistjerks.com/f78/t119013-cataclysm_subtlety_compendium/'
 
     model.reforgeOrder = {
         {
@@ -2400,12 +2434,12 @@ function Reforgenator:SubtletyRogueModel()
             cap = "MaximumPossible"
         },
         {
-            rating = CR_CRIT_MELEE,
-            cap = "MaximumPossible"
-        },
-        {
             rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
+        },
+        {
+            rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
         },
         {
             rating = CR_HIT_SPELL,
@@ -2417,7 +2451,7 @@ function Reforgenator:SubtletyRogueModel()
         },
         {
             rating = CR_HIT_MELEE,
-            cap = "MaximumPossible"
+            cap = "DWHitCap"
         },
     }
 
