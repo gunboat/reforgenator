@@ -2469,9 +2469,21 @@ function Reforgenator:CatModel()
         ["ITEM_MOD_HIT_RATING_SHORT"] = 1.24,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t123596-feral_cat_4_2_fire_cat_funtimes/'
+    model.notes = 'http://elitistjerks.com/f73/t127445-feral_cat_cataclysm_4_3_dragon_soul/'
 
     model.reforgeOrder = {
+        {
+            rating = CR_HASTE_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_CRIT_MELEE,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
         {
             rating = CR_HIT_MELEE,
             cap = "MeleeHitCap"
@@ -2479,10 +2491,6 @@ function Reforgenator:CatModel()
         {
             rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
-        },
-        {
-            rating = CR_MASTERY,
-            cap = "MaximumPossible"
         },
     }
 
