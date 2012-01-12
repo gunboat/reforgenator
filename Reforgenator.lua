@@ -2828,10 +2828,10 @@ function Reforgenator:FireMageModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.72,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.59,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.55,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.3,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 3.44,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 2.21,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 2.01,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.42,
     }
 
     model.notes = 'http://elitistjerks.com/f75/t110326-cataclysm_fire_mage_compendium/#Gearing_a_Fire_Mage'
@@ -2847,6 +2847,10 @@ function Reforgenator:FireMageModel()
         },
         {
             rating = CR_CRIT_SPELL,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
