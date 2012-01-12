@@ -2501,13 +2501,13 @@ function Reforgenator:AffWarlockModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 0.53,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.45,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.37,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.37,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.78,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 2.32,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.79,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.24,
     }
 
-    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_4_2_release/'
+    model.notes = 'http://elitistjerks.com/f80/t112939-affliction_cataclysm_4_3_release/'
 
     model.reforgeOrder = {
         {
@@ -2520,6 +2520,10 @@ function Reforgenator:AffWarlockModel()
         },
         {
             rating = CR_CRIT_SPELL,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
     }
