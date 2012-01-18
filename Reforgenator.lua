@@ -3149,10 +3149,10 @@ function Reforgenator:HolyPallyModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_SPIRIT_SHORT"] = 75,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 40,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 35,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 30,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 0.75,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.40,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.35,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.30,
     }
 
     model.notes = 'http://elitistjerks.com/f76/t110847-%5Bholy%5Dcataclysm_holy_compendium/ http://www.bandagespec.com/2011/02/on-haste-crit-and-other-secondary-stats.html'
@@ -3166,14 +3166,14 @@ function Reforgenator:HolyPallyModel()
             rating = CR_HASTE_SPELL,
             cap = "MaximumPossible"
         },
-	{
-	    rating = CR_CRIT_SPELL,
-            cap = "MaximumPossible"
-	},
         {
             rating = CR_MASTERY,
             cap = "MaximumPossible"
         },
+	{
+	    rating = CR_CRIT_SPELL,
+            cap = "MaximumPossible"
+	},
     }
 
     return model
