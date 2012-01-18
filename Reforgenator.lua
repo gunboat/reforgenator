@@ -2937,14 +2937,14 @@ function Reforgenator:ElementalModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_SPIRIT_SHORT"] = 1.74,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 1.74,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.6,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.33,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.02,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 2.70,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.70,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.73,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.62,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.11,
     }
 
-    model.notes = 'http://elitistjerks.com/f79/t110309-elemental_cataclysm_discussion_patch_4_2_a/'
+    model.notes = 'http://elitistjerks.com/f79/t110309-elemental_cataclysm_discussion_patch_4_3_a/'
 
     model.reforgeOrder = {
         {
