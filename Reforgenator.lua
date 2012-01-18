@@ -3098,7 +3098,7 @@ function Reforgenator:HolyPriestModel()
         },
         {
             rating = CR_HASTE_SPELL,
-            cap = "12.5% Haste"
+            cap = "12.5% Haste",
         },
         {
             rating = CR_MASTERY,
@@ -3117,22 +3117,26 @@ function Reforgenator:RestoShamanModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_SPIRIT_SHORT"] = 90,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 60,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 55,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 0.65,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.60,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.55,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.40,
     }
 
-    model.notes = 'http://elitistjerks.com/f79/t121202-resto_raiding_4_1_updating_4_2_a/'
+    model.notes = 'http://elitistjerks.com/f79/t121202-resto_raiding_4_1_updating_4_3_a/'
 
     model.reforgeOrder = {
         {
-            rating = CR_HASTE_SPELL,
+            rating = CR_SPIRIT,
             cap = "Fixed",
-            userdata = { 610, 916 },
+            userdata = 2800,
         },
         {
-            rating = CR_SPIRIT,
+            rating = CR_HASTE_SPELL,
+            cap = "12.5% Haste",
+        },
+        {
+            rating = CR_MASTERY,
             cap = "MaximumPossible",
         },
     }
