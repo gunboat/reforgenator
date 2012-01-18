@@ -341,6 +341,7 @@ function Reforgenator:InitializeConstants()
         ["Maintain"] = function(m) return nil end,
         ["23.34% Crit"] = function(m) return Reforgenator:CalculateFrostSoftCritCap(m) end,
         ["15% Haste"] = function(m) return Reforgenator:CalculateFireSoftHasteCap(m) end,
+        ["12.5% Haste"] = function(m) return Reforgenator:CalculateHolySoftHasteCap(m) end,
     }
 
     c.RATING_NAMES = {
@@ -1957,6 +1958,21 @@ function Reforgenator:CalculateFireSoftHasteCap(playerModel)
     return hasteCap
 end
 
+function Reforgenator:CalculateHolySoftHasteCap(playerModel)
+    local c = Reforgenator.constants
+    local K = c.RATING_CONVERSIONS.haste
+
+    local hasteCap = (12.5 * K)
+
+    local reduction = 0
+
+    hasteCap = math.ceil(hasteCap - reduction)
+
+    self:Explain("calculated target haste rating = " .. hasteCap)
+
+    return hasteCap
+end
+
 function Reforgenator:BloodDKModel()
     local model = ReforgeModel:new()
     model.readOnly = true
@@ -3067,17 +3083,29 @@ function Reforgenator:HolyPriestModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_SPIRIT_SHORT"] = 80,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 75,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 70,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 50,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 0.80,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.75,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.70,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.50,
     }
 
     model.notes = 'http://elitistjerks.com/f77/t110245-cataclysm_holy_priest_compendium/'
 
     model.reforgeOrder = {
         {
+            rating = CR_SPIRIT,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HASTE_SPELL,
+            cap = "12.5% Haste"
+        },
+        {
             rating = CR_MASTERY,
+            cap = "MaximumPossible"
+        },
+        {
+            rating = CR_HASTE_SPELL,
             cap = "MaximumPossible"
         },
     }
