@@ -3039,13 +3039,13 @@ function Reforgenator:DiscPriestModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_SPIRIT_SHORT"] = 80,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 60,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 50,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 40,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 0.80,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.60,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.50,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.40,
     }
 
-    model.notes = 'http://elitistjerks.com/f77/t110244-cataclysm_discipline_priest_compendium/'
+    model.notes = 'http://elitistjerks.com/f77/t127522-4_3_discipline_priest_compendium/'
 
     model.reforgeOrder = {
         {
