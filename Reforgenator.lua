@@ -3003,13 +3003,13 @@ function Reforgenator:RestoDruidModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_SPIRIT_SHORT"] = 75,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 65,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 60,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 50,
+        ["ITEM_MOD_SPIRIT_SHORT"] = 0.75,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 0.65,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 0.60,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 0.50,
     }
 
-    model.notes = 'http://elitistjerks.com/f73/t110354-resto_cataclysm_4_2_a/'
+    model.notes = 'http://elitistjerks.com/f73/t110354-resto_cataclysm_4_3_dragon_soul/'
 
     model.reforgeOrder = {
         {
