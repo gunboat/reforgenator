@@ -2968,14 +2968,14 @@ function Reforgenator:EnhancementModel()
     local model = ReforgeModel:new()
     model.readOnly = true
     model.statWeights = {
-        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.15,
-        ["ITEM_MOD_HIT_RATING_SHORT"] = 2.15,
-        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 1.73,
-        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.26,
-        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.03,
+        ["ITEM_MOD_HIT_RATING_SHORT"] = 4.0,
+        ["ITEM_MOD_EXPERTISE_RATING_SHORT"] = 2.80,
+        ["ITEM_MOD_MASTERY_RATING_SHORT"] = 2.35,
+        ["ITEM_MOD_CRIT_RATING_SHORT"] = 1.54,
+        ["ITEM_MOD_HASTE_RATING_SHORT"] = 1.37,
     }
 
-    model.notes = 'http://elitistjerks.com/f79/t123790-enhancement_4_2_someone_spilled_spells_all_over_axe/'
+    model.notes = 'http://elitistjerks.com/f79/t127416-enhancement_4_3_least_your_old_axe_good_transmog/'
 
     model.reforgeOrder = {
         {
@@ -2983,12 +2983,12 @@ function Reforgenator:EnhancementModel()
             cap = "MeleeHitCap"
         },
         {
-            rating = CR_HIT_SPELL,
-            cap = "SpellHitCap"
-        },
-        {
             rating = CR_EXPERTISE,
             cap = "ExpertiseSoftCap"
+        },
+        {
+            rating = CR_HIT_SPELL,
+            cap = "SpellHitCap"
         },
         {
             rating = CR_MASTERY,
